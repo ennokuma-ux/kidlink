@@ -1,0 +1,297 @@
+<?php
+
+namespace App\Http\Controllers\Student\Games;
+
+use App\Http\Controllers\Controller;
+use App\Models\GameScore;
+use App\Models\Student;
+use App\Services\LevelCompletionRecorder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AnimalsGameController extends Controller
+{
+    public $totalLevels = 8;
+
+    public function stageSelect()
+    {
+        $user = Auth::user();
+        $student = Student::where('user_id', Auth::id())->first();
+
+        if (!$student) {
+            abort(403, 'No student profile found for this account.');
+        }
+
+        $currentLevel = 1;
+        $totalScore = 0;
+
+        if ($student) {
+            $highestCompleted = GameScore::where('student_id', $student->id)
+                ->where('game_type', 'animals')
+                ->where('score', '>=', 1)
+                ->max('level');
+
+            $currentLevel = $highestCompleted ? min($highestCompleted + 1, $this->totalLevels) : 1;
+
+            $scores = GameScore::where('student_id', $student->id)
+                ->where('game_type', 'animals')
+                ->get();
+            $totalScore = $scores->sum('score');
+        }
+
+        $levels = $this->getLevelsData($currentLevel);
+
+        return view('student.games.animals.stage-select', [
+            'student' => $student,
+            'currentLevel' => $currentLevel,
+            'totalScore' => $totalScore,
+            'levels' => $levels,
+            'totalLevels' => $this->totalLevels,
+        ]);
+    }
+
+    public function play($level)
+    {
+        $level = (int) $level;
+
+        if ($level < 1 || $level > $this->totalLevels) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+        $student = Student::where('user_id', Auth::id())->first();
+
+        if (!$student) {
+            abort(403, 'No student profile found for this account.');
+        }
+
+        $highestCompleted = 0;
+        if ($student) {
+            $highestCompleted = GameScore::where('student_id', $student->id)
+                ->where('game_type', 'animals')
+                ->where('score', '>=', 1)
+                ->max('level') ?? 0;
+        }
+
+        $unlockedLevel = min($highestCompleted + 1, $this->totalLevels);
+
+        if ($level > $unlockedLevel) {
+            return redirect()->route('student.games.animals.stage-select')
+                ->with('error', 'Complete previous levels to unlock this stage.');
+        }
+
+        $levelData = $this->getLevelData($level);
+        $gameData = $this->getGameData($level);
+
+        return view('student.games.animals.play', [
+            'level' => $level,
+            'levelData' => $levelData,
+            'totalLevels' => $this->totalLevels,
+            'rounds' => $gameData['rounds'],
+            'totalRounds' => $gameData['totalRounds'],
+            'score' => 0,
+            'mistakes' => 0,
+        ]);
+    }
+
+    public function submit(Request $request, $level)
+    {
+        $level = (int) $level;
+
+        if ($level < 1 || $level > $this->totalLevels) {
+            return response()->json(['error' => 'Unknown level'], 404);
+        }
+
+        // The level total comes from the server, so a posted score is capped
+        // against the real number of questions rather than anything the browser
+        // claims the level contained.
+        $expectedTotal = $this->totalForLevel($level);
+
+        $request->validate([
+            'score' => 'required|integer|min:0|max:'.$expectedTotal,
+            'time_taken' => 'nullable|integer|min:0',
+            'mistakes' => 'nullable|integer|min:0',
+        ]);
+
+        $student = Student::where('user_id', Auth::id())->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        $result = $this->recorder()->record(
+            student: $student,
+            gameType: 'animals',
+            level: $level,
+            expectedTotal: $expectedTotal,
+            score: (int) $request->score,
+            mistakes: (int) ($request->mistakes ?? 0),
+            timeTaken: $request->time_taken !== null ? (int) $request->time_taken : null,
+        );
+
+        return response()->json([
+            'success' => true,
+            'completed' => $result['completed'],
+            'recorded' => $result['recorded'],
+            'improved' => $result['improved'],
+            'score' => $result['score'],
+            'total' => $result['total'],
+            'mistakes' => $result['mistakes'],
+            'percentage' => $result['percentage'],
+            'points_earned' => $result['points_earned'],
+            'next_level_unlocked' => $result['completed'] && $level < $this->totalLevels,
+        ]);
+    }
+
+    /**
+     * How many questions a level contains. The server owns this.
+     *
+     * One question is scored per round, since a round has a single correct animal
+     * among its options, so the total is the round count rather than the number of
+     * options on the board.
+     */
+    public function totalForLevel(int $level): int
+    {
+        return $this->roundsForLevel($level);
+    }
+
+    private function recorder(): LevelCompletionRecorder
+    {
+        return app(LevelCompletionRecorder::class);
+    }
+
+    protected function getLevelsData(int $currentLevel): array
+    {
+        $positions = [
+            1 => ['left' => '9.19%', 'top' => '44.89%'],
+            2 => ['left' => '14.74%', 'top' => '22.36%'],
+            3 => ['left' => '28.98%', 'top' => '18.39%'],
+            4 => ['left' => '37.46%', 'top' => '38.34%'],
+            5 => ['left' => '38.03%', 'top' => '63.16%'],
+            6 => ['left' => '51.87%', 'top' => '61.66%'],
+            7 => ['left' => '52.52%', 'top' => '37.22%'],
+            8 => ['left' => '59.27%', 'top' => '19.2%'],
+        ];
+
+        $levels = [];
+        for ($i = 1; $i <= $this->totalLevels; $i++) {
+            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
+            $levels[] = [
+                'number' => $i,
+                'unlocked' => $i <= $currentLevel,
+                'completed' => $i < $currentLevel,
+                'left' => $pos['left'],
+                'top' => $pos['top'],
+                'route' => route('student.games.animals.play', ['level' => $i]),
+            ];
+        }
+        return $levels;
+    }
+
+    protected function getLevelData(int $level): array
+    {
+        $levelData = [
+            1 => ['title' => 'Farm Animals', 'description' => 'Meet the friendly farm animals!'],
+            2 => ['title' => 'Farm Animals', 'description' => 'Match the farm animals!'],
+            3 => ['title' => 'Wild Animals', 'description' => 'Explore the wild kingdom!'],
+            4 => ['title' => 'Wild Animals', 'description' => 'Match the wild animals!'],
+            5 => ['title' => 'Ocean Creatures', 'description' => 'Dive into the deep blue sea!'],
+            6 => ['title' => 'Birds of the Sky', 'description' => 'Meet our feathered friends!'],
+            7 => ['title' => 'Animal Expert', 'description' => 'Show your animal skills!'],
+            8 => ['title' => 'Animal Master', 'description' => 'The ultimate animal challenge!'],
+        ];
+
+        $data = $levelData[$level] ?? $levelData[1];
+        $data['rounds'] = $this->roundsForLevel($level);
+        $data['questions'] = $data['rounds'] * $this->optionsForLevel($level);
+
+        return $data;
+    }
+
+    protected function roundsForLevel(int $level): int
+    {
+        return 3 + intdiv($level - 1, 2);
+    }
+
+    protected function optionsForLevel(int $level): int
+    {
+        return 4 + intdiv($level - 1, 2);
+    }
+
+    protected function getGameData(int $level): array
+    {
+        $allAnimals = [
+            'cow'       => ['name' => 'Cow',       'emoji' => '🐄'],
+            'pig'       => ['name' => 'Pig',       'emoji' => '🐷'],
+            'chicken'   => ['name' => 'Chicken',   'emoji' => '🐔'],
+            'sheep'     => ['name' => 'Sheep',     'emoji' => '🐑'],
+            'horse'     => ['name' => 'Horse',     'emoji' => '🐴'],
+            'lion'      => ['name' => 'Lion',      'emoji' => '🦁'],
+            'elephant'  => ['name' => 'Elephant',  'emoji' => '🐘'],
+            'giraffe'   => ['name' => 'Giraffe',   'emoji' => '🦒'],
+            'zebra'     => ['name' => 'Zebra',     'emoji' => '🦓'],
+            'monkey'    => ['name' => 'Monkey',    'emoji' => '🐵'],
+            'dolphin'   => ['name' => 'Dolphin',   'emoji' => '🐬'],
+            'whale'     => ['name' => 'Whale',     'emoji' => '🐋'],
+            'shark'     => ['name' => 'Shark',     'emoji' => '🦈'],
+            'octopus'   => ['name' => 'Octopus',   'emoji' => '🐙'],
+            'eagle'     => ['name' => 'Eagle',     'emoji' => '🦅'],
+            'parrot'    => ['name' => 'Parrot',    'emoji' => '🦜'],
+            'owl'       => ['name' => 'Owl',       'emoji' => '🦉'],
+            'penguin'   => ['name' => 'Penguin',   'emoji' => '🐧'],
+            'bear'      => ['name' => 'Bear',      'emoji' => '🐻'],
+            'fox'       => ['name' => 'Fox',       'emoji' => '🦊'],
+        ];
+
+        $pools = [
+            1 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
+            2 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
+            3 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
+            4 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
+            5 => ['dolphin', 'whale', 'shark', 'octopus', 'bear', 'fox'],
+            6 => ['eagle', 'parrot', 'owl', 'penguin', 'bear', 'fox'],
+            7 => ['cow', 'lion', 'dolphin', 'eagle', 'monkey', 'shark', 'parrot', 'bear'],
+            8 => array_keys($allAnimals),
+        ];
+
+        $poolKeys = $pools[$level] ?? $pools[1];
+        $rounds = $this->roundsForLevel($level);
+        $optCount = $this->optionsForLevel($level);
+
+        $allRounds = [];
+        for ($r = 0; $r < $rounds; $r++) {
+            $targetKey = $poolKeys[array_rand($poolKeys)];
+            $distractorKeys = array_values(array_diff($poolKeys, [$targetKey]));
+            shuffle($distractorKeys);
+
+            $options = [$targetKey => $allAnimals[$targetKey]];
+            $needed = $optCount - 1;
+            for ($i = 0; $i < $needed && $i < count($distractorKeys); $i++) {
+                $options[$distractorKeys[$i]] = $allAnimals[$distractorKeys[$i]];
+            }
+            uksort($options, function () { return rand(-1, 1); });
+
+            $optionList = [];
+            foreach ($options as $key => $animal) {
+                $optionList[] = [
+                    'type' => $key,
+                    'name' => $animal['name'],
+                    'emoji' => $animal['emoji'],
+                    'isMatch' => $key === $targetKey,
+                ];
+            }
+
+            $allRounds[] = [
+                'target' => $targetKey,
+                'targetName' => $allAnimals[$targetKey]['name'],
+                'targetEmoji' => $allAnimals[$targetKey]['emoji'],
+                'options' => $optionList,
+            ];
+        }
+
+        return [
+            'rounds' => $allRounds,
+            'totalRounds' => $rounds,
+        ];
+    }
+}
