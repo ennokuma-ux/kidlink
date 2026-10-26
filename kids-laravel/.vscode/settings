@@ -1,0 +1,14 @@
+{
+    // Machine-local only: .vscode/ is gitignored. This workspace is broken unless
+    // "php" resolves to a build with pdo_pgsql, and on this machine the bare "php"
+    // on PATH is Herd's statically compiled 8.4.0 (mysql + sqlite only). Two things
+    // depend on that being right:
+    //   1. new integrated terminals, so `php artisan serve` works without flags
+    //   2. the PHP language server / Intelephense
+    // Prepending rather than replacing keeps the rest of PATH intact.
+    "php.executablePath": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64\\php.exe",
+
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64;${env:PATH}"
+    }
+}
