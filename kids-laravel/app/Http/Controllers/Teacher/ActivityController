@@ -1,1 +1,307 @@
 
+<?php
+
+namespace App\Http\Controllers\Teacher;
+
+use App\Http\Controllers\Controller;
+use App\Models\Activity;
+use App\Models\ActivityAttendance;
+use App\Models\Student;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class ActivityController extends Controller
+{
+    /**
+     * The planner is a weekly board, so a row always belongs to the week that
+     * was showing when it was created. `week_start` is normalised to the Monday
+     * of that week, and every read is scoped to a single week.
+     */
+    public function index(Request $request)
+    {
+        $teacherId = auth()->id();
+        $weekStart = $this->weekStart($request->query('week'));
+
+        $activities = Activity::where('teacher_id', $teacherId)
+            ->whereBetween('week_start', [$weekStart->toDateString(), $weekStart->copy()->addDays(6)->toDateString()])
+            ->orderBy('start_time')
+            ->get();
+
+        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        $stats = [
+            'total' => $activities->count(),
+            'completed' => $activities->where('is_completed', true)->count(),
+            'pending' => $activities->where('is_completed', false)->count(),
+        ];
+
+        return view('teacher.activities', [
+            'activities' => $activities->groupBy('day_of_week'),
+            'stats' => $stats,
+            'days' => $days,
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekStart->copy()->addDays(6),
+            'prevWeek' => $weekStart->copy()->subWeek()->toDateString(),
+            'nextWeek' => $weekStart->copy()->addWeek()->toDateString(),
+            'isCurrentWeek' => $weekStart->equalTo(Carbon::today()->startOfWeek(Carbon::MONDAY)),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $this->validatedActivity($request);
+
+        Activity::create($this->attributes($data));
+
+        return redirect()
+            ->route('teacher.activities.index', ['week' => $data['week_start']])
+            ->with('success', 'Activity created!');
+    }
+
+    public function update(Request $request, Activity $activity)
+    {
+        $this->authorize($activity);
+
+        $data = $this->validatedActivity($request, $activity);
+
+        $activity->update($this->attributes($data));
+
+        return redirect()
+            ->route('teacher.activities.index', ['week' => $data['week_start']])
+            ->with('success', 'Activity updated!');
+    }
+
+    public function toggleComplete(Request $request, Activity $activity)
+    {
+        $this->authorize($activity);
+
+        $activity->update(['is_completed' => ! $activity->is_completed]);
+
+        return redirect()
+            ->route('teacher.activities.index', ['week' => $this->weekOf($activity)->toDateString()])
+            ->with('success', $activity->is_completed ? 'Marked as completed!' : 'Marked as not completed!');
+    }
+
+    public function destroy(Request $request, Activity $activity)
+    {
+        $this->authorize($activity);
+
+        $week = $this->weekOf($activity);
+
+        $activity->delete();
+
+        return redirect()
+            ->route('teacher.activities.index', ['week' => $week->toDateString()])
+            ->with('success', 'Activity deleted!');
+    }
+
+    /**
+     * Which of this teacher's students took part, with an optional score out of
+     * 100 and a note. A row in activity_attendance is the participation record,
+     * so unchecking a student has to remove the row or the analytics keep
+     * counting them.
+     */
+    public function participation(Activity $activity)
+    {
+        $this->authorize($activity);
+
+        $students = $this->students($activity);
+
+        $records = ActivityAttendance::where('activity_id', $activity->id)
+            ->get()
+            ->keyBy('student_id');
+
+        $scored = $records->whereNotNull('score');
+
+        return view('teacher.activity-participation', [
+            'activity' => $activity,
+            'students' => $students,
+            'records' => $records,
+            'stats' => [
+                'participating' => $records->count(),
+                'scored' => $scored->count(),
+                'average' => $scored->isEmpty() ? null : round((float) $scored->avg('score'), 1),
+            ],
+        ]);
+    }
+
+    public function saveParticipation(Request $request, Activity $activity)
+    {
+        $this->authorize($activity);
+
+        $studentIds = $this->students($activity)->pluck('id');
+
+        $validated = $request->validate([
+            'participating' => ['nullable', 'array'],
+            'participating.*' => ['integer'],
+            'score' => ['nullable', 'array'],
+            'score.*' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'feedback' => ['nullable', 'array'],
+            'feedback.*' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        // Intersect so a hand-crafted request cannot record a student belonging
+        // to another teacher.
+        $participating = collect($validated['participating'] ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->intersect($studentIds);
+
+        $stale = ActivityAttendance::where('activity_id', $activity->id);
+
+        if ($participating->isEmpty()) {
+            $stale->delete();
+        } else {
+            $stale->whereNotIn('student_id', $participating)->delete();
+        }
+
+        foreach ($participating as $studentId) {
+            $score = $validated['score'][$studentId] ?? null;
+            $feedback = trim((string) ($validated['feedback'][$studentId] ?? ''));
+
+            ActivityAttendance::updateOrCreate(
+                ['activity_id' => $activity->id, 'student_id' => $studentId],
+                [
+                    'score' => $score === null || $score === '' ? null : (int) $score,
+                    'feedback' => $feedback === '' ? null : $feedback,
+                ],
+            );
+        }
+
+        return redirect()
+            ->route('teacher.activities.participation', $activity)
+            ->with('success', 'Participation saved!');
+    }
+
+    private function students(Activity $activity)
+    {
+        return Student::where('teacher_id', $activity->teacher_id)
+            ->where('is_active', true)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+    }
+
+    private function attributes(array $data): array
+    {
+        return [
+            'title' => $data['title'],
+            'type' => $data['type'],
+            'day_of_week' => $data['day_of_week'],
+            'start_time' => $data['start_time'],
+            'end_time' => $data['end_time'],
+            'group_name' => $data['group_name'] ?? null,
+            'teacher_id' => auth()->id(),
+            'week_start' => $data['week_start'],
+        ];
+    }
+
+    /**
+     * Validate the form and refuse any slot that would sit on top of another
+     * activity on the same day of the same week.
+     */
+    private function validatedActivity(Request $request, ?Activity $editing = null): array
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:Lesson,Craft,Music,Story,Movement'],
+            'day_of_week' => ['required', 'in:Monday,Tuesday,Wednesday,Thursday,Friday'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'group_name' => ['nullable', 'string', 'max:255'],
+            'week' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $weekStart = $this->weekStart($validated['week'] ?? null);
+
+        $clash = $this->overlappingActivity(
+            $editing?->id,
+            $weekStart,
+            $validated['day_of_week'],
+            $validated['start_time'],
+            $validated['end_time'],
+        );
+
+        if ($clash !== null) {
+            throw ValidationException::withMessages([
+                'start_time' => sprintf(
+                    'That slot overlaps "%s" (%s %s to %s) on the same day.',
+                    $clash->title,
+                    $clash->day_of_week,
+                    substr((string) $clash->start_time, 0, 5),
+                    substr((string) $clash->end_time, 0, 5),
+                ),
+            ]);
+        }
+
+        $validated['week_start'] = $weekStart->toDateString();
+
+        return $validated;
+    }
+
+    /**
+     * Two activities clash when they share a day of the same week and their
+     * times intersect. Touching endpoints (a 09:00 finish and a 09:00 start)
+     * are fine, so the comparison is strictly greater on both sides.
+     */
+    private function overlappingActivity(
+        ?int $ignoreId,
+        Carbon $weekStart,
+        string $day,
+        string $start,
+        string $end
+    ): ?Activity {
+        $startSeconds = $this->secondsOfDay($start);
+        $endSeconds = $this->secondsOfDay($end);
+
+        return Activity::where('teacher_id', auth()->id())
+            ->where('day_of_week', $day)
+            ->whereBetween('week_start', [$weekStart->toDateString(), $weekStart->copy()->addDays(6)->toDateString()])
+            ->when($ignoreId !== null, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->get()
+            ->first(fn (Activity $activity) => $this->secondsOfDay($activity->start_time) < $endSeconds
+                && $this->secondsOfDay($activity->end_time) > $startSeconds);
+    }
+
+    /**
+     * Times arrive as "08:00" from the form and come back as "08:00:00" from
+     * the database, so compare them as seconds rather than as raw strings.
+     */
+    private function secondsOfDay(string $time): int
+    {
+        $parts = array_pad(explode(':', trim($time)), 3, '0');
+
+        return ((int) $parts[0]) * 3600 + ((int) $parts[1]) * 60 + (int) $parts[2];
+    }
+
+    /**
+     * Resolve the Monday of the week to show. Anything unparseable falls back to
+     * the current week so a hand-edited ?week= value can never blank the board.
+     */
+    private function weekStart(mixed $raw): Carbon
+    {
+        if (is_string($raw) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) === 1) {
+            try {
+                return Carbon::parse($raw)->startOfWeek(Carbon::MONDAY)->startOfDay();
+            } catch (Throwable) {
+                // fall through to the current week
+            }
+        }
+
+        return Carbon::today()->startOfWeek(Carbon::MONDAY);
+    }
+
+    private function weekOf(Activity $activity): Carbon
+    {
+        return $activity->week_start
+            ? Carbon::parse($activity->week_start)->startOfWeek(Carbon::MONDAY)
+            : Carbon::today()->startOfWeek(Carbon::MONDAY);
+    }
+
+    private function authorize(Activity $activity): void
+    {
+        abort_unless($activity->teacher_id === auth()->id(), 403);
+    }
+}
