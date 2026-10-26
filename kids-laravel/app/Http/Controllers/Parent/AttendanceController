@@ -1,1 +1,74 @@
 
+<?php
+
+namespace App\Http\Controllers\Parent;
+
+use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class AttendanceController extends Controller
+{
+    public function index(Request $request)
+    {
+        $children = auth()->user()->children()->where('is_active', true)->get();
+
+        if ($children->isEmpty()) {
+            return redirect()->route('parent.dashboard')->with('info', 'No children registered.');
+        }
+
+        $selectedChildId = $request->query('child_id');
+        $child = $children->where('id', $selectedChildId)->first() ?? $children->first();
+
+        $month = $request->month ? Carbon::parse($request->month) : Carbon::today();
+        $monthStart = $month->copy()->startOfMonth();
+        $monthEnd = $month->copy()->endOfMonth();
+
+        $attendances = Attendance::where('student_id', $child->id)
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->orderBy('date')
+            ->get();
+
+        $present = $attendances->where('status', 'Present')->count();
+        $absent = $attendances->where('status', 'Absent')->count();
+        $late = $attendances->where('status', 'Late')->count();
+        $total = $attendances->count();
+        $rate = $total > 0 ? round(($present / $total) * 100) : 0;
+
+        $monthlyChart = [];
+        $current = $monthStart->copy();
+        while ($current <= $monthEnd) {
+            $dayData = $attendances->firstWhere('date', $current->format('Y-m-d'));
+            $monthlyChart[] = [
+                'date' => $current->format('Y-m-d'),
+                'day' => $current->format('d'),
+                'status' => $dayData?->status ?? 'No Record',
+            ];
+            $current->addDay();
+        }
+
+        $monthlySummary = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $m = Carbon::today()->subMonths($i);
+            $mStart = $m->copy()->startOfMonth();
+            $mEnd = $m->copy()->endOfMonth();
+            $mAtt = Attendance::where('student_id', $child->id)
+                ->whereBetween('date', [$mStart, $mEnd])->get();
+            $mTotal = $mAtt->count();
+            $mPresent = $mAtt->where('status', 'Present')->count();
+            $monthlySummary[] = [
+                'month' => $m->format('M Y'),
+                'present' => $mPresent,
+                'absent' => $mAtt->where('status', 'Absent')->count(),
+                'late' => $mAtt->where('status', 'Late')->count(),
+                'rate' => $mTotal > 0 ? round(($mPresent / $mTotal) * 100) : 0,
+            ];
+        }
+
+        return view('parent.attendance', compact(
+            'children', 'child', 'attendances', 'present', 'absent', 'late',
+            'rate', 'month', 'monthlyChart', 'monthlySummary', 'total'
+        ));
+    }
+}
