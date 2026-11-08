@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Games;
+
+/**
+ * The single registry of student games.
+ *
+ * A game belongs to a topic (Shapes, Colors, Letters, Animals, Numbers) and a
+ * topic may hold several games, each with its own gameplay, slug, levels and
+ * scoring. Adding a new entry here (plus its controller, views and routes)
+ * automatically surfaces it in the home grid and in the in-game switcher.
+ */
+class GameCatalog
+{
+    /** Ordered topic slugs. Kept in the same order the home page lists them. */
+    public const TOPICS = ['letters', 'numbers', 'colors', 'shapes', 'animals'];
+
+    /** Every game in the catalogue. */
+    public static function all(): array
+    {
+        return [
+            [
+                'topic' => 'letters',
+                'slug' => 'letters',
+                'name' => 'Letters',
+                'desc' => 'Learn the alphabet!',
+                'gradient' => 'linear-gradient(135deg, #ff8555, #f47548)',
+                'img' => 'alphabet.png',
+            ],
+            [
+                'topic' => 'numbers',
+                'slug' => 'numbers',
+                'name' => 'Numbers',
+                'desc' => 'Count and calculate!',
+                'gradient' => 'linear-gradient(135deg, #258cc5, #1f6f9e)',
+                'img' => 'numbers.png',
+            ],
+            [
+                'topic' => 'numbers',
+                'slug' => 'whats-missing',
+                'name' => 'What\'s Missing?',
+                'desc' => 'Find the missing number in the sequence!',
+                'gradient' => 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                'img' => 'bulb.png',
+            ],
+            [
+                'topic' => 'colors',
+                'slug' => 'colors',
+                'name' => 'Colors',
+                'desc' => 'Identify colors!',
+                'gradient' => 'linear-gradient(135deg, #68b82f, #4e8a2f)',
+                'img' => 'rainbow.png',
+            ],
+            [
+                'topic' => 'colors',
+                'slug' => 'colors-sort',
+                'name' => 'Color Sort',
+                'desc' => 'Drag each paint drop into its matching bucket!',
+                'gradient' => 'linear-gradient(135deg, #ec4899, #db2777)',
+                'img' => 'art.png',
+            ],
+            [
+                'topic' => 'shapes',
+                'slug' => 'shapes',
+                'name' => 'Shapes',
+                'desc' => 'Find the shapes!',
+                'gradient' => 'linear-gradient(135deg, #f05d56, #e04942)',
+                'img' => 'shapes.png',
+            ],
+            [
+                'topic' => 'shapes',
+                'slug' => 'shapes-bingo',
+                'name' => 'Shape Bingo',
+                'desc' => 'Dab the called shapes and shout Bingo!',
+                'gradient' => 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                'img' => 'confetti.png',
+            ],
+            [
+                'topic' => 'animals',
+                'slug' => 'animals',
+                'name' => 'Animals',
+                'desc' => 'Name the animals!',
+                'gradient' => 'linear-gradient(135deg, #d9b348, #b8942e)',
+                'img' => 'elephant.png',
+            ],
+            [
+                'topic' => 'animals',
+                'slug' => 'animals-match',
+                'name' => 'Animal Match',
+                'desc' => 'Drag each animal onto its matching twin!',
+                'gradient' => 'linear-gradient(135deg, #14b8a6, #0d9488)',
+                'img' => 'match.png',
+            ],
+        ];
+    }
+
+    /** Games that share a topic. */
+    public static function gamesForTopic(string $topic): array
+    {
+        return array_values(array_filter(self::all(), fn (array $game) => $game['topic'] === $topic));
+    }
+
+    /** A single game by its slug, or null. */
+    public static function game(string $slug): ?array
+    {
+        foreach (self::all() as $game) {
+            if ($game['slug'] === $slug) {
+                return $game;
+            }
+        }
+
+        return null;
+    }
+}

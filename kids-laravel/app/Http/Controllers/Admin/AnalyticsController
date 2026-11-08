@@ -1,0 +1,163 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Student;
+use App\Services\AnalyticsService;
+use Illuminate\Http\Request;
+
+class AnalyticsController extends Controller
+{
+    /**
+     * How the student level tables can be ordered. "performance" leaves the
+     * ranking the query produced untouched.
+     */
+    public const SORT_OPTIONS = ['section', 'name', 'performance'];
+
+    public function __construct(private AnalyticsService $analytics) {}
+
+    public function index(Request $request)
+    {
+        $allStudents = Student::where('is_active', true)->get();
+        $availableSections = $this->analytics->availableSections($allStudents);
+
+        $section = trim((string) $request->query('section', ''));
+        if ($section !== '' && ! in_array($section, $availableSections, true)) {
+            $section = '';
+        }
+
+        $sort = (string) $request->query('sort', 'section');
+        if (! in_array($sort, self::SORT_OPTIONS, true)) {
+            $sort = 'section';
+        }
+
+        $students = $section === ''
+            ? $allStudents->values()
+            : $allStudents->where('class_name', $section)->values();
+
+        // The intervention panel follows the section filter but must not
+        // collapse to one child. Captured before the single-student narrowing.
+        $sectionScopedIds = $students->pluck('id')->all();
+
+        // The per-class table compares classes, so it is never narrowed by the
+        // section or student filter: it always counts every active enrolment.
+        $allScoredIds = $allStudents->pluck('id')->all();
+
+        // Optional single-student view, resolved only against active enrolments
+        // so a guessed id cannot pull in an archived or unknown child.
+        $studentOptions = $students;
+        $selectedStudent = null;
+        $studentId = $request->query('student');
+        if ($studentId !== null && $studentId !== '') {
+            $selectedStudent = $studentOptions->firstWhere('id', (int) $studentId);
+        }
+
+        if ($selectedStudent) {
+            $students = collect([$selectedStudent]);
+        }
+
+        // null keeps the service's whole-system semantics untouched when no
+        // section is picked; an empty array would mean "nobody" and zero the page.
+        $scopedIds = match (true) {
+            (bool) $selectedStudent => [$selectedStudent->id],
+            $section !== '' => $students->pluck('id')->all(),
+            default => null,
+        };
+
+        // Recommendations take a plain list, so it needs a real id set.
+        $recommendationIds = $scopedIds ?? $allStudents->pluck('id')->all();
+
+        $system = $this->analytics->systemSummary();
+        $summary = $this->analytics->summary($scopedIds);
+
+        $roleGrowth = $this->analytics->roleGrowthTrend(6);
+        $enrollmentTrend = $this->analytics->enrollmentTrend(6, $scopedIds);
+        $attendanceRate = $this->analytics->attendanceRateTrend($scopedIds, 6);
+        $gamePopularity = $this->analytics->globalGamePopularity($scopedIds);
+        $domainMastery = $this->analytics->globalDomainMastery($scopedIds);
+        $domainStatus = $this->analytics->domainStatusBreakdown($scopedIds);
+        $gamePlayTrend = $this->analytics->gamePlayTrend($scopedIds, 8);
+        $teacherWorkload = $this->analytics->teacherWorkload(10);
+        $topStudents = $this->analytics->topStudents(8, $scopedIds);
+        $needsSupport = $this->analytics->studentsNeedingSupport(8, $scopedIds);
+        // "Students per class" compares classes, so it is never narrowed by the
+        // section or student filter: it always counts every active enrolment.
+        $classDistribution = $this->analytics->classDistribution(null);
+        $recommendations = $this->analytics->studentRecommendations($recommendationIds, 6);
+
+        // Interventions and the per-class rollup are centre-wide views: they
+        // follow the section filter but stay on the whole class even when one
+        // child has been selected for inspection.
+        $interventions = $this->analytics->interventionFlags($sectionScopedIds);
+        $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
+
+        // Per-category scores for the leaderboard tables. The scoped list is
+        // only known when filtering, so fall back to every active enrolment.
+        $breakdownIds = $scopedIds ?? $recommendationIds;
+        $breakdown = collect($this->analytics->studentCategoryBreakdown($breakdownIds))
+            ->keyBy('student_id');
+        $sectionScores = $this->analytics->sectionScoreBreakdown($allScoredIds);
+
+        $attachScores = function (array $rows) use ($breakdown) {
+            return array_map(function (array $row) use ($breakdown) {
+                $scores = $breakdown->get($row['student_id']);
+
+                return array_merge($row, [
+                    'games' => $scores['games'] ?? [],
+                    'domain_overall' => $scores['domain_overall'] ?? null,
+                    'total_points' => $scores['total_points'] ?? 0,
+                ]);
+            }, $rows);
+        };
+
+        $topStudents = $attachScores($topStudents);
+        $needsSupport = $attachScores($needsSupport);
+
+        $topStudents = $this->analytics->sortStudentRows($topStudents, $sort);
+        $needsSupport = $this->analytics->sortStudentRows($needsSupport, $sort);
+
+        $sectionLegend = $this->analytics->sectionLegend($allStudents);
+        $totalStudents = $allStudents->count();
+        $dataQuality = [
+            ['label' => __('analytics.dq_no_teacher'), 'count' => $system['unassigned_students'], 'severity' => $system['unassigned_students'] > 0 ? 'high' : 'ok'],
+            ['label' => __('analytics.dq_no_parent'), 'count' => $system['unlinked_students'], 'severity' => $system['unlinked_students'] > 0 ? 'medium' : 'ok'],
+            ['label' => __('analytics.dq_inactive_users'), 'count' => $system['inactive_users'], 'severity' => $system['inactive_users'] > 0 ? 'low' : 'ok'],
+            ['label' => __('analytics.dq_teachers_no_students'), 'count' => max($system['teachers'] - $system['teachers_with_students'], 0), 'severity' => ($system['teachers'] - $system['teachers_with_students']) > 0 ? 'low' : 'ok'],
+        ];
+
+        $averageAge = $this->analytics->averageAge($scopedIds);
+        $describe = fn($pct) => $this->analytics->describe((float) $pct);
+
+        return view('admin.analytics', compact(
+            'students',
+            'studentOptions',
+            'selectedStudent',
+            'system',
+            'summary',
+            'roleGrowth',
+            'enrollmentTrend',
+            'attendanceRate',
+            'gamePopularity',
+            'domainMastery',
+            'domainStatus',
+            'gamePlayTrend',
+            'teacherWorkload',
+            'topStudents',
+            'needsSupport',
+            'classDistribution',
+            'sectionScores',
+            'recommendations',
+            'interventions',
+            'interventionCount',
+            'dataQuality',
+            'averageAge',
+            'describe',
+            'section',
+            'sort',
+            'availableSections',
+            'sectionLegend',
+            'totalStudents'
+        ));
+    }
+}
