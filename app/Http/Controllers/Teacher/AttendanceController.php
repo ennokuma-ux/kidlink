@@ -7,32 +7,129 @@ use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AttendanceController extends Controller
 {
     public function index(Request $request)
     {
-        $teacherId = auth()->id();
+        $teacher = auth()->user();
+        $teacherId = $teacher->id;
         $date = $request->date ? Carbon::parse($request->date) : Carbon::today();
 
-        $students = Student::where('teacher_id', $teacherId)
-            ->where('is_active', true)
-            ->orderBy('first_name')
-            ->get();
+        $students = Cache::remember("teacher.{$teacherId}.students", 300, function () use ($teacherId) {
+            return Student::where('teacher_id', $teacherId)
+                ->where('is_active', true)
+                ->orderBy('first_name')
+                ->get(['id', 'first_name', 'last_name', 'full_name', 'class_name', 'academic_year']);
+        });
 
-        $attendance = Attendance::whereDate('date', $date)
-            ->whereIn('student_id', $students->pluck('id'))
-            ->get()
-            ->keyBy('student_id');
+        // Only the sections this teacher actually has, canonical order first so
+        // any legacy class_name still shows up rather than becoming unreachable.
+        $availableSections = $students->pluck('class_name')
+            ->filter()
+            ->unique()
+            ->sortBy(fn ($name) => ($index = array_search($name, Student::SECTIONS, true)) === false
+                ? count(Student::SECTIONS)
+                : $index)
+            ->values();
+
+        // Newest year first; only years this teacher actually has children in.
+        $availableYears = $students->pluck('academic_year')
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $search = trim((string) $request->query('search', ''));
+        $section = (string) $request->query('section', '');
+        $year = (string) $request->query('year', '');
+
+        // A stale bookmark should not silently blank the table.
+        if ($section !== '' && !in_array($section, $availableSections->all(), true)) {
+            $section = '';
+        }
+
+        if ($year !== '' && !in_array($year, $availableYears->all(), true)) {
+            $year = '';
+        }
+
+        // The attendance cache stays keyed by teacher + date only, so switching
+        // filters never re-queries; filtering happens over the cached students.
+        $cacheKey = "teacher.{$teacherId}.attendance.{$date->format('Y-m-d')}";
+        $attendance = Cache::remember($cacheKey, 60, function () use ($date, $students) {
+            return Attendance::whereDate('date', $date)
+                ->whereIn('student_id', $students->pluck('id'))
+                ->get(['id', 'student_id', 'date', 'status'])
+                ->keyBy('student_id');
+        });
+
+        $filtered = $students->filter(function ($student) use ($search, $section, $year) {
+            if ($section !== '' && $student->class_name !== $section) {
+                return false;
+            }
+
+            if ($year !== '' && $student->academic_year !== $year) {
+                return false;
+            }
+
+            if ($search !== '') {
+                $haystack = strtolower(trim($student->name . ' ' . $student->first_name . ' ' . $student->last_name));
+                if (!str_contains($haystack, strtolower($search))) {
+                    return false;
+                }
+            }
+
+            return true;
+        })->values();
+
+        $countStatus = fn ($status) => $filtered
+            ->filter(fn ($student) => optional($attendance->get($student->id))->status === $status)
+            ->count();
 
         $stats = [
-            'total' => $students->count(),
-            'present' => $attendance->where('status', 'Present')->count(),
-            'absent' => $attendance->where('status', 'Absent')->count(),
-            'late' => $attendance->where('status', 'Late')->count(),
+            'total' => $filtered->count(),
+            'present' => $countStatus('Present'),
+            'absent' => $countStatus('Absent'),
+            'late' => $countStatus('Late'),
         ];
 
-        return view('teacher.attendance', compact('students', 'attendance', 'date', 'stats'));
+        // One small grouped query for the calendar dots: how each recent day went.
+        $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($students) {
+            $days = [];
+
+            Attendance::query()
+                ->select('date', 'status')
+                ->selectRaw('COUNT(*) as total')
+                ->whereIn('student_id', $students->pluck('id'))
+                ->where('date', '>=', Carbon::today()->subMonths(12)->toDateString())
+                ->groupBy('date', 'status')
+                ->get()
+                ->each(function ($row) use (&$days) {
+                    $key = Carbon::parse($row->date)->toDateString();
+                    $days[$key] ??= ['present' => 0, 'late' => 0, 'absent' => 0];
+                    $bucket = strtolower((string) $row->status);
+                    if (isset($days[$key][$bucket])) {
+                        $days[$key][$bucket] += (int) $row->total;
+                    }
+                });
+
+            return $days;
+        });
+
+        return view('teacher.attendance', [
+            'calendarDays' => $calendarDays,
+            'students' => $filtered,
+            'totalStudents' => $students->count(),
+            'attendance' => $attendance,
+            'date' => $date,
+            'stats' => $stats,
+            'search' => $search,
+            'section' => $section,
+            'year' => $year,
+            'availableSections' => $availableSections,
+            'availableYears' => $availableYears,
+        ]);
     }
 
     public function store(Request $request)
@@ -41,9 +138,13 @@ class AttendanceController extends Controller
             'date' => 'required|date',
             'attendance' => 'required|array',
             'attendance.*' => 'required|in:Present,Absent,Late,Excused',
+            'search' => 'nullable|string|max:255',
+            'section' => 'nullable|string|max:255',
+            'year' => 'nullable|string|max:9',
         ]);
 
-        $teacherId = auth()->id();
+        $teacher = auth()->user();
+        $teacherId = $teacher->id;
         $date = $request->date;
 
         foreach ($request->attendance as $studentId => $status) {
@@ -53,7 +154,17 @@ class AttendanceController extends Controller
             );
         }
 
-        return redirect()->route('teacher.attendance.index', ['date' => $date])
+        $cacheKey = "teacher.{$teacherId}.attendance.{$date}";
+        Cache::forget($cacheKey);
+        Cache::forget("teacher.{$teacherId}.attendance.calendar");
+
+        // Keep the teacher where they were: same date, same search, same section.
+        return redirect()->route('teacher.attendance.index', array_filter([
+            'date' => $date,
+            'search' => $request->input('search'),
+            'section' => $request->input('section'),
+            'year' => $request->input('year'),
+        ]))
             ->with('success', 'Attendance saved!');
     }
 }

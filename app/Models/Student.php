@@ -2,12 +2,169 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
     use HasFactory;
+
+    /**
+     * The only sections a child can be enrolled in. Validation and every
+     * form read from here so the list cannot drift between screens.
+     */
+    public const SECTIONS = [
+        '1-3 years old',
+        '4-5 years old',
+    ];
+
+    /**
+     * One colour per section, used everywhere a section is visualised so the
+     * same group is never two different colours between screens. Taken from the
+     * existing analytics palette.
+     */
+    public const SECTION_COLORS = [
+        '1-3 years old' => '#1982c4',
+        '4-5 years old' => '#ff8555',
+    ];
+
+    /**
+     * Sections can be null in the database (legacy rows, and students created
+     * before a section was required), so anything unrecognised shares one
+     * neutral colour rather than being painted as a real section.
+     */
+    public const UNASSIGNED_SECTION = 'Unassigned';
+
+    public const UNASSIGNED_COLOR = '#8b949d';
+
+    /**
+     * The handedness a child account can be recorded with. "Not yet
+     * established" is the neutral choice for toddlers whose dominant hand is
+     * still undecided, and the default when no pick is made. Validation and
+     * every form read from here so the list cannot drift between screens.
+     */
+    public const HANDS = [
+        'Right',
+        'Left',
+        'Both',
+        'Not yet established',
+    ];
+
+    /**
+     * The translated label for each stored handedness value.
+     */
+    public static function handLabels(): array
+    {
+        return [
+            'Right' => __('student.hand_right'),
+            'Left' => __('student.hand_left'),
+            'Both' => __('student.hand_both'),
+            'Not yet established' => __('student.hand_not_established'),
+        ];
+    }
+
+    /**
+     * The display label for this student's handedness. A value outside the
+     * list renders as itself rather than blank, and an empty one falls back
+     * to the neutral label so the column never shows nothing at all.
+     */
+    public function handLabel(): string
+    {
+        $value = (string) $this->dominant_hand;
+
+        return self::handLabels()[$value] ?? ($value ?: __('student.hand_not_established'));
+    }
+
+    /**
+     * The display label for a stored section, or the neutral "Unassigned" one.
+     */
+    public static function sectionLabel(?string $section): string
+    {
+        return $section ?: self::UNASSIGNED_SECTION;
+    }
+
+    /**
+     * The colour for a stored section, falling back to the neutral one so an
+     * unexpected value can never crash a chart or render as no colour at all.
+     */
+    public static function colorForSection(?string $section): string
+    {
+        return self::SECTION_COLORS[$section] ?? self::UNASSIGNED_COLOR;
+    }
+
+    /**
+     * A date of birth that keeps a child's age inside the range their section
+     * is named for, so an assigned birthday can never contradict the section.
+     * The middle of the range is used: "1-3 years old" yields a 2-year-old and
+     * "4-5 years old" a 4-year-old. Deriving it from the label means a new
+     * entry in SECTIONS needs no change here.
+     */
+    public static function dateOfBirthForSection(?string $section): ?Carbon
+    {
+        if (! $section || ! preg_match('/(\d+)\s*(?:-\s*(\d+)\s*)?years?\s*old/i', $section, $matches)) {
+            return null;
+        }
+
+        $from = (int) $matches[1];
+        $to = ($matches[2] ?? '') === '' ? $from : (int) $matches[2];
+
+        return now()->subYears($from)->subMonths((int) round(($to - $from) * 6));
+    }
+
+    /**
+     * Month the school year starts in. A child enrolled from June onwards
+     * belongs to the year that begins that calendar year.
+     */
+    public const ACADEMIC_YEAR_START_MONTH = 6;
+
+    /**
+     * The academic year a date falls in, as "2026-2027".
+     */
+    public static function academicYearFor(?Carbon $date = null): string
+    {
+        $date ??= now();
+        $start = $date->month >= self::ACADEMIC_YEAR_START_MONTH ? $date->year : $date->year - 1;
+
+        return $start.'-'.($start + 1);
+    }
+
+    public static function currentAcademicYear(): string
+    {
+        return self::academicYearFor(now());
+    }
+
+    /**
+     * Whether a value looks like a real academic year: two consecutive years.
+     */
+    public static function isValidAcademicYear(?string $value): bool
+    {
+        return $value !== null
+            && preg_match('/^(\d{4})-(\d{4})$/', $value, $m) === 1
+            && (int) $m[2] === (int) $m[1] + 1;
+    }
+
+    /**
+     * Years offered in pickers: the previous, current and next school year,
+     * plus any year already stored (so an old record is never unselectable),
+     * newest first.
+     *
+     * @param  iterable<string|null>  $existing
+     * @return list<string>
+     */
+    public static function academicYearOptions(iterable $existing = []): array
+    {
+        $startYear = (int) substr(self::currentAcademicYear(), 0, 4);
+
+        $years = collect([$startYear + 1, $startYear, $startYear - 1])
+            ->map(fn ($y) => $y.'-'.($y + 1))
+            ->merge(collect($existing)->filter(fn ($y) => self::isValidAcademicYear($y)))
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return $years->all();
+    }
 
     protected $fillable = [
         'first_name',
@@ -28,6 +185,7 @@ class Student extends Model
         'mother_contact',
         'siblings_count',
         'class_name',
+        'academic_year',
     ];
 
     protected $casts = [

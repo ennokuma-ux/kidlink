@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('sex', ['Female', 'Male']);
             $table->date('date_of_birth');
             $table->string('address')->nullable();
-            $table->enum('dominant_hand', ['Right', 'Left', 'Both'])->default('Right');
+            $table->enum('dominant_hand', ['Right', 'Left', 'Both', 'Not yet established'])->default('Not yet established');
             $table->foreignId('parent_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('teacher_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();

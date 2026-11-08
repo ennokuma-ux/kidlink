@@ -4,53 +4,116 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\GameScore;
+use App\Models\Point;
 use App\Models\Student;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $student = $this->resolveStudent();
+        $stats = $this->statsFor($student);
 
-        $student = Student::where('user_id', $user->id)->first();
+        $scores = $stats['scores'];
+        $totalScore = $scores->sum('score');
+        $totalGames = $stats['games_played'];
+        $totalPoints = $stats['total_points'];
+        $avgScore = $stats['avg_score'];
+
+        $pointsByGame = Point::getTotalPointsByGame($student->id);
+        $recentActivity = Point::getRecentActivity($student->id, 5);
+        $streak = $stats['streak'];
+
+        $highestLevelByGame = [];
+        foreach ($scores as $s) {
+            $g = $s->game_type;
+            if (!isset($highestLevelByGame[$g]) || $s->level > $highestLevelByGame[$g]) {
+                $highestLevelByGame[$g] = $s->level;
+            }
+        }
+
+        // Only the games this student's teacher has assigned (directly or via class).
+        $assignedSlugs = \App\Support\GameAssignmentAccess::slugsFor($student);
+        $games = array_values(array_filter(
+            \App\Games\GameCatalog::all(),
+            fn ($game) => in_array($game['slug'], $assignedSlugs, true)
+        ));
+
+        foreach ($games as &$game) {
+            $type = $game['slug'];
+            $gameScores = $scores->where('game_type', $type);
+            $game['played'] = $gameScores->count();
+            $game['best'] = $gameScores->max('score');
+            $game['highestLevel'] = $highestLevelByGame[$type] ?? 0;
+            $game['points'] = $pointsByGame[$type] ?? 0;
+        }
+        unset($game);
+
+        return view('student.home', compact(
+            'student', 'scores', 'totalScore', 'totalGames', 'totalPoints',
+            'pointsByGame', 'recentActivity', 'streak', 'games', 'avgScore'
+        ));
+    }
+
+    /**
+     * Live stats for the dashboard, read fresh from the database so the
+     * numbers can be refreshed without reloading the page.
+     */
+    public function stats()
+    {
+        $stats = $this->statsFor($this->resolveStudent());
+
+        return response()->json([
+            'total_points' => $stats['total_points'],
+            'games_played' => $stats['games_played'],
+            'streak' => $stats['streak'],
+            'avg_score' => $stats['avg_score'],
+        ]);
+    }
+
+    private function resolveStudent(): Student
+    {
+        $student = Student::where('user_id', auth()->id())->first();
 
         if (!$student) {
-            $student = Student::where('first_name', $user->first_name)
-                ->where('last_name', $user->last_name)
-                ->first();
+            abort(403, 'No student profile found for this account.');
         }
 
-        $scores = collect();
-        $totalScore = 0;
-        $totalGames = 0;
+        return $student;
+    }
+
+    private function statsFor(Student $student): array
+    {
+        $scores = GameScore::where('student_id', $student->id)->get();
+
         $streak = 0;
-
-        if ($student) {
-            $scores = GameScore::where('student_id', $student->id)->get();
-            $totalScore = $scores->sum('score');
-            $totalGames = $scores->count();
-
-            $recent = $scores->sortByDesc('created_at')->take(5);
-            foreach ($recent as $s) {
-                if ($s->score >= $s->total * 0.5) {
-                    $streak++;
-                } else {
-                    break;
-                }
+        foreach ($scores->sortByDesc('created_at')->take(5) as $s) {
+            if ($s->score >= $s->total * 0.5) {
+                $streak++;
+            } else {
+                break;
             }
-
-            session(['student_child_id' => $student->id, 'student_child_name' => $student->name]);
         }
 
-        $games = [
-            ['type' => 'letters', 'name' => 'Letters', 'desc' => 'Learn the alphabet!', 'color' => 'from-[#ff8555] to-[#f47548]', 'img' => 'alphabet.png'],
-            ['type' => 'numbers', 'name' => 'Numbers', 'desc' => 'Count and calculate!', 'color' => 'from-[#258cc5] to-[#1f6f9e]', 'img' => 'numbers.png'],
-            ['type' => 'colors', 'name' => 'Colors', 'desc' => 'Identify colors!', 'color' => 'from-[#68b82f] to-[#4e8a2f]', 'img' => 'rainbow.png'],
-            ['type' => 'shapes', 'name' => 'Shapes', 'desc' => 'Find the shapes!', 'color' => 'from-[#f05d56] to-[#e04942]', 'img' => 'shapes.png'],
-            ['type' => 'animals', 'name' => 'Animals', 'desc' => 'Name the animals!', 'color' => 'from-[#d9b348] to-[#b8942e]', 'img' => 'elephant.png'],
-        ];
+        $average = $scores->avg(fn (GameScore $s) => $this->accuracyFor($s));
 
-        return view('student.home', compact('student', 'scores', 'totalScore', 'totalGames', 'streak', 'games'));
+        return [
+            'scores' => $scores,
+            'games_played' => $scores->count(),
+            'total_points' => Point::getTotalPoints($student->id),
+            'streak' => $streak,
+            // Correct answers over total attempts, so mistakes count against it.
+            'avg_score' => (int) round($average ?? 0),
+        ];
+    }
+
+    /**
+     * Guards against a zero denominator so a malformed row cannot 500 the page.
+     */
+    private function accuracyFor(GameScore $score): float
+    {
+        $attempts = $score->total + ($score->mistakes ?? 0);
+
+        return $attempts > 0 ? 100 * $score->score / $attempts : 0.0;
     }
 }

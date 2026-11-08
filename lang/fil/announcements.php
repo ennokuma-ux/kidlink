@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'announcements' => 'Mga Anunsyo',
+    'new_announcement' => 'Bagong Anunsyo',
+    'new_announcement_title' => 'Bagong Anunsyo',
+    'visible_to_every_teacher_and_parent' => 'Makikita ng bawat guro at magulang.',
+    'cancel' => 'Kanselahin',
+    'title' => 'Pamagat',
+    'announcement' => 'Anunsyo',
+    'short_headline_placeholder' => 'Maikling pamagat, halimbawa: Maaga ang pagsasara ng paaralan sa Biyernes',
+    'write_full_announcement_here' => 'Isulat ang buong anunsyo dito...',
+    'publish' => 'I-publish',
+    'post_updates_description' => 'Mag-post ng mga update na mababasa ng mga guro at magulang.',
+    'updates_from_description' => 'Mga update mula sa mga guro at mga tagapamahala ng paaralan.',
+    'new_announcement_button' => '+ Bagong Anunsyo',
+    'announcements_posted_info' => 'Ang mga anunsyo ay pinopost ng mga guro at mga tagapamahala. Maaari mo itong basahin dito.',
+    'removed_account' => 'Nakalabas na account',
+    'no_announcements_yet' => 'Wala pang mga anunsyo.',
+    'post_the_first_one' => 'I-post ang una',
+    'remove_this_announcement' => 'Tanggalin ang anunsyong ito? Hindi na ito makikita ng mga magulang at guro.',
+    'remove' => 'Tanggalin',
+    'success' => 'Tagumpay!',
+    'oops' => 'Ay!',
+];

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('eccd_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
-            $table->enum('domain', ['Gross Motor', 'Fine Motor', 'Self-Help', 'Receptive Language', 'Expressive Language', 'Cognitive']);
+            $table->enum('domain', ['Gross Motor', 'Fine Motor', 'Self-Help', 'Receptive Language', 'Expressive Language', 'Cognitive', 'Social-Emotional']);
             $table->text('indicator');
             $table->text('notes')->nullable();
             $table->enum('status', ['Not Yet', 'In Progress', 'Achieved'])->default('Not Yet');

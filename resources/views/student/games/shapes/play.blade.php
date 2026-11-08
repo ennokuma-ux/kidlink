@@ -1,0 +1,359 @@
+@extends('layouts.app')
+
+@section('title', __('game.shapes_play_title', ['level' => $level]))
+
+@section('content')
+{{-- In-game mascot buddy: reacts to correct/wrong/next-stage feedback --}}
+<x-mascot buddy side state="start" :size="200" />
+{{-- Level 1 is the tutorial stage --}}
+<x-tutorial-stage game="shapes" :level="$level" />
+<x-game-kit game="shapes" :level="$level" accent="#ff595e" />
+
+<div class="min-h-screen p-4 md:p-8" style="background: linear-gradient(135deg, #f4fae6 0%, #e0f2fe 25%, #fefce8 50%, #ffedd5 75%, #f4fae6 100%);">
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800" style="font-family: 'Fredoka One', cursive;">{{ __('game.shapes_heading') }}</h1>
+                <p class="text-sm text-gray-500 mt-1">{{ __('game.level_of_total', ['level' => $level, 'total' => $totalLevels]) }} · {{ $levelData['description'] }}</p>
+            </div>
+            <a href="{{ route('student.games.shapes.stage-select') }}" class="bg-white text-gray-500 px-4 py-2 rounded-lg font-bold border border-gray-200 hover:border-orange-400 hover:text-orange-400 transition">{{ __('game.back') }}</a>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+            <span class="bg-[#fff1f1] text-[#e8454a] border-2 border-[#ffc9cb] px-3 py-1 rounded-full text-xs font-extrabold">{{ __('game.round') }} <span id="roundNum">1</span> / <span id="roundTotal">{{ $totalRounds }}</span></span>
+            <div class="bg-white rounded-xl shadow-sm px-5 py-2 border border-gray-200 flex items-center gap-2">
+                <span class="text-gray-500 font-semibold text-sm">{{ __('game.score_label') }}</span>
+                <span class="text-2xl font-bold text-gray-800" id="scoreDisplay">{{ $score ?? 0 }}</span>
+                <span class="text-gray-500 font-medium text-sm">/ {{ $levelData['questions'] }}</span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 bg-white rounded-xl shadow-sm px-5 py-2 border border-gray-200">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#ff595e]"></span>
+                <span class="text-gray-500 font-semibold text-sm">{{ __('game.mistakes_label') }}</span>
+                <span class="font-bold text-gray-800 text-sm" id="mistakesDisplay">{{ $mistakes ?? 0 }}</span>
+            </span>
+        </div>
+
+        <div id="arena" class="mx-auto" style="width: min(92vw, 560px);">
+            <div id="tray" class="bg-white border-2 border-gray-200 rounded-3xl p-5 mb-5 shadow-md">
+                <div id="trayRow" class="flex justify-center items-center gap-4 flex-wrap" style="min-height: 80px;"></div>
+            </div>
+            <div id="board" class="bg-white border-2 border-gray-200 rounded-3xl p-6 shadow-lg">
+                <div id="holesRow" class="flex justify-center items-center gap-4 flex-wrap" style="min-height: 120px;"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-6" style="min-height: 44px;">
+            <p id="feedbackText" class="text-lg font-bold text-gray-500 transition-all">{{ __('game.instructions_shapes') }}</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.hole {
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
+    background: var(--hole-tint, #fed7aa);
+    border: 3px dashed var(--hole-border, #f97316);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+.hole.drag-over {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3);
+}
+.hole.filled {
+    background: var(--hole-color, #f97316);
+    border: 3px solid var(--hole-color, #f97316);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+.hole .shape-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: brightness(0);
+}
+.hole.filled .shape-img {
+    filter: none;
+}
+.tray-item {
+    width: 74px;
+    height: 74px;
+    border-radius: 18px;
+    background: var(--item-tint, #ffe9ea);
+    border: 2px solid var(--item-border, #ff595e);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    touch-action: none;
+    user-select: none;
+}
+.tray-item:active {
+    cursor: grabbing;
+}
+.tray-item:hover {
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.tray-item.dragging { opacity: 0.25; transform: scale(0.9); }
+.tray-item.used { opacity: 0.2; pointer-events: none; transform: scale(0.8); }
+.tray-item.wrong { animation: shake 0.4s ease; }
+.tray-item .shape-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: brightness(0);
+}
+.drag-ghost {
+    position: fixed;
+    z-index: 1000;
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    background: var(--ghost-bg, #ffe9ea);
+    border: 2px solid var(--ghost-border, #ff595e);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+.drag-ghost .shape-img { width: 50px; height: 50px; object-fit: contain; pointer-events: none; }
+.celebration {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 3.5rem; z-index: 1000; pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+}
+@keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+    30% { opacity: 1; transform: translate(-50%, -55%) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-9px); }
+    50% { transform: translateX(9px); }
+    75% { transform: translateX(-6px); }
+}
+.overlay-card {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 900; backdrop-filter: blur(4px);
+}
+.overlay-card .card {
+    background: white; border-radius: 24px; padding: 40px 48px;
+    text-align: center; max-width: 400px; box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+}
+</style>
+
+@push('scripts')
+<script>
+    const rounds = @json($rounds);
+    const totalRounds = {{ $totalRounds }};
+    const totalQuestions = {{ $levelData['questions'] }};
+    const assetBase = @json(asset(''));
+    const routeStageSelect = @json(route('student.games.shapes.stage-select'));
+    const routeNextLevel = @json(route('student.games.shapes.play', ['level' => $level + 1]));
+    const submitUrl = @json(route('student.games.shapes.submit', $level));
+    const levelNum = {{ $level }};
+
+    const L = {
+        'drag_into_hole': @json(__('game.drag_into_hole')),
+        'shape_fits': @json(__('game.shape_fits')),
+        'shape_doesnt_fit': @json(__('game.shape_doesnt_fit')),
+        'drop_shape': @json(__('game.drop_shape')),
+        'level_complete_shapes': @json(__('game.level_complete_shapes')),
+        'level_num_complete': @json(__('game.level_num_complete')),
+        'score_line': @json(__('game.score_line')),
+        'mistakes_line': @json(__('game.mistakes_line')),
+        'points_earned': @json(__('game.points_earned')),
+        'back_to_map': @json(__('game.back_to_map')),
+        'home': @json(__('game.home')),
+        'next_level': @json(__('game.next_level')),
+        'score_saved': @json(__('game.score_saved')),
+    };
+
+
+    let currentRound = 0;
+    let score = {{ $score ?? 0 }};
+    let mistakes = {{ $mistakes ?? 0 }};
+    let filledThisRound = 0;
+    let holesThisRound = 0;
+    let playing = false;
+
+    var holesRow = document.getElementById('holesRow');
+    var trayRow = document.getElementById('trayRow');
+    var feedbackText = document.getElementById('feedbackText');
+
+    function tint(hex, amount) {
+        var n = parseInt(hex.replace('#', ''), 16);
+        var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+        return 'rgb(' + Math.round(r + (255 - r) * amount) + ',' + Math.round(g + (255 - g) * amount) + ',' + Math.round(b + (255 - b) * amount) + ')';
+    }
+
+    function showCelebration(name) {
+        if (window.KidLinkFx) KidLinkFx.celebrate(name);
+    }
+
+    function setFeedback(message, color) {
+        feedbackText.textContent = message;
+        feedbackText.style.color = color || '#6b7280';
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreDisplay').textContent = score;
+        document.getElementById('mistakesDisplay').textContent = mistakes;
+        document.getElementById('roundNum').textContent = currentRound + 1;
+    }
+
+    function loadRound(roundIndex) {
+        var round = rounds[roundIndex];
+        filledThisRound = 0;
+        holesThisRound = round.holes.length;
+        playing = true;
+
+        holesRow.innerHTML = '';
+        round.holes.forEach(function(hole, i) {
+            var el = document.createElement('div');
+            el.className = 'hole';
+            el.dataset.type = hole.type;
+            el.dataset.index = i;
+            el.style.setProperty('--hole-color', hole.color);
+            el.style.setProperty('--hole-tint', tint(hole.color, 0.75));
+            el.style.setProperty('--hole-border', tint(hole.color, 0.4));
+            var img = document.createElement('img');
+            img.className = 'shape-img';
+            img.src = assetBase + hole.image;
+            img.alt = hole.name;
+            el.appendChild(img);
+            holesRow.appendChild(el);
+        });
+
+        trayRow.innerHTML = '';
+        round.tray.forEach(function(item, i) {
+            var el = document.createElement('div');
+            el.className = 'tray-item';
+            el.dataset.type = item.type;
+            el.dataset.index = i;
+            el.style.setProperty('--item-tint', tint(item.color, 0.8));
+            el.style.setProperty('--item-border', tint(item.color, 0.5));
+            var img = document.createElement('img');
+            img.className = 'shape-img';
+            img.src = assetBase + item.image;
+            img.alt = item.name;
+            el.appendChild(img);
+            el.addEventListener('pointerdown', function(e) { startDrag(e, el, item); });
+            trayRow.appendChild(el);
+        });
+
+        updateHUD();
+        setFeedback(L.drag_into_hole, '#6b7280');
+    }
+
+    function startDrag(e, itemEl, item) {
+        if (!playing || itemEl.classList.contains('used')) return;
+        e.preventDefault();
+        itemEl.classList.add('dragging');
+
+        var ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.style.setProperty('--ghost-bg', tint(item.color, 0.8));
+        ghost.style.setProperty('--ghost-border', item.color);
+        var gImg = document.createElement('img');
+        gImg.className = 'shape-img';
+        gImg.style.filter = 'none';
+        gImg.src = assetBase + item.image;
+        gImg.alt = item.name;
+        ghost.appendChild(gImg);
+        document.body.appendChild(ghost);
+
+        function onMove(e2) {
+            ghost.style.left = e2.clientX + 'px';
+            ghost.style.top = e2.clientY + 'px';
+            var under = document.elementFromPoint(e2.clientX, e2.clientY);
+            document.querySelectorAll('.hole.drag-over').forEach(function(h) { h.classList.remove('drag-over'); });
+            var hole = under ? under.closest('.hole') : null;
+            if (hole && !hole.classList.contains('filled')) {
+                hole.classList.add('drag-over');
+            }
+        }
+
+        function onUp(e2) {
+            itemEl.classList.remove('dragging');
+            document.querySelectorAll('.hole.drag-over').forEach(function(h) { h.classList.remove('drag-over'); });
+            var under = document.elementFromPoint(e2.clientX, e2.clientY);
+            var hole = under ? under.closest('.hole') : null;
+
+            if (hole && hole.dataset.type === item.type && !hole.classList.contains('filled')) {
+                hole.style.setProperty('--hole-color', item.color);
+                hole.classList.add('filled');
+                itemEl.classList.add('used');
+                score++;
+                filledThisRound++;
+                setFeedback(L.shape_fits.replace(':name', item.name), '#8ac926');
+                showCelebration('star');
+                if (filledThisRound >= holesThisRound) {
+                    playing = false;
+                    setTimeout(function() { nextRound(); }, currentRound + 1 >= totalRounds ? 350 : 900);
+                }
+            } else if (hole) {
+                void itemEl.offsetWidth;
+                itemEl.classList.add('wrong');
+                mistakes++;
+                setFeedback(L.shape_doesnt_fit, '#ff595e');
+                setTimeout(function() { itemEl.classList.remove('wrong'); }, 500);
+            } else {
+                setFeedback(L.drop_shape, '#6b7280');
+            }
+
+            ghost.remove();
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+            updateHUD();
+        }
+
+        ghost.style.left = e.clientX + 'px';
+        ghost.style.top = e.clientY + 'px';
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+    }
+
+    function nextRound() {
+        currentRound++;
+        if (currentRound >= totalRounds) { finishLevel(); return; }
+        showCelebration('sparkles');
+        setTimeout(function() { loadRound(currentRound); }, 700);
+    }
+
+    function finishLevel() {
+        showCelebration('sparkles');
+        setFeedback(L.level_complete_shapes, '#e8454a');
+
+        // The result card shows at once; the score is saved behind it.
+        KidLinkGame.finish({ score: score, total: totalQuestions, mistakes: mistakes });
+    }
+
+    // Idle hint: after 15 quiet seconds a piece and its hole shake and the mascot gives a clue.
+    KidLinkGame.hints(function () {
+        if (!playing) return null;
+        const item = trayRow.querySelector('.tray-item:not(.used)');
+        if (!item) return null;
+        const hole = Array.from(holesRow.querySelectorAll('.hole:not(.filled)')).find(function (h) {
+            return h.dataset.type === item.dataset.type;
+        });
+        if (!hole) return null;
+        return { round: currentRound + ':' + item.dataset.index, els: [item, hole], clues: KidLinkGame.clues('drag') };
+    });
+
+    loadRound(0);
+</script>
+@endpush
+@endsection

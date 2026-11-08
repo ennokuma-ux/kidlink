@@ -1,74 +1,161 @@
-<button type="button" id="childModeBtn"
-    class="flex items-center gap-2 bg-gradient-to-r from-[#68b82f] to-[#4e8a2f] hover:from-[#5da32a] hover:to-[#3f7a26] text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    Child Mode
-</button>
+<?php
+    $user = auth()->user();
+    $accounts = (in_array($user->role, ['super_admin', 'admin'], true)
+        ? App\Models\Student::query()
+        : ($user->role === 'teacher' ? $user->teacherStudents() : $user->children()))
+        ->where('students.is_active', true)
+        ->orderBy('first_name')
+        ->get()
+        ->map(fn ($c) => [
+            'id' => $c->id,
+            'first' => $c->first_name,
+            'name' => $c->name,
+            'class_name' => $c->class_name,
+            'initial' => strtoupper(substr($c->first_name ?: '?', 0, 1)),
+            'url' => route('child-mode.enter', $c),
+        ])
+        ->values()
+        ->all();
 
-<div id="childModeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h3 class="text-xl font-bold text-[#182438]">Choose a Child</h3>
-                <p class="text-sm text-[#5f6873]">Log in instantly as a student to play educational games.</p>
+    $manageAccountsUrl = match ($user->role) {
+        'teacher' => route('teacher.accounts.index'),
+        default => route('parent.dashboard'),
+    };
+?>
+<script type="application/json" id="childModeLabels"><?php echo json_encode(['availableOne' => __('child.available_one'), 'availableOther' => __('child.available_other'), 'noSection' => __('child.no_section')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
+<script type="application/json" id="childModeAccounts"><?php echo json_encode($accounts, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
+<div x-data="{
+        open: false,
+        search: '',
+        accounts: [],
+        labels: {},
+        init() {
+            this.accounts = JSON.parse(document.getElementById('childModeAccounts').textContent);
+            this.labels = JSON.parse(document.getElementById('childModeLabels').textContent);
+        },
+        async refresh() {
+            try {
+                const res = await fetch('<?php echo e(route('child-mode.accounts')); ?>', { headers: { 'Accept': 'application/json' } });
+                if (res.ok) this.accounts = (await res.json()).accounts;
+            } catch (e) {
+                // keep the last known list if the refresh fails
+            }
+        },
+        openPicker() {
+            this.open = true;
+            this.search = '';
+            this.$nextTick(() => this.$refs.pickerSearch.focus());
+            this.refresh();
+        },
+        close() {
+            this.open = false;
+            this.search = '';
+        },
+        get filtered() {
+            const q = this.search.trim().toLowerCase();
+            if (!q) return this.accounts;
+            return this.accounts.filter(a => {
+                const haystack = [a.first, a.name, a.class_name].filter(Boolean).join(' ').toLowerCase();
+                return haystack.includes(q);
+            });
+        }
+    }" @keydown.escape.window="close()">
+    <button type="button" @click="openPicker()" class="flex items-center gap-2 bg-[#8ac926] hover:bg-[#6fa51c] text-[#182438] px-4 py-2 rounded-lg text-sm font-semibold transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <?php echo e(__('child.mode')); ?>
+
+    </button>
+
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click.self="close()"
+         class="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:items-center bg-black/50 overflow-y-auto"
+         style="display: none;"
+         role="dialog"
+         aria-modal="true"
+         aria-label="<?php echo e(__('child.choose_aria')); ?>">
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="w-full max-w-md bg-white rounded-2xl shadow-2xl my-auto">
+            <div class="flex items-start justify-between gap-3 p-5 border-b border-gray-100">
+                <div>
+                    <h3 class="text-lg font-bold text-[#182438]"><?php echo e(__('child.choose_title')); ?></h3>
+                    <p class="text-xs text-gray-400 mt-0.5" x-text="accounts.length + (accounts.length === 1 ? labels.availableOne : labels.availableOther)"></p>
+                </div>
+                <button type="button" @click="close()" aria-label="<?php echo e(__('child.close')); ?>" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
             </div>
-            <button type="button" id="childModeClose" class="text-[#8b949d] hover:text-[#5f6873] text-2xl">&times;</button>
-        </div>
-        <div class="relative mb-4">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
-            <input type="text" id="childModeSearch" placeholder="Search children..." autocomplete="off"
-                class="w-full pl-9 pr-4 py-2.5 border border-[#ebe8e1] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-        </div>
-        <div id="childModeList" class="space-y-2 max-h-72 overflow-y-auto">
-            <?php $__empty_1 = true; $__currentLoopData = $children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <form method="POST" action="<?php echo e(route('child-mode.enter', $child)); ?>" class="child-mode-item">
-                <?php echo csrf_field(); ?>
-                <button type="submit"
-                    class="w-full flex items-center gap-3 px-4 py-3 border border-[#ebe8e1] rounded-xl hover:border-[#ff8555] hover:bg-[#faf8f3] transition text-left">
-                    <div class="w-11 h-11 bg-gradient-to-br from-[#258cc5] to-[#ff8555] rounded-full flex items-center justify-center text-white font-bold">
-                        <?php echo e(strtoupper(substr($child->first_name, 0, 1))); ?><?php echo e(strtoupper(substr($child->last_name, 0, 1))); ?>
 
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-medium text-[#182438]"><?php echo e($child->name); ?></p>
-                        <p class="text-xs text-[#5f6873]">Age: <?php echo e($child->age); ?> | Class: <?php echo e($child->class_name ?? 'N/A'); ?></p>
-                    </div>
-                    <span class="text-[#ff8555] font-semibold text-sm">Play</span>
-                </button>
-            </form>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <p class="text-center text-[#8b949d] py-6">No children available.</p>
-            <?php endif; ?>
+            <div class="p-4 border-b border-gray-100">
+                <div class="relative">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input x-ref="pickerSearch" x-model="search" type="search" autocomplete="off"
+                           placeholder="<?php echo e(__('child.search_placeholder')); ?>"
+                           aria-label="<?php echo e(__('child.search_aria')); ?>"
+                           class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#ff8555] focus:ring-1 focus:ring-[#ff8555]">
+                </div>
+            </div>
+
+            <div class="max-h-80 overflow-y-auto p-2">
+                <template x-for="a in filtered" :key="a.id">
+                    <form method="POST" :action="a.url">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-orange-50 transition flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style="background: linear-gradient(135deg, #1982c4, #ff8555);" x-text="a.initial"></span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block font-semibold text-[#182438] truncate" x-text="a.name"></span>
+                                <span class="block text-xs text-gray-400 truncate" x-text="a.class_name || labels.noSection"></span>
+                            </span>
+                            <span class="text-xs font-semibold text-[#ff8555] flex-shrink-0"><?php echo e(__('child.play')); ?></span>
+                        </button>
+                    </form>
+                </template>
+                <div x-show="filtered.length === 0" class="px-4 py-6 text-center">
+                    <p class="text-sm text-gray-500 font-medium" x-show="accounts.length === 0">
+                        <?php echo e(__('child.empty_title')); ?>
+
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1" x-show="accounts.length === 0">
+                        <?php echo e(__('child.empty_hint')); ?>
+
+                    </p>
+                    <a x-show="accounts.length === 0" href="<?php echo e($manageAccountsUrl); ?>"
+                       class="inline-block mt-3 text-sm font-semibold text-[#ff8555] hover:underline">
+                        <?php echo e(__('child.manage_accounts')); ?> &rarr;
+                    </a>
+                    <p x-show="accounts.length > 0" class="text-sm text-gray-400">
+                        <?php echo e(__('child.no_match')); ?>
+
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-4 py-3 border-t border-gray-100 bg-[#fffbf0] rounded-b-2xl">
+                <button type="button" @click="close()" class="w-full text-sm text-[#5f6873] hover:text-[#182438] font-medium transition"><?php echo e(__('child.cancel')); ?></button>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-const childModeBtn = document.getElementById('childModeBtn');
-const childModeModal = document.getElementById('childModeModal');
-const childModeClose = document.getElementById('childModeClose');
-const childModeSearch = document.getElementById('childModeSearch');
 
-if (childModeBtn && childModeModal) {
-    childModeBtn.addEventListener('click', function () {
-        childModeModal.classList.remove('hidden');
+<script>
+(function () {
+    if (window.__klEnterNote) return;
+    window.__klEnterNote = true;
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
+        if (!/\/child-mode\/enter\//.test(form.getAttribute('action') || '')) return;
+        try {
+            sessionStorage.setItem('klTransition', JSON.stringify({ ts: Date.now(), from: '/', kind: 'enter' }));
+        } catch (e) { /* private mode: no greeting screen, nothing else changes */ }
     });
-    childModeClose.addEventListener('click', function () {
-        childModeModal.classList.add('hidden');
-        childModeSearch.value = '';
-        document.querySelectorAll('.child-mode-item').forEach(item => item.style.display = '');
-    });
-    childModeModal.addEventListener('click', function (e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-            childModeSearch.value = '';
-            document.querySelectorAll('.child-mode-item').forEach(item => item.style.display = '');
-        }
-    });
-    childModeSearch.addEventListener('input', function () {
-        const q = this.value.toLowerCase().trim();
-        document.querySelectorAll('.child-mode-item').forEach(item => {
-            item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
-    });
-}
-</script><?php /**PATH C:\laragon\www\kidlink-laravel\resources\views/components/child_mode.blade.php ENDPATH**/ ?>
+})();
+</script>
+<?php /**PATH C:\laragon\www\kidlink-laravel\resources\views/components/child_mode.blade.php ENDPATH**/ ?>

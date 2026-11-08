@@ -14,8 +14,12 @@ class GameScore extends Model
     protected $fillable = [
         'student_id',
         'game_type',
+        'level',
         'score',
         'total',
+        'mistakes',
+        'percentage',
+        'time_taken',
     ];
 
     public function student(): \Illuminate\Database\Eloquent\Relations\BelongsTo

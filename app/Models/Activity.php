@@ -16,6 +16,8 @@ class Activity extends Model
         'start_time',
         'end_time',
         'group_name',
+        'target_mode',
+        'target_student_ids',
         'teacher_id',
         'week_start',
         'is_completed',
@@ -26,6 +28,7 @@ class Activity extends Model
         'end_time' => 'string',
         'week_start' => 'date',
         'is_completed' => 'boolean',
+        'target_student_ids' => 'array',
     ];
 
     public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo

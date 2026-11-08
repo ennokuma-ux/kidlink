@@ -29,6 +29,12 @@
         }
     },
     "scripts": {
+        "serve": [
+            "serve.cmd"
+        ],
+        "doctor": [
+            "@php artisan env:doctor"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

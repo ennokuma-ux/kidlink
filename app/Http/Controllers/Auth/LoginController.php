@@ -25,7 +25,7 @@ class LoginController extends Controller
 
         if ($user && !$user->is_active) {
             return back()->withErrors([
-                'email' => 'This account has been deactivated. Contact your administrator.',
+                'email' => 'This account has been archived. Please contact your administrator.',
             ])->onlyInput('email');
         }
 

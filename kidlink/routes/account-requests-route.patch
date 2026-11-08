@@ -1,0 +1,6 @@
+Inside the existing teacher route group in routes/web.php, add:
+
+Route::post('/account-requests', [TeacherStudentController::class, 'storeAccountRequest'])->name('account-requests.store');
+
+Make sure this import exists at the top:
+use App\Http\Controllers\Teacher\StudentController as TeacherStudentController;

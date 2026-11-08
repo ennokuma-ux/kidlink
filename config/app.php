@@ -11,6 +11,14 @@ return [
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
+
+    // Languages offered in the header switcher. `label` is what the button
+    // shows, always in its own language so it stays readable when selected.
+    'supported_locales' => [
+        'en' => 'English',
+        'fil' => 'Filipino',
+        'hil' => 'Hiligaynon',
+    ],
     'cipher' => 'AES-256-CBC',
     'key' => env('APP_KEY'),
     'previous_keys' => [
@@ -18,9 +26,14 @@ return [
             explode(',', env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
-    'maintenance' => [
+        'maintenance' => [
         'driver' => 'file',
     ],
+
+    'db_retry_attempts' => (int) env('DB_RETRY_ATTEMPTS', 4),
+    'db_retry_delay' => (int) env('DB_RETRY_DELAY', 400),
+
+
     'providers' => [
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'announcements' => 'Mga Anunsyo',
+    'new_announcement' => 'Bag-o nga Anunsyo',
+    'new_announcement_title' => 'Bag-o nga Anunsyo',
+    'visible_to_every_teacher_and_parent' => 'Makit-an sang tanan nga maestro kag ginikanan.',
+    'cancel' => 'Kanselahon',
+    'title' => 'Titulo',
+    'announcement' => 'Anunsyo',
+    'short_headline_placeholder' => 'Mubo nga titulo, halimbawa: Aga nga pagsara sang eskwelahan sa Biyernes',
+    'write_full_announcement_here' => 'Isulat ang bilog nga anunsyo diri...',
+    'publish' => 'I-publish',
+    'post_updates_description' => 'Mag-post sang mga update nga mabasahan sang mga maestro kag ginikanan.',
+    'updates_from_description' => 'Mga update gikan sa mga maestro kag tagapamahala sang eskwelahan.',
+    'new_announcement_button' => '+ Bag-o nga Anunsyo',
+    'announcements_posted_info' => 'Ang mga anunsyo gin-post sang mga maestro kag tagapamahala. Pwede mo ini basahon diri.',
+    'removed_account' => 'Naka-removed nga account',
+    'no_announcements_yet' => 'Wala pa sang mga anunsyo.',
+    'post_the_first_one' => 'I-post ang una',
+    'remove_this_announcement' => 'Tanggalon ang anunsyo nga ini? Indi na ini makita sang mga ginikanan kag maestro.',
+    'remove' => 'Tanggalon',
+    'success' => 'Madinalag-on!',
+    'oops' => 'Ay!',
+];

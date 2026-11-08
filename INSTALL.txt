@@ -1,0 +1,10 @@
+KIDLINK ACCOUNT REQUEST ROUTE FIX
+
+1. Extract this ZIP directly into C:\laragon\www\kidlink-laravel (the folder containing artisan). Allow the .ps1 file to be placed at the project root.
+2. In PowerShell, run:
+   .\install-account-request-route.ps1
+3. Then run:
+   php artisan optimize:clear
+   php artisan route:list --name=account-requests
+
+The installer backs up routes/web.php before changing it. It does not replace the file. If the route exists already, it makes no change. If the controller method is missing, it warns you.

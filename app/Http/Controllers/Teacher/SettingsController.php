@@ -15,18 +15,19 @@ class SettingsController extends Controller
         return view('teacher.settings', compact('user'));
     }
 
-    public function update(Request $request)
+    /**
+     * Name and email stay admin-managed; a teacher can keep their own contact
+     * number up to date.
+     */
+    public function updateProfile(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . auth()->id(),
-            'contact' => 'nullable|string|max:255',
+        $validated = $request->validate([
+            'contact' => ['nullable', 'string', 'max:255'],
         ]);
 
-        auth()->user()->update($request->only('first_name', 'last_name', 'email', 'contact'));
+        $request->user()->update(['contact' => $validated['contact'] ?? null]);
 
-        return redirect()->route('teacher.settings.index')->with('success', 'Profile updated!');
+        return redirect()->route('teacher.settings.index')->with('success', 'Contact updated!');
     }
 
     public function updatePassword(Request $request)

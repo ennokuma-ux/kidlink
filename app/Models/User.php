@@ -28,6 +28,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'announcements_seen_at' => 'datetime',
         'is_active' => 'boolean',
     ];
 
@@ -40,6 +41,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Student::class, 'parent_student', 'parent_id', 'student_id')
             ->withTimestamps();
+    }
+
+    /** Active children, loaded once per request and shared by the page and the header. */
+    private ?\Illuminate\Support\Collection $activeChildrenCache = null;
+
+    public function activeChildren(): \Illuminate\Support\Collection
+    {
+        return $this->activeChildrenCache ??= $this->children()->where('is_active', true)->get();
     }
 
     public function teacherStudents(): \Illuminate\Database\Eloquent\Relations\HasMany

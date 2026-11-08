@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('game_scores', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
-            $table->enum('game_type', ['letters', 'numbers', 'colors', 'shapes', 'animals']);
+            $table->enum('game_type', ['letters', 'numbers', 'colors', 'colors-sort', 'whats-missing', 'shapes', 'animals', 'animals-memory', 'animals-match', 'shapes-bingo']);
             $table->integer('score');
             $table->integer('total');
             $table->timestamps();

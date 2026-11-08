@@ -1,0 +1,1 @@
+Route::get('/profile/edit', fn () => redirect()->route('parent.dashboard'))->name('profile.edit');

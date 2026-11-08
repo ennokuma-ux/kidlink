@@ -1,0 +1,39 @@
+/* Dashboard view modes (Simple / Detailed / Individual) and viewport-sized charts */
+
+/* Hide sections that don't belong to the active view */
+#dash[data-view="simple"] [data-mode]:not([data-mode~="simple"]),
+#dash[data-view="detailed"] [data-mode]:not([data-mode~="detailed"]),
+#dash[data-view="individual"] [data-mode]:not([data-mode~="individual"]) {
+    display: none !important;
+}
+
+/* Charts take a share of the screen height instead of a fixed pixel height */
+.kl-chart {
+    position: relative;
+    width: 100%;
+    height: clamp(170px, 28vh, 300px);
+}
+.kl-chart > canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+
+/* Simple: one screen. The two charts take the height left under the header,
+   filter bar, alert banner and stat cards. */
+#dash[data-view="simple"] .kl-chart { height: clamp(140px, 20vh, 240px); }
+#dash[data-view="simple"] .mb-8,
+#dash[data-view="simple"] .mb-6 { margin-bottom: 0.75rem; }
+#dash[data-view="simple"] .gap-6 { gap: 0.75rem; }
+#dash[data-view="simple"] .p-6 { padding: 0.75rem 1rem; }
+#dash[data-view="simple"] .p-6 .text-3xl { font-size: 1.5rem; line-height: 1.75rem; }
+#dash[data-view="simple"] .p-6 h3 { font-size: 0.95rem; margin-bottom: 0; }
+#dash[data-view="simple"] .p-6 .mb-4 { margin-bottom: 0.4rem; }
+#dash[data-view="simple"] .kl-intervention .rounded-xl > :not(:first-child),
+#dash[data-view="individual"] .kl-intervention .rounded-xl > :not(:first-child) { display: none; }
+#dash[data-view="simple"] .kl-intervention .rounded-xl > :first-child,
+#dash[data-view="individual"] .kl-intervention .rounded-xl > :first-child { border-bottom: 0; padding-top: 0.6rem; padding-bottom: 0.6rem; }
+#dash[data-view="simple"] form[data-live-filter] > .border-t { display: none; }
+
+/* Individual: one child, so the charts can be larger */
+#dash[data-view="individual"] .kl-chart { height: clamp(190px, 32vh, 340px); }
+
+/* View switcher */
+.kl-view-btn[aria-pressed="true"] { background: #ff8555; color: #fff; }
+.kl-view-btn[aria-pressed="false"]:hover { color: #182438; }
