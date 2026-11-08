@@ -9,6 +9,7 @@ cd /var/www/html
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
+ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
 php artisan package:discover --ansi || true
 php artisan config:cache || true
 
