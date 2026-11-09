@@ -21,7 +21,7 @@
     @foreach(['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', 'all' => 'All'] as $key => $label)
         <a href="{{ route('admin.account-requests.index', ['status' => $key]) }}"
            class="px-4 py-2 rounded-lg text-sm font-semibold transition {{ $filter === $key ? 'bg-[#ff8555] text-white' : 'text-[#5f6873] hover:bg-[#fdf3d6]' }}">
-            {{ $label }} <span class="ml-1 text-xs {{ $filter === $key ? 'text-white/80' : 'text-[#8b949d]' }}">{{ $counts[$key] }}</span>
+            {{ $label }} <span class="ml-1 text-xs {{ $filter === $key ? 'text-white/80' : 'text-[#6b7280]' }}">{{ $counts[$key] }}</span>
         </a>
     @endforeach
 </div>
@@ -79,7 +79,7 @@
                 </tr>
                 @endif
             @empty
-                <tr><td colspan="7" class="px-6 py-14 text-center text-[#8b949d]">{{ $filter === 'pending' ? 'Nothing is waiting for approval.' : 'No account requests here yet.' }}</td></tr>
+                <tr><td colspan="7" class="px-6 py-14 text-center text-[#6b7280]">{{ $filter === 'pending' ? 'Nothing is waiting for approval.' : 'No account requests here yet.' }}</td></tr>
             @endforelse
             </tbody>
         </table>

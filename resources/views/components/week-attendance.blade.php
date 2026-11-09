@@ -13,7 +13,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-sm">
         <thead>
-            <tr class="text-left text-[11px] font-semibold uppercase tracking-wide text-[#8b949d]">
+            <tr class="text-left text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
                 <th class="py-2 pr-3">{{ $unit === 'week' ? __('analytics.period_column_week') : __('analytics.week_day') }}</th>
                 <th class="py-2 px-2 text-center">{{ __('analytics.week_present') }}</th>
                 <th class="py-2 px-2 text-center">{{ __('analytics.week_late') }}</th>
@@ -31,14 +31,14 @@
                 <tr class="{{ $isToday ? 'bg-[#fff6f0]' : '' }}">
                     <td class="py-2 pr-3 font-medium text-[#182438] whitespace-nowrap">
                         {{ $day['day'] }}
-                        @if($isToday)<span class="ml-1 px-1.5 py-0.5 rounded bg-[#ff8555] text-white text-[10px] font-semibold">{{ __('analytics.week_today') }}</span>@endif
+                        @if($isToday)<span class="ml-1 px-1.5 py-0.5 rounded bg-[#ff8555] text-white text-xs font-semibold">{{ __('analytics.week_today') }}</span>@endif
                     </td>
                     <td class="py-2 px-2 text-center font-semibold text-[#8ac926]">{{ $marks ? $day['present'] : '–' }}</td>
                     <td class="py-2 px-2 text-center font-semibold text-[#ffca3a]">{{ $marks ? $day['late'] : '–' }}</td>
                     <td class="py-2 px-2 text-center font-semibold text-[#ff595e]">{{ $marks ? $day['absent'] : '–' }}</td>
                     <td class="py-2 pl-3">
                         @if($rate === null)
-                            <span class="text-xs text-[#8b949d]">{{ __('analytics.week_none') }}</span>
+                            <span class="text-xs text-[#6b7280]">{{ __('analytics.week_none') }}</span>
                         @else
                             <div class="flex items-center gap-2">
                                 <div class="flex-1 h-2 rounded-full bg-[#e6ebf3] overflow-hidden">

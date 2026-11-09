@@ -44,7 +44,7 @@
     </div>
     <div class="mt-4">
         <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
             <input type="text" id="studentSearch" placeholder="{{ __('teacher.search_accounts') }}" autocomplete="off"
                 class="w-full md:w-80 pl-9 pr-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
         </div>
@@ -152,7 +152,7 @@
                     </td>
 <td class="px-6 py-4 text-[#5f6873]">{{ \App\Models\Student::ageLabel($student->age) }}</td>
                     <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $student->class_name ? 'bg-[#fff0e6] text-[#ff8555]' : 'bg-[#f1e7cc] text-[#8b949d]' }}">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $student->class_name ? 'bg-[#fff0e6] text-[#ff8555]' : 'bg-[#f1e7cc] text-[#6b7280]' }}">
                             {{ $student->class_name ?? __('teacher.unassigned') }}
                         </span>
                     </td>
@@ -179,9 +179,9 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="9" class="px-6 py-12 text-center text-[#8b949d]">{{ __('teacher.no_students_found') }}</td></tr>
+                <tr><td colspan="9" class="px-6 py-12 text-center text-[#6b7280]">{{ __('teacher.no_students_found') }}</td></tr>
                 @endforelse
-                <tr id="studentNoMatch" hidden><td colspan="9" class="px-6 py-12 text-center text-[#8b949d]">{{ __('No students match these filters.') }}</td></tr>
+                <tr id="studentNoMatch" hidden><td colspan="9" class="px-6 py-12 text-center text-[#6b7280]">{{ __('No students match these filters.') }}</td></tr>
             </tbody>
         </table>
     </div>
@@ -218,7 +218,7 @@
                         <td class="px-6 py-4 text-[#5f6873]">{{ $parent->contact ?? '—' }}</td>
                         <td class="px-6 py-4">
                             @if($parent->children->isEmpty())
-                                <span class="text-[#8b949d]">—</span>
+                                <span class="text-[#6b7280]">—</span>
                             @else
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[#fff0e6] text-[#ff8555]">
                                     {{ $parent->children->count() }} {{ Str::plural('child', $parent->children->count()) }}
@@ -245,7 +245,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-6 py-12 text-center text-[#8b949d]">{{ __('teacher.no_parent_accounts_found') }}</td></tr>
+                    <tr><td colspan="6" class="px-6 py-12 text-center text-[#6b7280]">{{ __('teacher.no_parent_accounts_found') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -306,7 +306,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="px-6 py-12 text-center text-[#8b949d]">{{ __('teacher.no_archived_students') }}</td></tr>
+                    <tr><td colspan="8" class="px-6 py-12 text-center text-[#6b7280]">{{ __('teacher.no_archived_students') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -361,7 +361,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="px-6 py-12 text-center text-[#8b949d]">{{ __('teacher.no_archived_parent_accounts') }}</td></tr>
+                    <tr><td colspan="5" class="px-6 py-12 text-center text-[#6b7280]">{{ __('teacher.no_archived_parent_accounts') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -465,7 +465,7 @@ function createPager(name, rowEls) {
         pageButtons(total).forEach(n => {
             if (n === 'gap') {
                 const gap = document.createElement('span');
-                gap.textContent = '…'; gap.className = 'px-1 text-[#8b949d]';
+                gap.textContent = '…'; gap.className = 'px-1 text-[#6b7280]';
                 nav.appendChild(gap);
             } else {
                 add(String(n), n, n === page ? active : idle, n === page);

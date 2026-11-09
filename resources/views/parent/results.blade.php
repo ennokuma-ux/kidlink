@@ -26,19 +26,19 @@
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#1982c4]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_avg_accuracy') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_avg_accuracy') }}</p>
         <p class="text-2xl font-bold text-gray-800 mt-1">{{ $avgAccuracy }}%</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#8ac926]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_levels_completed') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_levels_completed') }}</p>
         <p class="text-2xl font-bold text-[#6fa51c] mt-1">{{ $totalLevels }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ffca3a]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_games_played') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_games_played') }}</p>
         <p class="text-2xl font-bold text-[#e6b020] mt-1">{{ $byGame->count() }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_best_game') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_best_game') }}</p>
         <p class="text-lg font-bold text-orange-600 mt-1 truncate">{{ $bestGame['game'] ?? '—' }}</p>
     </div>
 </div>
@@ -55,7 +55,7 @@
 
 @if($totalLevels === 0)
 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
-    <p class="text-gray-400 text-center py-8">{{ __('parent_ui.no_game_scores', ['name' => $child->first_name]) }}</p>
+    <p class="text-gray-500 text-center py-8">{{ __('parent_ui.no_game_scores', ['name' => $child->first_name]) }}</p>
 </div>
 @else
 
@@ -65,7 +65,7 @@
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
-                <tr class="text-left text-xs font-semibold uppercase text-gray-400 border-b border-gray-100">
+                <tr class="text-left text-xs font-semibold uppercase text-gray-500 border-b border-gray-100">
                     <th class="py-2 pr-4">{{ __('parent_ui.col_game') }}</th>
                     <th class="py-2 px-4 text-center">{{ __('parent_ui.col_levels') }}</th>
                     <th class="py-2 px-4 text-center">{{ __('parent_ui.col_highest_level') }}</th>
@@ -117,7 +117,7 @@
         </div>
         <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-gray-700 truncate">{{ $item['game'] }} · {{ __('parent_ui.level_label', ['n' => $item['level']]) }}</p>
-            <p class="text-xs text-gray-400">
+            <p class="text-xs text-gray-500">
                 {{ __('parent_ui.score_of', ['score' => $item['score'], 'total' => $item['total']]) }}
                 · {{ trans_choice('parent_ui.mistakes_count', $item['mistakes'], ['count' => $item['mistakes']]) }}
                 @if($item['time']) · {{ $item['time'] }} @endif
@@ -129,7 +129,7 @@
     @endforeach
 
     @if($scores->count() > $historyLimit && $game === '')
-    <p class="text-xs text-gray-400 text-center mt-4">{{ __('parent_ui.showing_latest', ['count' => $historyLimit]) }}</p>
+    <p class="text-xs text-gray-500 text-center mt-4">{{ __('parent_ui.showing_latest', ['count' => $historyLimit]) }}</p>
     @endif
 </div>
 @endif
@@ -146,7 +146,7 @@
         </div>
         <div class="flex-1">
             <p class="text-sm font-semibold text-gray-700">{{ $item->activity->title ?? __('parent_ui.activity_fallback') }}</p>
-            <p class="text-xs text-gray-400">{{ $item->created_at->diffForHumans() }}</p>
+            <p class="text-xs text-gray-500">{{ $item->created_at->diffForHumans() }}</p>
         </div>
         <span class="px-3 py-1 rounded-full text-xs font-bold" style="background: {{ $t['bg'] }}; color: {{ $t['fg'] }};">{{ $t['label'] }}</span>
     </div>

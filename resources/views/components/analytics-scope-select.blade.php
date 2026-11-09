@@ -62,18 +62,18 @@
                    class="flex items-center gap-3 rounded-xl border border-[#f1e7cc] px-4 py-3 hover:border-[#1982c4] hover:bg-[#f2f8fc] transition">
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ \App\Models\Student::colorForSection($name) }}"></span>
                     <span class="font-semibold text-[#182438] truncate">{{ \App\Models\Student::sectionLabel($name) }}</span>
-                    <span class="ml-auto text-sm text-[#8b949d]">{{ $count }}</span>
+                    <span class="ml-auto text-sm text-[#6b7280]">{{ $count }}</span>
                 </a>
             @if($loop->last)</div>@endif
         @empty
-            <p class="text-sm text-[#8b949d] text-center py-2">{{ __('analytics.scope_no_sections') }}</p>
+            <p class="text-sm text-[#6b7280] text-center py-2">{{ __('analytics.scope_no_sections') }}</p>
         @endforelse
     </div>
 
     {{-- Student list --}}
     <div x-show="pane === 'individual'" x-cloak style="display:none;" x-transition.opacity class="mt-6 bg-white rounded-2xl shadow-sm p-5">
         @if($studentList->isEmpty())
-            <p class="text-sm text-[#8b949d] text-center py-2">{{ __('analytics.scope_no_students') }}</p>
+            <p class="text-sm text-[#6b7280] text-center py-2">{{ __('analytics.scope_no_students') }}</p>
         @else
             <input type="text" x-model="search" placeholder="{{ __('analytics.scope_search') }}"
                    class="w-full mb-3 rounded-lg border border-[#f1e7cc] px-3 py-2 text-sm focus:ring-2 focus:ring-[#8ac926] outline-none">
@@ -81,11 +81,11 @@
                 <template x-for="student in filtered" :key="student.id">
                     <a :href="student.url" class="flex items-center justify-between gap-3 rounded-xl border border-[#f1e7cc] px-4 py-3 hover:border-[#8ac926] hover:bg-[#f3faee] transition">
                         <span class="font-medium text-[#182438] truncate" x-text="student.name"></span>
-                        <span class="text-xs text-[#8b949d] shrink-0" x-text="student.section"></span>
+                        <span class="text-xs text-[#6b7280] shrink-0" x-text="student.section"></span>
                     </a>
                 </template>
             </div>
-            <p x-show="filtered.length === 0" class="text-sm text-[#8b949d] text-center py-3">{{ __('analytics.scope_no_match') }}</p>
+            <p x-show="filtered.length === 0" class="text-sm text-[#6b7280] text-center py-3">{{ __('analytics.scope_no_match') }}</p>
         @endif
     </div>
 </div>

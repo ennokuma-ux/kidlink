@@ -24,13 +24,13 @@
         <div class="relative w-full max-w-lg rounded-3xl bg-white p-5 sm:p-8 text-center max-h-[92vh] overflow-y-auto shadow-2xl border-4 border-[#ffd9a0]"
              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
 
-            <button type="button" @click="close()" class="absolute top-3 right-4 text-3xl text-[#8b949d] hover:text-[#182438]" aria-label="{{ $ui['close'] }}">&times;</button>
+            <button type="button" @click="close()" class="absolute top-3 right-4 text-3xl text-[#6b7280] hover:text-[#182438]" aria-label="{{ $ui['close'] }}">&times;</button>
 
             <div class="flex justify-center -mt-2 mb-2">
                 <x-mascot state="happy" :size="120" />
             </div>
 
-            <p class="text-xs font-semibold uppercase tracking-wide text-[#8b949d] mb-1"
+            <p class="text-xs font-semibold uppercase tracking-wide text-[#6b7280] mb-1"
                x-text="@js($ui['step_of']).replace(':current', step + 1).replace(':total', 3)"></p>
             <h2 class="text-2xl font-bold text-[#182438] mb-4" style="font-family: 'Fredoka One', 'Inter', sans-serif;">{{ $content['name'] }}</h2>
 
@@ -41,7 +41,7 @@
 
             {{-- Step 2: unscored practice --}}
             <div x-show="step === 1">
-                <p class="text-sm text-[#8b949d] mb-2">{{ $ui['try_it'] }}</p>
+                <p class="text-sm text-[#6b7280] mb-2">{{ $ui['try_it'] }}</p>
                 <p class="text-xl font-bold text-[#182438] mb-4">{{ $content['practice']['question'] }}</p>
                 <div class="flex justify-center gap-3">
                     <template x-for="(option, index) in practice.options" :key="index">
@@ -72,7 +72,7 @@
                         class="ml-auto px-8 py-3 rounded-xl bg-[#ff8555] text-white font-bold text-lg hover:bg-[#f47548] transition disabled:opacity-40 disabled:cursor-not-allowed"
                         x-text="step === 2 ? @js($ui['start']) : @js($ui['next'])"></button>
             </div>
-            <button type="button" @click="close()" x-show="step < 2" class="mt-3 text-sm text-[#8b949d] hover:text-[#182438]">{{ $ui['skip'] }}</button>
+            <button type="button" @click="close()" x-show="step < 2" class="mt-3 text-sm text-[#6b7280] hover:text-[#182438]">{{ $ui['skip'] }}</button>
         </div>
     </div>
 </div>

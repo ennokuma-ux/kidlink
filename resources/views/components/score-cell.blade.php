@@ -1,7 +1,7 @@
 @props(['value', 'suffix' => '%'])
 
 @if(is_null($value))
-    <span class="text-[#8b949d]" title="{{ __('ui.no_data') }}">&mdash;</span>
+    <span class="text-[#6b7280]" title="{{ __('ui.no_data') }}">&mdash;</span>
 @else
     <span @class([
         'font-bold',

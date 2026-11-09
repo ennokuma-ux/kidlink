@@ -75,7 +75,7 @@
                             <td class="px-4 py-3">
                                 <span class="font-medium text-[#182438]">{{ $student->first_name }} {{ $student->last_name }}</span>
                                 @if($student->class_name)
-                                    <span class="block text-xs text-[#8b949d]">{{ $student->class_name }}</span>
+                                    <span class="block text-xs text-[#6b7280]">{{ $student->class_name }}</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
@@ -96,7 +96,7 @@
         </div>
 
         <div class="mt-4 flex items-center justify-between">
-            <p class="text-xs text-[#8b949d]">{{ __('teacher.unchecking_removes_record') }}</p>
+            <p class="text-xs text-[#6b7280]">{{ __('teacher.unchecking_removes_record') }}</p>
             <button type="submit" class="px-6 py-2.5 bg-[#ff8555] text-white rounded-lg hover:bg-[#f47548] transition font-medium">{{ __('teacher.save_participation') }}</button>
         </div>
     </form>

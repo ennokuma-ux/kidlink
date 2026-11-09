@@ -27,7 +27,7 @@
             @endif
             <div>
                 <h3 class="text-lg font-semibold text-[#182438]">{{ $heading ?: __('intervention.heading') }}</h3>
-                <p class="text-xs text-[#8b949d]">
+                <p class="text-xs text-[#6b7280]">
                     {{ __('intervention.subtitle', ['days' => \App\Services\AnalyticsService::ATTENDANCE_WINDOW_DAYS]) }}
                     
                 </p>
@@ -62,11 +62,11 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full
+                            <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full
                                 {{ $flag['severity'] === 'high' ? 'bg-[#ff595e] text-white' : ($flag['severity'] === 'medium' ? 'bg-[#ffca3a] text-[#182438]' : 'bg-[#8ac926] text-[#182438]') }}">
                                 {{ __('intervention.severity_' . $flag['severity']) }}
                             </span>
-                            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#ff595e] text-white">
+                            <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#ff595e] text-white">
                                 {{ __('intervention.required') }}
                             </span>
                         </div>
@@ -75,14 +75,14 @@
                     <ul class="space-y-2 mt-2">
                         @foreach ($flag['reasons'] as $reason)
                             <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-3">
-                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mt-0.5
+                                <span class="shrink-0 text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mt-0.5
                                     {{ $reason['type'] === 'Attendance' ? 'bg-[#fde8ef] text-[#ff595e]' : ($reason['type'] === 'Baseline' ? 'bg-[#fff6e5] text-[#a16207]' : 'bg-[#eef3f9] text-[#1982c4]') }}">
                                     {{ __('intervention.type_' . strtolower($reason['type'])) }}
                                 </span>
                                 <span class="text-sm text-[#5f6873]">
                                     <span class="font-medium text-[#182438]">{{ $reason['label'] }}.</span>
                                     {{ $reason['message'] }}
-                                    <span class="block text-xs text-[#8b949d] mt-0.5">{{ __('intervention.do') }} {{ $reason['action'] }}</span>
+                                    <span class="block text-xs text-[#6b7280] mt-0.5">{{ __('intervention.do') }} {{ $reason['action'] }}</span>
                                 </span>
                             </li>
                         @endforeach

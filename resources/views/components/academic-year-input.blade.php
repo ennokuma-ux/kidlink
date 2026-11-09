@@ -39,7 +39,7 @@
                    @required($required) class="{{ $box }}">
         </label>
     </div>
-    <p class="mt-1 text-xs text-[#8b949d]" data-academic-year-note @if($current === '' || $years) hidden @endif>
+    <p class="mt-1 text-xs text-[#6b7280]" data-academic-year-note @if($current === '' || $years) hidden @endif>
         {{ __('Saved as') }}: <span data-academic-year-saved>{{ $current }}</span>
     </p>
 </div>

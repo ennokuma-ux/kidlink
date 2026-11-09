@@ -8,12 +8,12 @@
                     {{ strtoupper(substr($child->first_name, 0, 1)) }}
                 </span>
                 {{ $child->first_name }} {{ $child->last_name }}
-                <svg class="w-4 h-4 text-gray-400 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <svg class="w-4 h-4 text-gray-500 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95 -translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden" style="display: none;">
                 <div class="p-2 border-b border-gray-100">
                     <div class="relative">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <input x-model="search" type="text" placeholder="{{ __('child.search_children_placeholder') }}" class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-300 focus:ring-1 focus:ring-orange-200" @keydown.escape="open = false" x-ref="searchInput" x-init="$watch('open', v => { if(v) $nextTick(() => $refs.searchInput.focus()) })">
                     </div>
                 </div>
@@ -25,12 +25,12 @@
                             </span>
                             <div class="flex-1 min-w-0">
                                 <p class="font-semibold text-gray-700 truncate" x-text="c.name"></p>
-                                <p class="text-xs text-gray-400" x-text="labels.age + (c.age < 1 ? '{{ __('Below 1') }}' : c.age) + (c.class_name ? ' · ' + c.class_name : '')"></p>
+                                <p class="text-xs text-gray-500" x-text="labels.age + (c.age < 1 ? '{{ __('Below 1') }}' : c.age) + (c.class_name ? ' · ' + c.class_name : '')"></p>
                             </div>
                             <svg x-show="c.id == {{ $child->id }}" class="w-5 h-5 text-gray-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                         </a>
                     </template>
-                    <p x-show="filtered.length === 0" class="px-4 py-3 text-sm text-gray-400 text-center">{{ __('child.no_matching_children') }}</p>
+                    <p x-show="filtered.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">{{ __('child.no_matching_children') }}</p>
                 </div>
             </div>
         </div>

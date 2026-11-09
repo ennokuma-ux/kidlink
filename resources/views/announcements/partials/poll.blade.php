@@ -24,7 +24,7 @@
         <div class="min-w-0 flex-1">
             <p class="text-xs font-semibold uppercase tracking-wide text-[#6a4c93]">{{ __('Poll') }}</p>
             <h4 class="font-semibold text-[#182438] break-words">{{ $poll->question }}</h4>
-            <p class="text-xs text-[#8b949d] mt-0.5">
+            <p class="text-xs text-[#6b7280] mt-0.5">
                 {{ $poll->allow_multiple ? __('Choose all that apply') : __('Choose one') }}
                 @if($poll->closes_at)
                     &middot;
@@ -75,7 +75,7 @@
                     <span class="text-[#182438] break-words min-w-0">
                         {{ $option->label }}
                         @if($isMine)
-                            <span class="ml-1 inline-block rounded-full bg-[#ecf7d6] px-2 py-0.5 text-[11px] font-semibold text-[#2f7a1a] align-middle">{{ __('Your vote') }}</span>
+                            <span class="ml-1 inline-block rounded-full bg-[#ecf7d6] px-2 py-0.5 text-xs font-semibold text-[#2f7a1a] align-middle">{{ __('Your vote') }}</span>
                         @endif
                     </span>
                     <span class="shrink-0 tabular-nums text-[#5f6873]">{{ $count }} &middot; {{ $pct }}%</span>
@@ -86,7 +86,7 @@
             </div>
         @endforeach
         <div class="flex flex-wrap items-center gap-3 pt-1">
-            <p class="text-xs text-[#8b949d]">
+            <p class="text-xs text-[#6b7280]">
                 {{ $voters === 1 ? __('1 person voted') : __(':count people voted', ['count' => $voters]) }}
             </p>
             @unless($closed)

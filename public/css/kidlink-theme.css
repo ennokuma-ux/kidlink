@@ -32,7 +32,7 @@ input[type="submit"]:disabled {
 :where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-500"] {
   background-color: var(--kidlink-orange) !important;
   border-color: var(--kidlink-orange) !important;
-  color: #fff !important;
+  color: #182438 !important; /* navy on orange = 6.5:1; white was 2.4:1 */
 }
 :where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff8555]"]:hover,
 :where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f47548]"]:hover,
@@ -91,3 +91,64 @@ a.kidlink-student-option:focus,
 }
 .kidlink-brand-orange { color: var(--kidlink-orange) !important; }
 .kidlink-brand-orange-bg { background-color: var(--kidlink-orange) !important; }
+
+
+/* ==========================================================================
+   Mobile / Lighthouse layer
+   ========================================================================== */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+img, video { max-width: 100%; height: auto; }
+body { overflow-wrap: anywhere; }
+table { max-width: 100%; }
+
+/* Text on the orange brand colour: navy passes 4.5:1, white does not. */
+[class*="bg-[#ff8555]"][class*="text-white"],
+[class*="bg-[#f47548]"][class*="text-white"],
+.kidlink-brand-orange-bg { color: #182438 !important; }
+
+/* Notches and home indicators. */
+@supports (padding: max(0px)) {
+  header { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+  main { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+}
+
+/* Phones and tablets: finger-sized targets (Lighthouse wants 48x48 CSS px, or
+   enough spacing) and 16px fields so iOS does not zoom in on focus. */
+@media (pointer: coarse), (max-width: 767px) {
+  button, [role="button"], input[type="submit"], input[type="button"], select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="color"]),
+  textarea {
+    min-height: 44px;
+  }
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
+
+  /* Small text links and buttons (Edit, Delete, Record...) get a bigger hit area. */
+  main a[class*="text-xs"], main a[class*="text-sm"],
+  main button[class*="text-xs"] {
+    display: inline-flex; align-items: center; min-height: 44px; padding-top: .5rem; padding-bottom: .5rem;
+  }
+  main a[class*="text-xs"], main button[class*="text-xs"] { padding-left: .25rem; padding-right: .25rem; }
+
+  input[type="checkbox"], input[type="radio"] { width: 1.25rem; height: 1.25rem; }
+  label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { min-height: 44px; }
+
+  /* Sidebar links and pager buttons. */
+  aside nav a { min-height: 44px; }
+}
+
+/* Modals: scroll inside the viewport and never overflow it. */
+@media (max-width: 639px) {
+  .fixed.inset-0 > div[class*="max-w-"] { max-width: 100%; }
+  .swal2-popup { width: calc(100vw - 2rem) !important; max-width: 32rem; }
+  .swal2-actions { flex-wrap: wrap; gap: .5rem; }
+  h1, h2 { overflow-wrap: anywhere; }
+}
+
+/* Wide content scrolls on its own instead of widening the page. */
+main { min-width: 0; }
+main pre, main code { overflow-x: auto; max-width: 100%; }
+main .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -31,7 +31,7 @@
                     <div x-show="open" x-transition class="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl z-50 py-2" style="display: none;">
                         <div class="px-4 py-2 border-b border-gray-100">
                             <p class="text-sm font-semibold text-gray-700">{{ $student->first_name }} {{ $student->last_name }}</p>
-                            <p class="text-xs text-gray-400">{{ __('student.role_student') }}</p>
+                            <p class="text-xs text-gray-500">{{ __('student.role_student') }}</p>
                         </div>
                         @if(session('parent_user_id'))
                         <form method="POST" action="{{ route('child-mode.exit') }}">
@@ -86,19 +86,19 @@
                 }
             }">
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500">
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_total_points') }}</p>
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_total_points') }}</p>
                 <p class="text-3xl font-bold text-gray-800 mt-1" style="font-family: 'Fredoka One', cursive;" x-text="stats.total_points">{{ $totalPoints }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#1982c4]">
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_games_played') }}</p>
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_games_played') }}</p>
                 <p class="text-3xl font-bold text-[#1982c4] mt-1" style="font-family: 'Fredoka One', cursive;" x-text="stats.games_played">{{ $totalGames }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#8ac926]">
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_win_streak') }}</p>
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_win_streak') }}</p>
                 <p class="text-3xl font-bold text-[#8ac926] mt-1" style="font-family: 'Fredoka One', cursive;" x-text="stats.streak">{{ $streak }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ffca3a]">
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_avg_score') }}</p>
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">{{ __('student.stat_avg_score') }}</p>
                 <p class="text-3xl font-bold text-[#e6b020] mt-1" style="font-family: 'Fredoka One', cursive;" x-text="stats.avg_score + '%'">{{ $avgScore }}%</p>
             </div>
         </div>
@@ -128,7 +128,7 @@
                         @if($game['played'] > 0)
                         <span class="absolute top-3 right-3 inline-flex items-center gap-1 bg-white/95 rounded-full px-2.5 py-1 text-xs font-bold text-gray-700 shadow-sm"><i class="ico ico-star text-[#ffca3a]" aria-hidden="true"></i> {{ number_format($game['points']) }}</span>
                         @else
-                        <span class="absolute top-3 right-3 inline-flex items-center rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-orange-500 shadow-sm">{{ __('student.new_badge') }}</span>
+                        <span class="absolute top-3 right-3 inline-flex items-center rounded-full bg-white/95 px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide text-orange-500 shadow-sm">{{ __('student.new_badge') }}</span>
                         @endif
                     </div>
 
@@ -137,15 +137,15 @@
                         <div class="flex items-start justify-between gap-2">
                             <h3 class="font-bold text-base text-gray-800" style="font-family: 'Fredoka One', cursive;">{{ $game['name'] }}</h3>
                             @if($game['played'] > 0)
-                            <span class="shrink-0 rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-bold text-gray-400">{{ $game['played'] }}x</span>
+                            <span class="shrink-0 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-bold text-gray-500">{{ $game['played'] }}x</span>
                             @endif
                         </div>
-                        <p class="text-gray-400 text-xs mt-1 leading-relaxed">{{ $game['desc'] }}</p>
+                        <p class="text-gray-500 text-xs mt-1 leading-relaxed">{{ $game['desc'] }}</p>
 
                         @if($game['played'] > 0)
                         <div class="mt-4">
                             <div class="flex items-center justify-between text-xs mb-1.5">
-                                <span class="text-gray-400 font-semibold">{{ __('student.level') }} {{ $game['highestLevel'] }}/8</span>
+                                <span class="text-gray-500 font-semibold">{{ __('student.level') }} {{ $game['highestLevel'] }}/8</span>
                                 <span class="font-bold text-gray-600">{{ number_format($game['points']) }} {{ __('student.pts') }}</span>
                             </div>
                             <div class="flex gap-1">
@@ -197,7 +197,7 @@
                 </div>
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-gray-700">{{ $activityGame['name'] ?? ucfirst($activity->game_type) }} - {{ __('student.level') }} {{ $activity->level }}</p>
-                    <p class="text-xs text-gray-400">{{ $activity->created_at->diffForHumans() }}</p>
+                    <p class="text-xs text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm font-bold text-[#6fa51c]">+{{ $activity->points_earned }} {{ __('student.pts') }}</p>

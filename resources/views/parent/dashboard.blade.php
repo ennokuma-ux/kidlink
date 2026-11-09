@@ -43,27 +43,27 @@
 {{-- Headline stats: overall average, attendance, domain mastery and engagement --}}
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#1982c4]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('analytics.stat_overall_average') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('analytics.stat_overall_average') }}</p>
         <p class="text-2xl font-bold text-gray-800 mt-1">{{ round($overallAvg) }}%</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#8ac926]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('analytics.stat_attendance_rate') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('analytics.stat_attendance_rate') }}</p>
         <p class="text-2xl font-bold text-[#6fa51c] mt-1">{{ $attendanceRate }}%</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#6a4c93]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('analytics.stat_domain_mastery') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('analytics.stat_domain_mastery') }}</p>
         <p class="text-2xl font-bold text-[#583d7c] mt-1">{{ $domainMastery }}%</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('analytics.stat_activities_scored') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('analytics.stat_activities_scored') }}</p>
         <p class="text-2xl font-bold text-gray-800 mt-1">{{ $scoredActivities }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ff595e]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('dashboard.absences') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('dashboard.absences') }}</p>
         <p class="text-2xl font-bold text-[#e8454a] mt-1">{{ $absentCount }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ffca3a]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('dashboard.late') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('dashboard.late') }}</p>
         <p class="text-2xl font-bold text-[#e6b020] mt-1">{{ $lateCount }}</p>
     </div>
 </div>
@@ -71,20 +71,20 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.score_trend') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.recorded_days', ['count' => $scoreTrend->count()]) }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.recorded_days', ['count' => $scoreTrend->count()]) }}</p>
         @if($scoreTrend->count())
         <div class="chart-box"><canvas id="scoreTrendChart"></canvas></div>
         @else
-        <div class="h-[220px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_game_scores') }}</div>
+        <div class="h-[220px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_game_scores') }}</div>
         @endif
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.developmental_domains') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.indicators_assessed', ['count' => $assessedIndicators]) }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.indicators_assessed', ['count' => $assessedIndicators]) }}</p>
         @if($assessedIndicators > 0)
         <div class="chart-box"><canvas id="domainRadarChart"></canvas></div>
         @else
-        <div class="h-[220px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_indicators_assessed') }}</div>
+        <div class="h-[220px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_indicators_assessed') }}</div>
         @endif
     </div>
 </div>
@@ -92,20 +92,20 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.indicator_status_title') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.status_subtitle_parent') }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.status_subtitle_parent') }}</p>
         @if($assessedIndicators > 0)
         <div class="chart-box"><canvas id="domainStatusChart"></canvas></div>
         @else
-        <div class="h-[240px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_indicators_assessed_short') }}</div>
+        <div class="h-[240px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_indicators_assessed_short') }}</div>
         @endif
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.area_performance') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.area_subtitle') }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.area_subtitle') }}</p>
         @if($areaScores->count())
         <div class="chart-box"><canvas id="areaPerformanceChart"></canvas></div>
         @else
-        <div class="h-[240px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_activity_scores') }}</div>
+        <div class="h-[240px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_activity_scores') }}</div>
         @endif
     </div>
 </div>
@@ -113,20 +113,20 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.game_performance') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.sessions_played', ['count' => $totalPlays]) }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.sessions_played', ['count' => $totalPlays]) }}</p>
         @if($gamePerformance->count())
         <div class="chart-box"><canvas id="gamePerformanceChart"></canvas></div>
         @else
-        <div class="h-[240px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_games_played') }}</div>
+        <div class="h-[240px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_games_played') }}</div>
         @endif
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('analytics.attendance_trend') }}</h3>
-        <p class="text-xs text-gray-400 mb-4">{{ __('analytics.last_8_weeks') }}</p>
+        <p class="text-xs text-gray-500 mb-4">{{ __('analytics.last_8_weeks') }}</p>
         @if($attendanceTrend->count())
         <div class="chart-box"><canvas id="attendanceTrendChart"></canvas></div>
         @else
-        <div class="h-[240px] flex items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg">{{ __('analytics.no_attendance_recent') }}</div>
+        <div class="h-[240px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded-lg">{{ __('analytics.no_attendance_recent') }}</div>
         @endif
     </div>
 </div>
@@ -143,7 +143,7 @@
         @endforeach
     </ul>
     @else
-    <p class="text-gray-400 text-sm">{{ __('analytics.no_data_recorded') }}</p>
+    <p class="text-gray-500 text-sm">{{ __('analytics.no_data_recorded') }}</p>
     @endif
 </div>
 @endif

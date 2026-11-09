@@ -22,7 +22,7 @@
         </a>
 
         <div class="min-w-0 sm:flex-1">
-            <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('analytics.scope_viewing') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('analytics.scope_viewing') }}</p>
             <p class="font-bold text-[#182438] truncate">{{ $label }}</p>
         </div>
 
@@ -42,12 +42,12 @@
 
     @if($scope === 'all' && count($legend))
         <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 pt-4 border-t border-[#f1e7cc]">
-            <span class="text-xs font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('analytics.sections_label') }}</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('analytics.sections_label') }}</span>
             @foreach($legend as $item)
                 <span class="inline-flex items-center gap-2 text-sm text-[#5f6873]">
                     <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $item['color'] }}"></span>
                     <span class="text-[#182438]">{{ $item['label'] }}</span>
-                    <span class="text-[#8b949d]">{{ $item['total'] }}</span>
+                    <span class="text-[#6b7280]">{{ $item['total'] }}</span>
                 </span>
             @endforeach
         </div>

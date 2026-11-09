@@ -14,14 +14,14 @@
         <button type="button" id="analyticsStudentTrigger" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="listbox"
                 class="w-full flex items-center justify-between gap-2 rounded-lg border border-[#f1e7cc] bg-white px-3 py-2 text-sm text-[#182438] text-left focus:ring-2 focus:ring-[#ff8555] outline-none">
             <span class="truncate" x-text="selectedLabel"></span>
-            <svg class="w-4 h-4 text-[#8b949d] flex-shrink-0 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <svg class="w-4 h-4 text-[#6b7280] flex-shrink-0 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
 
         <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95 -translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" role="listbox"
              class="absolute left-0 right-0 mt-1 z-50 bg-white rounded-xl shadow-xl border border-[#f1e7cc] overflow-hidden" style="display: none;">
             <div class="p-2 border-b border-[#f0ece4]">
                 <div class="relative">
-                    <svg class="w-4 h-4 text-[#8b949d] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <svg class="w-4 h-4 text-[#6b7280] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" x-model="search" x-ref="searchInput"
                            placeholder="{{ __('analytics.search_students') }}"
                            class="w-full pl-9 pr-3 py-2 text-sm border border-[#f1e7cc] rounded-lg focus:outline-none focus:border-[#ff8555] focus:ring-1 focus:ring-[#ff8555]"
@@ -39,10 +39,10 @@
                     <button type="button" role="option" @click="pick(student.id)"
                             class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition" :class="selectedId === student.id ? 'bg-gray-50' : ''">
                         <span class="font-semibold text-[#182438]" x-text="student.name"></span>
-                        <span class="text-xs text-[#8b949d]" x-show="student.section" x-text="' — ' + student.section"></span>
+                        <span class="text-xs text-[#6b7280]" x-show="student.section" x-text="' — ' + student.section"></span>
                     </button>
                 </template>
-                <p x-show="filtered.length === 0" class="px-4 py-3 text-sm text-[#8b949d] text-center">{{ __('analytics.no_matching_students') }}</p>
+                <p x-show="filtered.length === 0" class="px-4 py-3 text-sm text-[#6b7280] text-center">{{ __('analytics.no_matching_students') }}</p>
             </div>
         </div>
     </div>

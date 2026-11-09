@@ -15,7 +15,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="min-w-0">
             <h3 class="text-lg font-semibold text-[#182438] truncate">{{ $title }}</h3>
-            <p class="text-xs text-[#8b949d]">{{ $mode === 'week' ? $period['label'] : __('analytics.this_week_subtitle') }}</p>
+            <p class="text-xs text-[#6b7280]">{{ $mode === 'week' ? $period['label'] : __('analytics.this_week_subtitle') }}</p>
         </div>
 
         <div class="flex items-center gap-2 relative">
@@ -47,7 +47,7 @@
                     <span class="font-semibold text-sm text-[#182438]" x-text="monthLabel"></span>
                     <button type="button" @click="shift(1)" class="w-8 h-8 rounded-lg hover:bg-[#fbf0d6] text-[#182438]" aria-label="Next month">&rsaquo;</button>
                 </div>
-                <div class="grid grid-cols-7 text-center text-[10px] font-semibold uppercase text-[#8b949d] mb-1">
+                <div class="grid grid-cols-7 text-center text-xs font-semibold uppercase text-[#6b7280] mb-1">
                     <template x-for="d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="d"><span x-text="d"></span></template>
                 </div>
                 <div class="grid grid-cols-7 gap-y-0.5">
@@ -62,7 +62,7 @@
                         </a>
                     </template>
                 </div>
-                <p class="mt-3 text-[11px] text-[#8b949d]">{{ $mode === 'week' ? __('analytics.period_hint_week') : __('analytics.period_hint_month') }}</p>
+                <p class="mt-3 text-xs text-[#6b7280]">{{ $mode === 'week' ? __('analytics.period_hint_week') : __('analytics.period_hint_month') }}</p>
                 <div class="mt-2 pt-2 border-t border-[#f1e7cc] flex items-center justify-between text-xs">
                     <a :href="href(todayStr)" class="font-medium text-[#ff8555] hover:text-[#f47548]" x-text="labels.today"></a>
                     <a x-show="mode === 'month'" :href="href(viewFirst)" class="font-medium text-[#1982c4] hover:text-[#1e73a8]" x-text="labels.viewMonth.replace(':month', monthLabel)"></a>

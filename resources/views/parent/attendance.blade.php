@@ -18,27 +18,27 @@
 
 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-3">
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#8ac926]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_present') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_present') }}</p>
         <p class="text-2xl font-bold text-[#6fa51c] mt-1">{{ $present }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ffca3a]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_late') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_late') }}</p>
         <p class="text-2xl font-bold text-[#ffca3a] mt-1">{{ $late }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#ff595e]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_absent') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_absent') }}</p>
         <p class="text-2xl font-bold text-[#ff595e] mt-1">{{ $absent }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#4a9fd2]">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_excused') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_excused') }}</p>
         <p class="text-2xl font-bold text-[#1982c4] mt-1">{{ $excused }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#1982c4] col-span-2 md:col-span-1">
-        <p class="text-gray-400 text-xs font-semibold uppercase">{{ __('parent_ui.stat_rate') }}</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase">{{ __('parent_ui.stat_rate') }}</p>
         <p class="text-2xl font-bold text-[#1982c4] mt-1">{{ $total > 0 ? $rate.'%' : '—' }}</p>
     </div>
 </div>
-<p class="text-xs text-gray-400 mb-8">{{ __('parent_ui.rate_note') }}</p>
+<p class="text-xs text-gray-500 mb-8">{{ __('parent_ui.rate_note') }}</p>
 
 <!-- Month Navigation (keeps the selected child) -->
 <div class="flex items-center gap-3 mb-6" data-ajax-filter-scope>
@@ -78,11 +78,11 @@
 @endphp
 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8" x-data="{ picked: @js($todayDay ? $dayInfo($todayDay) : null) }">
     @if($total === 0)
-    <p class="text-sm text-gray-400 mb-4">{{ __('parent_ui.no_attendance_month') }}</p>
+    <p class="text-sm text-gray-500 mb-4">{{ __('parent_ui.no_attendance_month') }}</p>
     @endif
     <div class="grid grid-cols-7 gap-2">
         @foreach([__('parent_ui.day_sun'), __('parent_ui.day_mon'), __('parent_ui.day_tue'), __('parent_ui.day_wed'), __('parent_ui.day_thu'), __('parent_ui.day_fri'), __('parent_ui.day_sat')] as $dayName)
-        <div class="text-center text-xs font-bold text-gray-400 pb-2">{{ $dayName }}</div>
+        <div class="text-center text-xs font-bold text-gray-500 pb-2">{{ $dayName }}</div>
         @endforeach
         @for($i = 0; $i < $month->copy()->startOfMonth()->dayOfWeek; $i++)
         <div></div>
@@ -94,7 +94,7 @@
             'Absent' => 'bg-[#ffe2e3] text-[#c9343a]',
             'Late' => 'bg-[#fff0bf] text-[#8a6500]',
             'Excused' => 'bg-[#d3e8f6] text-[#0f5483]',
-            default => ($day['weekend'] || $day['future']) ? 'bg-white text-gray-300' : 'bg-gray-50 text-gray-400',
+            default => ($day['weekend'] || $day['future']) ? 'bg-white text-gray-300' : 'bg-gray-50 text-gray-500',
         };
         $info = $dayInfo($day);
         @endphp
@@ -105,7 +105,7 @@
     </div>
 
     <div class="mt-5 min-h-[3.5rem] rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 flex flex-wrap items-center justify-between gap-2" aria-live="polite">
-        <p x-show="!picked" class="text-sm text-gray-400">{{ __('Tap a day to see its status.') }}</p>
+        <p x-show="!picked" class="text-sm text-gray-500">{{ __('Tap a day to see its status.') }}</p>
         <template x-if="picked">
             <p class="text-sm font-semibold text-gray-700" x-text="picked.label"></p>
         </template>
@@ -138,7 +138,7 @@
             <div class="w-full bg-gray-100 rounded-full h-2">
                 <div class="h-2 rounded-full bg-[#8ac926]" style="width: {{ $m['recorded'] > 0 ? $m['rate'] : 0 }}%"></div>
             </div>
-            <p class="text-xs text-gray-400 mt-1">
+            <p class="text-xs text-gray-500 mt-1">
                 @if($m['recorded'] > 0)
                 {{ __('parent_ui.summary_days', ['present' => $m['present'], 'late' => $m['late'], 'absent' => $m['absent']]) }}
                 @else

@@ -46,7 +46,7 @@
                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 transition hover:border-orange-300 hover:bg-orange-50/40"><input type="checkbox" name="games[]" value="{{ $game['slug'] }}" class="mt-1 rounded border-gray-300 text-orange-500 focus:ring-orange-300"><span><span class="block font-bold text-gray-800">{{ $game['name'] }}</span><span class="mt-0.5 block text-xs text-gray-500">{{ $game['desc'] }}</span></span></label>
             @endforeach</div>
             <button class="rounded-xl bg-[#ff8555] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#f47548]">Save class assignments</button>
-            <p class="text-xs text-gray-400">Saving replaces the selected class's current game list. Leave every game unchecked to remove all class assignments.</p>
+            <p class="text-xs text-gray-500">Saving replaces the selected class's current game list. Leave every game unchecked to remove all class assignments.</p>
         </form>
         @endif
     </section>
@@ -57,7 +57,7 @@
             <div class="grid max-w-3xl gap-3 sm:grid-cols-[minmax(0,1fr)_16rem]">
                 <div class="relative">
                     <label for="gameAssignmentStudentSearch" class="mb-1 block text-sm font-semibold text-gray-700">Search students</label>
-                    <span class="pointer-events-none absolute bottom-0 inset-y-auto flex h-[46px] items-center pl-4 text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
+                    <span class="pointer-events-none absolute bottom-0 inset-y-auto flex h-[46px] items-center pl-4 text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
                     <input id="gameAssignmentStudentSearch" type="search" placeholder="Search by student name..." autocomplete="off" class="w-full rounded-xl border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-800 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
                 </div>
                 <div>
@@ -89,7 +89,7 @@
                             <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 transition hover:border-orange-300 hover:bg-orange-50/40"><input type="checkbox" name="games[]" value="{{ $game['slug'] }}" @checked(in_array($game['slug'], $directSlugs, true)) class="mt-1 rounded border-gray-300 text-orange-500 focus:ring-orange-300"><span><span class="block font-bold text-gray-800">{{ $game['name'] }}</span><span class="mt-0.5 block text-xs text-gray-500">{{ in_array($game['slug'], $classSlugs, true) ? 'Also assigned to class' : $game['desc'] }}</span></span></label>
                         @endforeach</div>
                         <button class="rounded-xl bg-[#ff8555] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#f47548]">Save student assignments</button>
-                        <p class="text-xs text-gray-400">This saves direct assignments only. Class assignments remain in effect. Leave all unchecked to remove this student's direct assignments.</p>
+                        <p class="text-xs text-gray-500">This saves direct assignments only. Class assignments remain in effect. Leave all unchecked to remove this student's direct assignments.</p>
                     </form>
                 </div>
             </details>

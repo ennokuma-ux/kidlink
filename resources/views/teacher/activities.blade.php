@@ -58,7 +58,7 @@
 @if ($stats['total'] === 0)
     <div class="bg-white rounded-xl shadow-sm p-8 mb-6 text-center">
         <p class="text-[#5f6873]">{{ __('teacher.no_activities_this_week') }}</p>
-        <p class="text-sm text-[#8b949d] mt-1">{{ __('teacher.use_add_activity') }}</p>
+        <p class="text-sm text-[#6b7280] mt-1">{{ __('teacher.use_add_activity') }}</p>
     </div>
 @endif
 
@@ -97,20 +97,20 @@
                     <p class="text-[#5f6873] text-xs">{{ substr($activity->start_time, 0, 5) }} - {{ substr($activity->end_time, 0, 5) }}</p>
                     @if(($activity->target_mode ?? 'section') === 'individual')
                         @php($count = count($activity->target_student_ids ?? []))
-                        <p class="text-[#8b949d] text-xs mt-1">{{ __('Students') }}: {{ $count }}</p>
+                        <p class="text-[#6b7280] text-xs mt-1">{{ __('Students') }}: {{ $count }}</p>
                     @elseif($activity->group_name)
-                        <p class="text-[#8b949d] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>
+                        <p class="text-[#6b7280] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>
                     @endif
                     <div class="flex items-center justify-between mt-2 pt-2 border-t">
                         <form method="POST" action="{{ route('teacher.activities.toggle', $activity) }}" class="inline">
                             @csrf @method('PUT')
-                            <button type="submit" class="text-xs {{ $activity->is_completed ? 'text-[#8ac926]' : 'text-[#8b949d]' }}">
+                            <button type="submit" class="text-xs {{ $activity->is_completed ? 'text-[#8ac926]' : 'text-[#6b7280]' }}">
                                 {{ $activity->is_completed ? __('teacher.completed') : __('teacher.mark_done') }}
                             </button>
                         </form>
                         <div class="flex items-center gap-3">
                             <a href="{{ route('teacher.activities.participation', $activity) }}" class="text-xs text-[#1982c4] hover:underline">{{ __('teacher.record') }}</a>
-                            <button type="button" onclick="openEditModal(this)" class="text-xs text-[#8b949d] hover:text-[#182438]">{{ __('teacher.edit') }}</button>
+                            <button type="button" onclick="openEditModal(this)" class="text-xs text-[#6b7280] hover:text-[#182438]">{{ __('teacher.edit') }}</button>
                             <form method="POST" action="{{ route('teacher.activities.destroy', $activity) }}" class="inline" data-confirm="{{ __('teacher.delete_activity_confirm') }}" data-confirm-title="{{ __('teacher.delete_activity_title') }}" data-confirm-yes="{{ __('teacher.delete') }}" data-confirm-no="{{ __('teacher.cancel') }}">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-xs text-[#ff595e]">{{ __('teacher.delete') }}</button>
@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 @empty
-                <p class="text-[#8b949d] text-xs text-center py-4">{{ __('teacher.no_activities') }}</p>
+                <p class="text-[#6b7280] text-xs text-center py-4">{{ __('teacher.no_activities') }}</p>
                 @endforelse
             </div>
         </div>
@@ -137,7 +137,7 @@
         <h3 class="font-semibold text-[#182438]" x-text="monthLabel"></h3>
         <button type="button" @click="shift(1)" class="w-9 h-9 rounded-lg border border-[#f1e7cc] hover:bg-[#fffbf0] text-[#182438]" aria-label="Next month">&rsaquo;</button>
     </div>
-    <div class="grid grid-cols-7 text-center text-[11px] font-semibold uppercase text-[#8b949d] mb-1">
+    <div class="grid grid-cols-7 text-center text-xs font-semibold uppercase text-[#6b7280] mb-1">
         <template x-for="d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="d"><span x-text="d"></span></template>
     </div>
     <div class="grid grid-cols-7 gap-y-1">
@@ -148,7 +148,7 @@
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-full" :class="cell.today ? 'ring-2 ring-[#ff8555] font-bold' : ''" x-text="cell.day"></span>
                 <span x-show="days[cell.date]" class="mt-0.5 flex items-center gap-1">
                     <span class="block w-2 h-2 rounded-full" :class="days[cell.date] && days[cell.date].done === days[cell.date].total ? 'bg-[#8ac926]' : 'bg-[#ff8555]'"></span>
-                    <span class="hidden md:inline text-[10px] text-[#5f6873]" x-text="days[cell.date] ? days[cell.date].total + ' ' + (days[cell.date].total === 1 ? labels.one : labels.many) : ''"></span>
+                    <span class="hidden md:inline text-xs text-[#5f6873]" x-text="days[cell.date] ? days[cell.date].total + ' ' + (days[cell.date].total === 1 ? labels.one : labels.many) : ''"></span>
                 </span>
             </button>
         </template>
@@ -160,10 +160,10 @@
 </div>
 
 <div id="addActivityModal" class="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 hidden p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold text-[#182438]">{{ __('teacher.new_activity') }}</h3>
-            <button onclick="this.closest('#addActivityModal').classList.add('hidden')" class="text-[#8b949d] hover:text-[#5f6873] text-2xl">&times;</button>
+            <button onclick="this.closest('#addActivityModal').classList.add('hidden')" class="text-[#6b7280] hover:text-[#5f6873] text-2xl">&times;</button>
         </div>
 
         @if ($errors->any())
@@ -212,7 +212,7 @@
                 </div>
             </div>
             @include('teacher.partials.activity-target', ['prefix' => 'add'])
-            <p class="text-xs text-[#8b949d]">
+            <p class="text-xs text-[#6b7280]">
                 {{ __('teacher.scheduled_for_week', ['date' => $weekStart->format('M j, Y')]) }}
             </p>
             <div class="flex justify-end gap-3 pt-4">
@@ -223,10 +223,10 @@
     </div>
 </div>
 <div id="editActivityModal" class="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 hidden p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold text-[#182438]">{{ __('teacher.edit_activity') }}</h3>
-            <button onclick="this.closest('#editActivityModal').classList.add('hidden')" class="text-[#8b949d] hover:text-[#5f6873] text-2xl">&times;</button>
+            <button onclick="this.closest('#editActivityModal').classList.add('hidden')" class="text-[#6b7280] hover:text-[#5f6873] text-2xl">&times;</button>
         </div>
 
         @if ($errors->any())
@@ -439,7 +439,7 @@ window.activityTarget = (function () {
             const name = document.createElement('span');
             name.className = 'block text-sm font-semibold text-[#182438] truncate'; name.textContent = s.name;
             const meta = document.createElement('span');
-            meta.className = 'block text-xs text-[#8b949d] truncate';
+            meta.className = 'block text-xs text-[#6b7280] truncate';
             meta.textContent = [s.section, s.year, AGE_LABEL(s.age)].filter(Boolean).join(' · ');
             text.append(name, meta); label.append(box, text); li.append(label); list.append(li);
         });

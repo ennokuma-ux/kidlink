@@ -10,17 +10,17 @@
         @if($accountRequests->isEmpty())
             <div class="p-10 text-center">
                 <p class="text-[#182438] font-semibold">{{ __('teacher.request_none') }}</p>
-                <p class="text-sm text-[#8b949d] mt-1">{{ __('teacher.request_none_hint') }}</p>
+                <p class="text-sm text-[#6b7280] mt-1">{{ __('teacher.request_none_hint') }}</p>
             </div>
         @else
             <div class="overflow-auto max-h-[32rem]">
                 <table class="w-full">
                     <thead class="bg-[#fffbf0] sticky top-0 z-10 shadow-[0_1px_0_#f1e7cc]">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('teacher.request_account_col') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('teacher.request_submitted') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('teacher.request_status') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#8b949d]">{{ __('teacher.request_review_col') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('teacher.request_account_col') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('teacher.request_submitted') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('teacher.request_status') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#6b7280]">{{ __('teacher.request_review_col') }}</th>
                             <th class="px-4 py-3"></th>
                         </tr>
                     </thead>
@@ -56,12 +56,12 @@
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         <span class="font-semibold text-[#182438]">{{ $accountRequest->first_name }} {{ $accountRequest->last_name }}</span>
-                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold {{ $accountRequest->role === 'parent' ? 'bg-[#e1f0f8] text-[#1e73a8]' : 'bg-[#fff0e6] text-[#c5582a]' }}">
+                                        <span class="px-2 py-0.5 rounded text-xs font-semibold {{ $accountRequest->role === 'parent' ? 'bg-[#e1f0f8] text-[#1e73a8]' : 'bg-[#fff0e6] text-[#c5582a]' }}">
                                             {{ $accountRequest->role === 'parent' ? __('teacher.request_parent') : __('teacher.request_student') }}
                                         </span>
                                     </div>
                                     @if($accountRequest->email)
-                                        <p class="text-xs text-[#8b949d]">{{ $accountRequest->email }}</p>
+                                        <p class="text-xs text-[#6b7280]">{{ $accountRequest->email }}</p>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm text-[#5f6873] whitespace-nowrap" title="{{ $accountRequest->created_at?->format('M j, Y g:i A') }}">
@@ -75,7 +75,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-sm text-[#5f6873] min-w-[14rem]">
                                     @if($accountRequest->status === 'pending')
-                                        <span class="text-[#8b949d]">{{ __('teacher.request_awaiting') }}</span>
+                                        <span class="text-[#6b7280]">{{ __('teacher.request_awaiting') }}</span>
                                     @else
                                         <p>
                                             {{ __('teacher.request_reviewed_on', ['when' => $accountRequest->reviewed_at?->diffForHumans()]) }}
@@ -86,7 +86,7 @@
                                         @if($accountRequest->status === 'rejected' && $accountRequest->review_notes)
                                             <p class="mt-1 text-[#c0392b]"><span class="font-semibold">{{ __('teacher.request_reason') }}:</span> {{ $accountRequest->review_notes }}</p>
                                         @elseif($accountRequest->status === 'approved')
-                                            <p class="mt-1 text-xs text-[#8b949d]">{{ __('teacher.request_approved_hint') }}</p>
+                                            <p class="mt-1 text-xs text-[#6b7280]">{{ __('teacher.request_approved_hint') }}</p>
                                         @endif
                                     @endif
                                 </td>

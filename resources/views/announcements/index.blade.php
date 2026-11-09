@@ -72,7 +72,7 @@
                         <span class="flex items-center gap-2 min-w-0">
                             <span class="font-semibold text-[#182438] truncate">{{ $announcement->title }}</span>
                             @if($tagLabel && $tagStyle)
-                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide {{ $tagStyle['badge'] }}">
+                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide {{ $tagStyle['badge'] }}">
                                     @if($announcement->tag === 'emergency')
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
                                     @endif
@@ -80,30 +80,30 @@
                                 </span>
                             @endif
                             @if($announcement->is_pinned)
-                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#fff0e6] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#c5582a]">
+                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#fff0e6] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#c5582a]">
                                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 3a1 1 0 0 1 .7 1.7L15.4 6l.6 5.2 2.2 1.6A1 1 0 0 1 17.6 14.5H13V21a1 1 0 0 1-2 0v-6.5H6.4a1 1 0 0 1-.6-1.7L8 11.2 8.6 6 7.3 4.7A1 1 0 0 1 8 3h8z"/></svg>
                                     {{ __('Pinned') }}
                                 </span>
                             @endif
                             @if($pollInfo)
-                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#e1f0f8] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#1e73a8]">
+                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#e1f0f8] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#1e73a8]">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19V6m6 13V10M3 19V13m18 6V3"/></svg>
                                     {{ __('Poll') }}
                                 </span>
                             @endif
                             @if($isNew)
-                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#ff595e] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
+                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#ff595e] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>{{ __('New') }}
                                 </span>
                             @endif
                             @if($commentCount)
-                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#fbf0d6] px-2 py-0.5 text-[11px] font-semibold text-[#5f6873]">
+                                <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#fbf0d6] px-2 py-0.5 text-xs font-semibold text-[#5f6873]">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8M8 14h5m-9 6l3-3h11a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14z"/></svg>
                                     {{ $commentCount }}
                                 </span>
                             @endif
                         </span>
-                        <span class="block text-xs text-[#8b949d] mt-0.5 truncate">
+                        <span class="block text-xs text-[#6b7280] mt-0.5 truncate">
                             {{ $authorName }}
                             @if($announcement->author)
                                 &middot; {{ ucfirst(str_replace('_', ' ', $announcement->author->role)) }}
@@ -112,7 +112,7 @@
                         </span>
                         <span x-show="!open" class="block text-sm text-[#5f6873] mt-1 truncate">{{ $announcement->body }}</span>
                     </span>
-                    <svg class="w-5 h-5 shrink-0 text-[#8b949d] transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-5 h-5 shrink-0 text-[#6b7280] transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
                 @if($canArchive)
@@ -150,7 +150,7 @@
                 <div class="mt-5 pt-4 border-t border-dashed border-[#f1e7cc]">
                     <h4 class="text-sm font-semibold text-[#182438] mb-3">
                         {{ __('announcements.comments') }}
-                        <span class="text-[#8b949d] font-normal">({{ $commentCount }})</span>
+                        <span class="text-[#6b7280] font-normal">({{ $commentCount }})</span>
                     </h4>
 
                     <div class="space-y-3">
@@ -162,7 +162,7 @@
                             <div class="flex items-start gap-3">
                                 <span class="w-8 h-8 rounded-full bg-[#1982c4] text-white text-xs font-bold flex items-center justify-center shrink-0">{{ strtoupper(mb_substr($commentAuthor, 0, 1)) }}</span>
                                 <div class="flex-1 min-w-0 rounded-xl bg-[#fbf0d6] px-4 py-2.5">
-                                    <p class="text-xs text-[#8b949d]">
+                                    <p class="text-xs text-[#6b7280]">
                                         <span class="font-semibold text-[#182438]">{{ $commentAuthor }}</span>
                                         @if($comment->author) &middot; {{ ucfirst(str_replace('_', ' ', $comment->author->role)) }} @endif
                                         &middot; {{ $comment->created_at?->diffForHumans() }}
@@ -175,12 +175,12 @@
                                           data-confirm-yes="{{ __('announcements.remove') }}" data-confirm-no="{{ __('announcements.cancel') }}" class="shrink-0">
                                         @csrf @method('DELETE')
                                         <button type="submit" title="{{ __('announcements.remove_comment') }}" aria-label="{{ __('announcements.remove_comment') }}"
-                                                class="w-7 h-7 rounded-lg text-[#8b949d] hover:text-[#ff595e] hover:bg-[#ffe9ea] transition">&times;</button>
+                                                class="w-7 h-7 rounded-lg text-[#6b7280] hover:text-[#ff595e] hover:bg-[#ffe9ea] transition">&times;</button>
                                     </form>
                                 @endif
                             </div>
                         @empty
-                            <p class="text-sm text-[#8b949d]">{{ __('announcements.no_comments') }}</p>
+                            <p class="text-sm text-[#6b7280]">{{ __('announcements.no_comments') }}</p>
                         @endforelse
                     </div>
 

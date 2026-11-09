@@ -15,7 +15,7 @@
             </div>
             <div class="min-w-0">
                 <p class="font-medium text-sm text-gray-800 truncate">{{ auth()->user()->full_name }}</p>
-                <p class="text-xs text-gray-400">{{ __('Parent') }}</p>
+                <p class="text-xs text-gray-500">{{ __('Parent') }}</p>
             </div>
         </div>
     </div>
@@ -43,6 +43,6 @@
         </a>
     </nav>
     <div class="p-4 border-t border-gray-100">
-        <div class="text-xs text-gray-400 text-center">{{ __('sidebar.footer') }}</div>
+        <div class="text-xs text-gray-500 text-center">{{ __('sidebar.footer') }}</div>
     </div>
 </aside>

@@ -112,7 +112,7 @@
                 </div>
 
                 <div>
-                    <span class="block text-sm font-medium text-[#182438] mb-2">{{ __('Options') }} <span class="text-[#8b949d] font-normal">({{ __('2 to 6') }})</span></span>
+                    <span class="block text-sm font-medium text-[#182438] mb-2">{{ __('Options') }} <span class="text-[#6b7280] font-normal">({{ __('2 to 6') }})</span></span>
                     <div class="space-y-2" x-ref="optionList">
                         <template x-for="(option, i) in options" :key="i">
                             <div class="flex items-center gap-2">
@@ -120,7 +120,7 @@
                                     :placeholder="@js(__('Option')) + ' ' + (i + 1)"
                                     class="flex-1 px-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                                 <button type="button" @click="remove(i)" x-show="options.length > min" :aria-label="@js(__('Remove option'))"
-                                    class="w-9 h-9 rounded-lg text-xl leading-none text-[#8b949d] hover:text-[#ff595e] hover:bg-[#ffe9ea] transition">&times;</button>
+                                    class="w-9 h-9 rounded-lg text-xl leading-none text-[#6b7280] hover:text-[#ff595e] hover:bg-[#ffe9ea] transition">&times;</button>
                             </div>
                         </template>
                     </div>
@@ -139,7 +139,7 @@
                         <span class="text-sm text-[#182438]">{{ __('Allow choosing more than one option') }}</span>
                     </label>
                     <div>
-                        <label for="poll_closes_at" class="block text-sm font-medium text-[#182438] mb-1">{{ __('Closes on') }} <span class="text-[#8b949d] font-normal">({{ __('optional') }})</span></label>
+                        <label for="poll_closes_at" class="block text-sm font-medium text-[#182438] mb-1">{{ __('Closes on') }} <span class="text-[#6b7280] font-normal">({{ __('optional') }})</span></label>
                         <input type="datetime-local" name="poll_closes_at" id="poll_closes_at" value="{{ old('poll_closes_at') }}"
                             class="w-full px-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none @error('poll_closes_at') border-[#ff595e] @enderror">
                         @error('poll_closes_at')
@@ -147,7 +147,7 @@
                         @enderror
                     </div>
                 </div>
-                <p class="text-xs text-[#8b949d]">{{ __('Everyone who can read the board can vote and change their answer until the poll closes. Only totals are shown, not who voted for what. A poll cannot be edited once published.') }}</p>
+                <p class="text-xs text-[#6b7280]">{{ __('Everyone who can read the board can vote and change their answer until the poll closes. Only totals are shown, not who voted for what. A poll cannot be edited once published.') }}</p>
             </div>
         </div>
 

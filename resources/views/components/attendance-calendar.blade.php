@@ -13,7 +13,7 @@
     <div class="flex items-center justify-between gap-2 mb-3">
         <div>
             <h3 class="text-sm font-semibold text-[#182438]">{{ __('teacher.calendar_attendance_title') }}</h3>
-            <p class="text-xs text-[#8b949d] hidden sm:block">{{ __('teacher.calendar_attendance_hint') }}</p>
+            <p class="text-xs text-[#6b7280] hidden sm:block">{{ __('teacher.calendar_attendance_hint') }}</p>
         </div>
         <div class="flex items-center gap-2">
             <button type="button" @click="shift(-1)" class="w-7 h-7 rounded-lg border border-[#f1e7cc] hover:bg-[#fbf0d6] text-[#182438]" aria-label="Previous month">&lsaquo;</button>
@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-7 text-center text-[11px] font-semibold uppercase text-[#8b949d] mb-1">
+    <div class="grid grid-cols-7 text-center text-xs font-semibold uppercase text-[#6b7280] mb-1">
         <template x-for="d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="d"><span x-text="d"></span></template>
     </div>
     <div class="grid grid-cols-7 gap-1">
@@ -35,18 +35,18 @@
                         'border-transparent hover:bg-[#fbf0d6]': !cell.selected,
                         'text-[#c9ced6]': !cell.inMonth,
                         'text-[#182438]': cell.inMonth && !cell.weekend,
-                        'text-[#8b949d]': cell.inMonth && cell.weekend
+                        'text-[#6b7280]': cell.inMonth && cell.weekend
                     }">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full" :class="cell.today ? 'ring-2 ring-[#ff8555] font-bold' : ''" x-text="cell.day"></span>
                 <span x-show="days[cell.date]" class="mt-0.5 flex items-center gap-1">
                     <span class="block w-2 h-2 rounded-full" :class="dotClass(cell.date)"></span>
-                    <span class="hidden md:inline text-[10px] text-[#5f6873]" x-text="rateText(cell.date)"></span>
+                    <span class="hidden md:inline text-xs text-[#5f6873]" x-text="rateText(cell.date)"></span>
                 </span>
             </button>
         </template>
     </div>
 
-    <div class="mt-3 pt-2 border-t border-[#f1e7cc] flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#5f6873]">
+    <div class="mt-3 pt-2 border-t border-[#f1e7cc] flex flex-wrap items-center justify-between gap-2 text-xs text-[#5f6873]">
         <div class="flex flex-wrap items-center gap-3">
             <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8ac926]"></span>{{ __('teacher.calendar_legend_good') }}</span>
             <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ffca3a]"></span>{{ __('teacher.calendar_legend_mid') }}</span>

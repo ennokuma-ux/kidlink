@@ -2,7 +2,9 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ff8555">
+    <meta name="description" content="{{ __('KidLink: early childhood learning, attendance and progress for teachers, parents and children.') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>KidLink - @yield('title', __('page.parent_dashboard'))</title>
     

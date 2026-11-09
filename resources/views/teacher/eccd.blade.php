@@ -94,7 +94,7 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p id="eccdSaveStatus" class="text-sm text-[#5f6873]" role="status" aria-live="polite">{{ __('All changes saved.') }}</p>
             <button type="submit" id="eccdSaveButton" disabled
-                class="inline-flex items-center justify-center gap-2 bg-[#ff8555] hover:bg-[#f47548] disabled:bg-[#f1e7cc] disabled:text-[#8b949d] disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg transition font-semibold">
+                class="inline-flex items-center justify-center gap-2 bg-[#ff8555] hover:bg-[#f47548] disabled:bg-[#f1e7cc] disabled:text-[#6b7280] disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg transition font-semibold">
                 {{ __('Save changes') }}
                 <span id="eccdSaveCount" class="hidden rounded-full bg-white/25 px-2 py-0.5 text-xs font-bold"></span>
             </button>

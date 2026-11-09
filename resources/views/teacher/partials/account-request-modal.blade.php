@@ -11,7 +11,7 @@
         <div class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-lg max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-xl font-bold text-[#182438]">{{ __('teacher.request_account') }}</h3>
-                <button type="button" @click="open = false" class="text-[#8b949d] hover:text-[#5f6873] text-2xl" aria-label="{{ __('teacher.cancel') }}">&times;</button>
+                <button type="button" @click="open = false" class="text-[#6b7280] hover:text-[#5f6873] text-2xl" aria-label="{{ __('teacher.cancel') }}">&times;</button>
             </div>
             <p class="text-sm text-[#5f6873] mb-5">{{ __('teacher.request_note') }}</p>
 
@@ -72,7 +72,7 @@
                         <div>
                             <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.date_of_birth') }}</label>
                             <input type="date" name="date_of_birth" x-ref="date_of_birth" value="{{ old('date_of_birth') }}" max="{{ now()->toDateString() }}" @input="autoSection()" @change="autoSection()" :required="role === 'student'" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-                            <p class="text-xs text-[#8b949d] mt-1" x-show="ageText" x-text="ageText" x-cloak></p>
+                            <p class="text-xs text-[#6b7280] mt-1" x-show="ageText" x-text="ageText" x-cloak></p>
                         </div>
                     </div>
                     <div>
@@ -111,10 +111,10 @@
                                        x-show="!parentSearch || @js(mb_strtolower($parentUser->full_name.' '.$parentUser->email)).includes(parentSearch.toLowerCase())">
                                     <input type="checkbox" name="parent_ids[]" value="{{ $parentUser->id }}" x-model="parentIds" :value="{{ $parentUser->id }}"
                                            class="w-4 h-4 text-[#ff8555] rounded focus:ring-[#ff8555]">
-                                    <span class="text-sm text-[#5f6873]">{{ $parentUser->full_name }} <span class="text-xs text-[#8b949d]">({{ $parentUser->email }})</span></span>
+                                    <span class="text-sm text-[#5f6873]">{{ $parentUser->full_name }} <span class="text-xs text-[#6b7280]">({{ $parentUser->email }})</span></span>
                                 </label>
                             @empty
-                                <p class="text-sm text-[#8b949d] p-2">{{ __('teacher.no_parent_accounts_yet') }}</p>
+                                <p class="text-sm text-[#6b7280] p-2">{{ __('teacher.no_parent_accounts_yet') }}</p>
                             @endforelse
                         </div>
                     </div>

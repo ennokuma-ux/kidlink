@@ -27,7 +27,7 @@
 
 @if($totalIndicators === 0)
 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-    <p class="text-gray-400 text-center py-8">{{ __('parent_ui.no_milestone_records') }}</p>
+    <p class="text-gray-500 text-center py-8">{{ __('parent_ui.no_milestone_records') }}</p>
 </div>
 @else
 
@@ -36,7 +36,7 @@
     @foreach($statusStyle as $status => $style)
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
         <p class="text-2xl font-bold" style="color: {{ $style['fg'] }};">{{ $counts[$status] }}</p>
-        <p class="text-xs font-semibold text-gray-400 uppercase mt-1">{{ $style['label'] }}</p>
+        <p class="text-xs font-semibold text-gray-500 uppercase mt-1">{{ $style['label'] }}</p>
     </div>
     @endforeach
 </div>
@@ -52,7 +52,7 @@
         <div class="w-full bg-gray-100 rounded-full h-2">
             <div class="h-2 rounded-full" style="width: {{ $stat['percentage'] }}%; background: {{ $barColor($stat['percentage']) }};"></div>
         </div>
-        <p class="text-xs text-gray-400 mt-1">{{ $stat['achieved'] }}/{{ $stat['total'] }} {{ __('parent_ui.achieved_label') }}</p>
+        <p class="text-xs text-gray-500 mt-1">{{ $stat['achieved'] }}/{{ $stat['total'] }} {{ __('parent_ui.achieved_label') }}</p>
     </div>
     @endforeach
 </div>

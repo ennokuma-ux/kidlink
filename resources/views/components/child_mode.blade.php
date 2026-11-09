@@ -86,14 +86,14 @@
             <div class="flex items-start justify-between gap-3 p-5 border-b border-gray-100">
                 <div>
                     <h3 class="text-lg font-bold text-[#182438]">{{ __('child.choose_title') }}</h3>
-                    <p class="text-xs text-gray-400 mt-0.5" x-text="accounts.length + (accounts.length === 1 ? labels.availableOne : labels.availableOther)"></p>
+                    <p class="text-xs text-gray-500 mt-0.5" x-text="accounts.length + (accounts.length === 1 ? labels.availableOne : labels.availableOther)"></p>
                 </div>
-                <button type="button" @click="close()" aria-label="{{ __('child.close') }}" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                <button type="button" @click="close()" aria-label="{{ __('child.close') }}" class="text-gray-500 hover:text-gray-600 text-2xl leading-none">&times;</button>
             </div>
 
             <div class="p-4 border-b border-gray-100">
                 <div class="relative">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input x-ref="pickerSearch" x-model="search" type="search" autocomplete="off"
                            placeholder="{{ __('child.search_placeholder') }}"
                            aria-label="{{ __('child.search_aria') }}"
@@ -109,7 +109,7 @@
                             <span class="kidlink-avatar w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center bg-gray-100 text-gray-700 text-sm font-bold" x-text="a.initial"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="block font-semibold text-[#182438] truncate" x-text="a.name"></span>
-                                <span class="block text-xs text-gray-400 truncate" x-text="a.class_name || labels.noSection"></span>
+                                <span class="block text-xs text-gray-500 truncate" x-text="a.class_name || labels.noSection"></span>
                             </span>
                             <span class="text-xs font-semibold text-gray-500 flex-shrink-0">{{ __('child.play') }}</span>
                         </button>
@@ -119,14 +119,14 @@
                     <p class="text-sm text-gray-500 font-medium" x-show="accounts.length === 0">
                         {{ __('child.empty_title') }}
                     </p>
-                    <p class="text-xs text-gray-400 mt-1" x-show="accounts.length === 0">
+                    <p class="text-xs text-gray-500 mt-1" x-show="accounts.length === 0">
                         {{ __('child.empty_hint') }}
                     </p>
                     <a x-show="accounts.length === 0" href="{{ $manageAccountsUrl }}"
                        class="inline-block mt-3 text-sm font-semibold text-[#ff8555] hover:underline">
                         {{ __('child.manage_accounts') }} &rarr;
                     </a>
-                    <p x-show="accounts.length > 0" class="text-sm text-gray-400">
+                    <p x-show="accounts.length > 0" class="text-sm text-gray-500">
                         {{ __('child.no_match') }}
                     </p>
                 </div>

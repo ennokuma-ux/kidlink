@@ -44,7 +44,7 @@
             <input id="contact" name="contact" value="{{ old('contact', $user->contact) }}" maxlength="40" autocomplete="tel" class="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
         </div>
         <div class="border-t border-gray-100 pt-5">
-            <h3 class="font-semibold text-gray-800">Change password <span class="font-normal text-gray-400">(optional)</span></h3>
+            <h3 class="font-semibold text-gray-800">Change password <span class="font-normal text-gray-500">(optional)</span></h3>
             <p class="mt-1 text-sm text-gray-500">Leave both password fields blank to keep your current password.</p>
             <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>

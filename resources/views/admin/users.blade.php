@@ -20,7 +20,7 @@
             </div>
         </div>
         <button type="button" onclick="this.closest('#generatedCredentials').remove()"
-            class="text-[#8b949d] hover:text-[#5f6873] text-2xl leading-none">&times;</button>
+            class="text-[#6b7280] hover:text-[#5f6873] text-2xl leading-none">&times;</button>
     </div>
 </div>
 @endif
@@ -58,7 +58,7 @@
     </div>
     <form method="GET" action="{{ route('admin.users.index') }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
         <div class="relative flex-1 md:max-w-xs">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin_ui.search_by_name_or_email') }}" autocomplete="off"
                 class="w-full pl-9 pr-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
         </div>
@@ -145,13 +145,13 @@
                                 </button>
                             </form>
                             @else
-                            <span class="text-xs text-[#8b949d]">—</span>
+                            <span class="text-xs text-[#6b7280]">—</span>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="px-6 py-12 text-center text-[#8b949d]">{{ __('admin_ui.no_accounts_found') }}</td></tr>
+                <tr><td colspan="6" class="px-6 py-12 text-center text-[#6b7280]">{{ __('admin_ui.no_accounts_found') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -211,7 +211,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-6 py-12 text-center text-[#8b949d]">{{ __('admin_ui.no_archived_accounts') }}</td></tr>
+                    <tr><td colspan="6" class="px-6 py-12 text-center text-[#6b7280]">{{ __('admin_ui.no_archived_accounts') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -220,10 +220,10 @@
 </div>
 
 <div id="addUserModal" class="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 hidden p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-md max-h-[90vh] flex flex-col">
         <div class="flex justify-between items-center mb-6 shrink-0">
             <h3 class="text-xl font-bold text-[#182438]">{{ __('admin_ui.create_account_title') }}</h3>
-            <button onclick="this.closest('#addUserModal').classList.add('hidden')" class="text-[#8b949d] hover:text-[#5f6873] text-2xl">&times;</button>
+            <button onclick="this.closest('#addUserModal').classList.add('hidden')" class="text-[#6b7280] hover:text-[#5f6873] text-2xl">&times;</button>
         </div>
         <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-4 overflow-y-auto pr-1 -mr-2">
             @csrf
@@ -246,7 +246,7 @@
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.password') }}</label>
                     <div class="relative">
                         <input type="password" name="password" id="addPassword" required minlength="8" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none pr-12">
-                        <button type="button" onclick="togglePassword('addPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b949d] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
+                        <button type="button" onclick="togglePassword('addPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
                     </div>
@@ -274,7 +274,7 @@
                         <option value="{{ $section }}">{{ $section }}</option>
                     @endforeach
                 </select>
-                <p class="text-xs text-[#8b949d] mt-1">{{ __('admin_ui.section_class_help') }}</p>
+                <p class="text-xs text-[#6b7280] mt-1">{{ __('admin_ui.section_class_help') }}</p>
             </div>
             <div id="addStudentYearSection" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('Academic year') }}</label>
@@ -297,12 +297,12 @@
                         <option value="{{ $teacher->id }}">{{ $teacher->full_name }}</option>
                     @endforeach
                 </select>
-                <p class="text-xs text-[#8b949d] mt-1">{{ __('admin_ui.assign_teacher_help') }}</p>
+                <p class="text-xs text-[#6b7280] mt-1">{{ __('admin_ui.assign_teacher_help') }}</p>
             </div>
             <div id="addStudentParentsSection" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.connect_parent_account_s') }}</label>
                 <div class="relative mb-2">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
                     <input type="text" id="addStudentParentSearch" placeholder="{{ __('admin_ui.search_parents_by_name_or_email') }}" autocomplete="off"
                         class="w-full pl-9 pr-4 py-2 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none text-sm">
                 </div>
@@ -310,13 +310,13 @@
                     @forelse($allParents as $parent)
                     <label class="flex items-center gap-3 cursor-pointer hover:bg-[#fffbf0] px-2 py-1 rounded-lg transition parent-item">
                         <input type="checkbox" name="parent_ids[]" value="{{ $parent->id }}" class="w-4 h-4 text-[#ff8555] rounded focus:ring-[#ff8555]">
-                        <span class="text-sm text-[#5f6873] parent-label">{{ $parent->full_name }} <span class="text-xs text-[#8b949d]">({{ $parent->email }})</span></span>
+                        <span class="text-sm text-[#5f6873] parent-label">{{ $parent->full_name }} <span class="text-xs text-[#6b7280]">({{ $parent->email }})</span></span>
                     </label>
                     @empty
-                    <p class="text-sm text-[#8b949d] p-2">{{ __('admin_ui.no_parent_accounts_yet') }}</p>
+                    <p class="text-sm text-[#6b7280] p-2">{{ __('admin_ui.no_parent_accounts_yet') }}</p>
                     @endforelse
                 </div>
-                <p class="text-xs text-[#8b949d] mt-1">{{ __('admin_ui.connect_parent_help') }}</p>
+                <p class="text-xs text-[#6b7280] mt-1">{{ __('admin_ui.connect_parent_help') }}</p>
             </div>
             <div class="flex justify-end gap-3 pt-4">
                 <button type="button" onclick="this.closest('#addUserModal').classList.add('hidden')" class="px-6 py-2.5 border border-[#f1e7cc] rounded-lg text-[#5f6873] hover:bg-[#fffbf0] transition">{{ __('admin_ui.cancel') }}</button>
@@ -327,10 +327,10 @@
 </div>
 
 <div id="editUserModal" class="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 hidden p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold text-[#182438]">{{ __('admin_ui.edit_account') }}</h3>
-            <button onclick="this.closest('#editUserModal').classList.add('hidden')" class="text-[#8b949d] hover:text-[#5f6873] text-2xl">&times;</button>
+            <button onclick="this.closest('#editUserModal').classList.add('hidden')" class="text-[#6b7280] hover:text-[#5f6873] text-2xl">&times;</button>
         </div>
         <form method="POST" id="editUserForm" class="space-y-4">
             @csrf @method('PUT')
@@ -357,7 +357,7 @@
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.new_password_optional') }}</label>
                     <div class="relative">
                         <input type="password" name="password" id="editPassword" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none pr-12" placeholder="{{ __('admin_ui.leave_blank_to_keep') }}">
-                        <button type="button" onclick="togglePassword('editPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b949d] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
+                        <button type="button" onclick="togglePassword('editPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
                     </div>
@@ -395,7 +395,7 @@
             <div id="editConnections" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2" id="editConnLabel">{{ __('admin_ui.connect_students') }}</label>
                 <div class="relative mb-2">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
                     <input type="text" id="editConnSearch" placeholder="{{ __('admin_ui.search_students') }}" autocomplete="off"
                         class="w-full pl-9 pr-4 py-2 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none text-sm">
                 </div>
@@ -406,16 +406,16 @@
                         <span class="text-sm text-[#5f6873]">{{ $student->name }}</span>
                     </label>
                     @empty
-                    <p class="text-sm text-[#8b949d] p-2">{{ __('admin_ui.no_students_yet') }}</p>
+                    <p class="text-sm text-[#6b7280] p-2">{{ __('admin_ui.no_students_yet') }}</p>
                     @endforelse
                 </div>
-                <p class="text-xs text-[#8b949d] mt-1">{{ __('admin_ui.connect_parent_students_help') }}</p>
+                <p class="text-xs text-[#6b7280] mt-1">{{ __('admin_ui.connect_parent_students_help') }}</p>
             </div>
 
             <div id="editParentConnections" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.connect_parents') }}</label>
                 <div class="relative mb-2">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">⌕</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
                     <input type="text" id="editParentConnSearch" placeholder="{{ __('admin_ui.search_parents') }}" autocomplete="off"
                         class="w-full pl-9 pr-4 py-2 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none text-sm">
                 </div>
@@ -426,10 +426,10 @@
                         <span class="text-sm text-[#5f6873]">{{ $parent->full_name }}</span>
                     </label>
                     @empty
-                    <p class="text-sm text-[#8b949d] p-2">{{ __('admin_ui.no_parent_accounts_yet') }}</p>
+                    <p class="text-sm text-[#6b7280] p-2">{{ __('admin_ui.no_parent_accounts_yet') }}</p>
                     @endforelse
                 </div>
-                <p class="text-xs text-[#8b949d] mt-1">{{ __('admin_ui.connect_parent_help') }}</p>
+                <p class="text-xs text-[#6b7280] mt-1">{{ __('admin_ui.connect_parent_help') }}</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-4">

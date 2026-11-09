@@ -11,7 +11,7 @@
 
 @if(count($games))
 <div class="mb-5">
-    <p class="text-[10px] font-extrabold uppercase tracking-widest text-[#8b949d] mb-2">{{ __('game.switch_label') }}</p>
+    <p class="text-xs font-extrabold uppercase tracking-widest text-[#6b7280] mb-2">{{ __('game.switch_label') }}</p>
     <div class="flex flex-wrap items-center gap-2">
         @foreach($games as $game)
             @if($game['slug'] === $current)

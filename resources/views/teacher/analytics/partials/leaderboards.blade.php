@@ -96,7 +96,7 @@
                     <header class="mb-3 flex items-start justify-between gap-2">
                         <div>
                             <h4 class="font-semibold capitalize text-[#182438]" x-text="b.topic.replace(/-/g, ' ')"></h4>
-                            <p class="text-xs text-[#8b949d]"><span x-text="b.basisLabel"></span> · <span x-text="b.total + ' ' + text.ranked"></span></p>
+                            <p class="text-xs text-[#6b7280]"><span x-text="b.basisLabel"></span> · <span x-text="b.total + ' ' + text.ranked"></span></p>
                         </div>
                         <span class="rounded-full bg-[#fffbf0] px-2 py-0.5 text-xs font-semibold text-[#5f6873] whitespace-nowrap" x-text="text.avg + ' ' + b.avg + '%'"></span>
                     </header>
@@ -118,15 +118,15 @@
                             </li>
                         </template>
                     </ol>
-                    <p x-show="b.more > 0" class="mt-2 text-center text-xs text-[#8b949d]" x-text="'+ ' + b.more + ' ' + text.more"></p>
+                    <p x-show="b.more > 0" class="mt-2 text-center text-xs text-[#6b7280]" x-text="'+ ' + b.more + ' ' + text.more"></p>
                 </section>
             </template>
         </div>
 
-        <p x-show="view.length === 0" x-cloak class="py-8 text-center text-sm text-[#8b949d]">{{ __('No scores match these filters.') }}</p>
+        <p x-show="view.length === 0" x-cloak class="py-8 text-center text-sm text-[#6b7280]">{{ __('No scores match these filters.') }}</p>
     </div>
     @else
-    <p class="py-8 text-center text-sm text-[#8b949d]">{{ __('analytics.no_scores_recorded') }}</p>
+    <p class="py-8 text-center text-sm text-[#6b7280]">{{ __('analytics.no_scores_recorded') }}</p>
     @endif
 </div>
 

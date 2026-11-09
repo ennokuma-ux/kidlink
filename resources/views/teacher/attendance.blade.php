@@ -15,7 +15,7 @@
         <div class="flex-1 min-w-0">
             <label for="attendanceSearch" class="block text-[#182438] font-medium mb-2">{{ __('teacher.search_student') }}</label>
             <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949d]">&nbsp;&#9906;</span>
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">&nbsp;&#9906;</span>
                 <input type="search" name="search" id="attendanceSearch" value="{{ $search }}"
                     placeholder="{{ __('teacher.type_a_name') }}" autocomplete="off"
                     class="w-full pl-9 pr-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
@@ -120,7 +120,7 @@
                             @if($student->class_name)
                                 <span class="px-2.5 py-1 bg-[#fdf3d6] rounded-full text-xs font-medium text-[#5f6873]">{{ $student->class_name }}</span>
                             @else
-                                <span class="text-xs text-[#8b949d]">&mdash;</span>
+                                <span class="text-xs text-[#6b7280]">&mdash;</span>
                             @endif
                         </td>
                     @endif
@@ -137,7 +137,7 @@
                 </tr>
 @empty
                 <tr>
-                    <td colspan="{{ $availableSections->count() > 1 ? 6 : 5 }}" class="px-6 py-12 text-center text-[#8b949d]">
+                    <td colspan="{{ $availableSections->count() > 1 ? 6 : 5 }}" class="px-6 py-12 text-center text-[#6b7280]">
                         @if($search !== '' || $section !== '' || $year !== '')
                             {{ __('teacher.no_students_match') }}
                         @else

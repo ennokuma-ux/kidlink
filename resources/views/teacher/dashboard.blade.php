@@ -121,22 +121,22 @@
     <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#1982c4]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_active_students') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['active_students'] }}</p>
-        <p class="text-xs text-[#8b949d] mt-1">{{ __('analytics.stat_of_enrolled', ['count' => $summary['students']]) }}</p>
+        <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_of_enrolled', ['count' => $summary['students']]) }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#8ac926]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_avg_game_accuracy') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['avg_game_pct'] }}%</p>
-        <p class="text-xs text-[#8b949d] mt-1">{{ __('analytics.stat_levels_played', ['count' => $summary['games_played']]) }}</p>
+        <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_levels_played', ['count' => $summary['games_played']]) }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#ff8555]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_attendance_rate') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['attendance_rate'] }}%</p>
-        <p class="text-xs text-[#8b949d] mt-1">{{ __('analytics.stat_late_arrivals', ['count' => $summary['late_count']]) }}</p>
+        <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_late_arrivals', ['count' => $summary['late_count']]) }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#ffca3a]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_points_awarded') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ number_format($summary['points_awarded']) }}</p>
-        <p class="text-xs text-[#8b949d] mt-1">{{ __('analytics.stat_all_time') }}</p>
+        <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_all_time') }}</p>
     </div>
 </div>
 
@@ -144,7 +144,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.attendance_trend_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.attendance_trend_subtitle') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.attendance_trend_subtitle') }}</p>
         <div class="chart-box"><canvas id="attendanceTrendChart"></canvas></div>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6">
@@ -161,14 +161,14 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.domain_mastery_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">
+        <p class="text-xs text-[#6b7280] mb-4">
             {{ __('analytics.domain_mastery_subtitle_teacher', ['who' => __('analytics.domain_who_name', ['name' => $selectedStudent->first_name])]) }}
         </p>
         <div class="chart-box"><canvas id="performanceRadarChart"></canvas></div>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.indicator_status_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.indicator_status_subtitle') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.indicator_status_subtitle') }}</p>
         <div class="chart-box"><canvas id="domainStatusChart"></canvas></div>
     </div>
 </div>
@@ -177,7 +177,7 @@
 <div class="grid grid-cols-1 gap-8 mb-10">
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.age_dist_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.age_dist_subtitle_cohort') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.age_dist_subtitle_cohort') }}</p>
         <div class="chart-box"><canvas id="ageDistChart"></canvas></div>
     </div>
 </div>
@@ -186,7 +186,7 @@
 {{-- Game performance --}}
 <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.game_perf_breakdown') }}</h3>
-    <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.gp_subtitle') }}</p>
+    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.gp_subtitle') }}</p>
     <div class="overflow-x-auto">
         <table class="w-full min-w-[640px]">
             <thead class="bg-[#fffbf0]">
@@ -212,14 +212,14 @@
                             {{ $stats['avg_pct'] >= 75 ? __('analytics.interp_confident') : ($stats['avg_pct'] >= 50 ? __('analytics.interp_progress') : __('analytics.interp_reteach')) }}
                         </td>
                     @else
-                        <td class="px-4 py-3 text-center text-[#8b949d]">0</td>
-                        <td class="px-4 py-3 text-center text-[#8b949d]">—</td>
-                        <td class="px-4 py-3 text-center text-[#8b949d]">—</td>
-                        <td class="px-4 py-3 text-[#8b949d]">{{ __('analytics.not_started') }}</td>
+                        <td class="px-4 py-3 text-center text-[#6b7280]">0</td>
+                        <td class="px-4 py-3 text-center text-[#6b7280]">—</td>
+                        <td class="px-4 py-3 text-center text-[#6b7280]">—</td>
+                        <td class="px-4 py-3 text-[#6b7280]">{{ __('analytics.not_started') }}</td>
                     @endif
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-4 py-8 text-center text-[#8b949d]">{{ __('analytics.no_game_data') }}</td></tr>
+                <tr><td colspan="5" class="px-4 py-8 text-center text-[#6b7280]">{{ __('analytics.no_game_data') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -230,13 +230,13 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
     <div class="bg-white rounded-xl shadow-sm p-6 {{ $selectedStudent ? 'lg:col-span-3' : 'lg:col-span-2' }}">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.weekly_trend_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.weekly_subtitle_long') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.weekly_subtitle_long') }}</p>
         <div class="chart-box"><canvas id="gamePlayTrendChart"></canvas></div>
     </div>
     @unless($selectedStudent)
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.enrolment_trend_title') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.enrolment_trend_subtitle_teacher') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.enrolment_trend_subtitle_teacher') }}</p>
         <div class="chart-box"><canvas id="enrollTrendChart"></canvas></div>
     </div>
     @endunless
@@ -247,14 +247,14 @@
 <div class="grid grid-cols-1 gap-8 mb-10">
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.recommended_interventions') }}</h3>
-        <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.ri_subtitle') }}</p>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.ri_subtitle') }}</p>
         <div class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
             @forelse($recommendations as $rec)
                 <div class="p-4 rounded-lg border-l-4
                     {{ $rec['severity'] === 'high' ? 'bg-[#fde8ef] border-[#ff595e]' : ($rec['severity'] === 'medium' ? 'bg-[#fff6e5] border-[#ffca3a]' : 'bg-[#ecf7d6] border-[#8ac926]') }}">
                     <div class="flex items-center justify-between mb-1">
                         <h4 class="font-semibold text-[#182438]">{{ $rec['name'] }}</h4>
-                        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full
+                        <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full
                             {{ $rec['severity'] === 'high' ? 'bg-[#ff595e] text-white' : ($rec['severity'] === 'medium' ? 'bg-[#ffca3a] text-[#182438]' : 'bg-[#8ac926] text-[#182438]') }}">
                             {{ __("analytics.severity_{$rec['severity']}") }}
                         </span>
@@ -283,7 +283,7 @@
     <h3 class="text-lg font-semibold text-[#182438] mb-1">
         {{ $selectedStudent ? __('analytics.score_by_category') : __('analytics.score_by_category_per_student') }}
     </h3>
-    <p class="text-xs text-[#8b949d] mb-4">
+    <p class="text-xs text-[#6b7280] mb-4">
         @if($selectedStudent)
             {{ __('analytics.category_blurb_selected') }}
         @else
@@ -315,14 +315,14 @@
                 </tr>
                 <tr>
                     @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                        <th class="px-2 py-2 text-center text-[11px] font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
+                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
                     @endforeach
                     @foreach(\App\Services\AnalyticsService::ECCD_DOMAINS as $domain)
-                        <th class="px-2 py-2 text-center text-[11px] font-semibold text-[#5f6873] uppercase"
+                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase"
                             title="{{ $domain }}">{{ \App\Services\AnalyticsService::ECCD_DOMAIN_SHORT[$domain] ?? $domain }}</th>
                     @endforeach
                     @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                        <th class="px-2 py-2 text-center text-[11px] font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
+                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -349,7 +349,7 @@
                                 @if(isset($row['points'][$game]))
                                     <span>{{ number_format($row['points'][$game]) }}</span>
                                 @else
-                                    <span class="text-[#8b949d]" title="{{ __('analytics.no_points_yet') }}">&mdash;</span>
+                                    <span class="text-[#6b7280]" title="{{ __('analytics.no_points_yet') }}">&mdash;</span>
                                 @endif
                             </td>
                         @endforeach
@@ -362,7 +362,7 @@
         </table>
     </div>
 
-    <p class="text-xs text-[#8b949d] mt-3">
+    <p class="text-xs text-[#6b7280] mt-3">
         <span class="text-[#8ac926] font-bold">&#8805;75%</span> {{ __('analytics.legend_on_track') }} &middot;
         <span class="text-[#ffca3a] font-bold">50&ndash;74%</span> {{ __('analytics.legend_needs_practice') }} &middot;
         <span class="text-[#ff595e] font-bold">&lt;50%</span> {{ __('analytics.legend_priority') }}
@@ -374,7 +374,7 @@
 @if(!$selectedStudent && count($sectionScores))
 <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.avg_score_by_section') }}</h3>
-    <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.asbs_subtitle') }}</p>
+    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.asbs_subtitle') }}</p>
 
     <div class="overflow-x-auto">
         <table class="w-full min-w-[520px]">
@@ -416,7 +416,7 @@
 {{-- Who is exceeding / struggling, per topic --}}
 <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.exceeding_struggling') }}</h3>
-    <p class="text-xs text-[#8b949d] mb-4">
+    <p class="text-xs text-[#6b7280] mb-4">
         {{ __('analytics.es_subtitle', [
             'exceeding' => \App\Services\AnalyticsService::EXCEEDING_PCT,
             'struggling' => \App\Services\AnalyticsService::STRUGGLING_PCT,
@@ -458,7 +458,7 @@
                                 @endforeach
                             </div>
                         @else
-                            <span class="text-xs text-[#8b949d]">—</span>
+                            <span class="text-xs text-[#6b7280]">—</span>
                         @endif
                     </td>
                     <td class="px-4 py-3">
@@ -472,7 +472,7 @@
                                 @endforeach
                             </div>
                         @else
-                            <span class="text-xs text-[#8b949d]">—</span>
+                            <span class="text-xs text-[#6b7280]">—</span>
                         @endif
                     </td>
                 </tr>
@@ -481,7 +481,7 @@
         </table>
     </div>
     @else
-    <p class="text-sm text-[#8b949d] py-8 text-center">{{ __('analytics.no_scores_recorded') }}</p>
+    <p class="text-sm text-[#6b7280] py-8 text-center">{{ __('analytics.no_scores_recorded') }}</p>
     @endif
 </div>
 @endunless
@@ -495,7 +495,7 @@
 @if(count($activityPerformance))
 <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.activity_performance') }}</h3>
-    <p class="text-xs text-[#8b949d] mb-4">{{ __('analytics.ap_subtitle') }}</p>
+    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.ap_subtitle') }}</p>
     <div class="chart-box"><canvas id="activityChart"></canvas></div>
 </div>
 @endif
@@ -503,7 +503,7 @@
 {{-- Level progression table --}}
 <div class="bg-white rounded-xl shadow-sm p-6">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.level_progress_map') }}</h3>
-    <p class="text-xs text-[#8b949d] mb-4">
+    <p class="text-xs text-[#6b7280] mb-4">
         @if($selectedStudent)
             {{ __('analytics.lpm_subtitle_selected', ['name' => $selectedStudent->first_name]) }}
         @else
