@@ -57,10 +57,11 @@ class AttendanceController extends Controller
 
         // The attendance cache stays keyed by teacher + date only, so switching
         // filters never re-queries; filtering happens over the cached students.
+        $studentIds = $students->pluck('id')->all();
         $cacheKey = "teacher.{$teacherId}.attendance.{$date->format('Y-m-d')}";
-        $attendance = Cache::remember($cacheKey, 60, function () use ($date, $students) {
+        $attendance = Cache::remember($cacheKey, 60, function () use ($date, $studentIds) {
             return Attendance::whereDate('date', $date)
-                ->whereIn('student_id', $filteredStudentIds)
+                ->whereIn('student_id', $studentIds)
                 ->get(['id', 'student_id', 'date', 'status'])
                 ->keyBy('student_id');
         });
