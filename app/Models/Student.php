@@ -135,13 +135,13 @@ class Student extends Model
     }
 
     /**
-     * Whether a value looks like a real academic year: two consecutive years.
+     * Whether a value is a standard academic year (two consecutive years).
+     * Academic years may also be custom labels such as "Summer 2026"; those
+     * are valid to save but are not "standard".
      */
     public static function isValidAcademicYear(?string $value): bool
     {
-        return $value !== null
-            && preg_match('/^(\d{4})-(\d{4})$/', $value, $m) === 1
-            && (int) $m[2] === (int) $m[1] + 1;
+        return \App\Support\AcademicYear::normalize($value) !== null;
     }
 
     /**
@@ -158,12 +158,16 @@ class Student extends Model
 
         $years = collect([$startYear + 1, $startYear, $startYear - 1])
             ->map(fn ($y) => $y.'-'.($y + 1))
-            ->merge(collect($existing)->filter(fn ($y) => self::isValidAcademicYear($y)))
+            ->merge(collect($existing)->map(fn ($y) => trim((string) $y))->filter())
             ->unique()
             ->sortDesc()
             ->values();
 
-        return $years->all();
+        // Standard years first (newest first), then custom labels A-Z.
+        $standard = $years->filter(fn ($y) => self::isValidAcademicYear($y))->values();
+        $custom = $years->reject(fn ($y) => self::isValidAcademicYear($y))->sort()->values();
+
+        return $standard->merge($custom)->all();
     }
 
     protected $fillable = [
@@ -238,6 +242,29 @@ class Student extends Model
     public function getAgeAttribute(): int
     {
         return $this->date_of_birth?->age ?? 0;
+    }
+
+    /**
+     * "Below 1" for babies under a year old (their age is 0), otherwise "N yrs".
+     * Used by the age filter, the accounts table and the creation forms so a
+     * zero is never shown as "0 yrs".
+     */
+    public static function ageLabel(int $age): string
+    {
+        return $age < 1 ? __('Below 1') : $age.' '.__('teacher.yrs');
+    }
+
+    /**
+     * Ages offered in the age filter: below 1 through 5 always, so a filter
+     * never silently lacks an age nobody happens to be enrolled at yet, plus
+     * any older age already on record.
+     *
+     * @param  iterable<int>  $existing
+     * @return list<int>
+     */
+    public static function ageFilterOptions(iterable $existing = []): array
+    {
+        return collect(range(0, 5))->merge($existing)->map(fn ($a) => (int) $a)->unique()->sort()->values()->all();
     }
 
     public function getNameAttribute(): string

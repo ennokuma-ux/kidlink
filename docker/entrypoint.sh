@@ -13,4 +13,7 @@ ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
 php artisan package:discover --ansi || true
 php artisan config:cache || true
 
+# Apply pending migrations on every deploy so the schema never lags the code.
+php artisan migrate --force || echo "WARNING: php artisan migrate failed; check the migration output above."
+
 exec "$@"

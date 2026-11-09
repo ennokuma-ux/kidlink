@@ -49,7 +49,9 @@ a.kidlink-student-option,
 .kidlink-child-option {
   background: #fff !important;
   color: #182438 !important;
-  border-color: #e5e7eb !important;
+  border-color: #ff8555 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
   box-shadow: none !important;
 }
 button.kidlink-child-option:hover,
@@ -63,12 +65,12 @@ a.kidlink-student-option:focus,
 .kidlink-student-option:focus-visible,
 .kidlink-child-option:focus-visible {
   background: #fff !important;
-  border-color: #9ca3af !important;
+  border-color: #f26a2e !important;
 }
 .kidlink-student-option[aria-current="true"],
 .kidlink-student-option.is-current {
   background: #fff !important;
-  border-color: #6b7280 !important;
+  border-color: #f26a2e !important;
 }
 .kidlink-student-option .kidlink-avatar,
 .kidlink-child-option .kidlink-avatar {

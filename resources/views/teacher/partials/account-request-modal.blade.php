@@ -72,6 +72,7 @@
                         <div>
                             <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.date_of_birth') }}</label>
                             <input type="date" name="date_of_birth" x-ref="date_of_birth" value="{{ old('date_of_birth') }}" max="{{ now()->toDateString() }}" @input="autoSection()" @change="autoSection()" :required="role === 'student'" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                            <p class="text-xs text-[#8b949d] mt-1" x-show="ageText" x-text="ageText" x-cloak></p>
                         </div>
                     </div>
                     <div>
@@ -85,11 +86,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('Academic year') }}</label>
-                        <select name="academic_year" x-ref="academic_year" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-                            @foreach($academicYears as $year)
-                                <option value="{{ $year }}" @selected(old('academic_year', \App\Models\Student::currentAcademicYear()) === $year)>{{ $year }}@if($year === \App\Models\Student::currentAcademicYear()) ({{ __('current') }})@endif</option>
-                            @endforeach
-                        </select>
+                        <x-academic-year-input name="academic_year" id="requestAcademicYear" x-ref="academic_year" :value="\App\Models\Student::currentAcademicYear()" class="px-4 py-3" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('student.hand_label') }}</label>
@@ -149,14 +146,17 @@ window.accountRequestForm = function (role, reopen) {
     return {
         open: reopen, role: role, parentSearch: '', parentIds: @js($selectedParents),
         sectionRanges: @js(\App\Support\SectionPlacement::ranges()),
+        ageText: '',
         // Picks the section that matches the birthday; leaves it alone when the age fits none.
         autoSection() {
             const dob = this.$refs.date_of_birth.value;
+            this.ageText = '';
             if (!dob) return;
             const b = new Date(dob + 'T00:00:00'), t = new Date();
             if (isNaN(b) || b > t) return;
             let age = t.getFullYear() - b.getFullYear();
             if (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) age--;
+            this.ageText = @js(__('Age')) + ': ' + (age < 1 ? @js(__('Below 1')) : age + ' ' + @js(__('teacher.yrs')));
             const match = Object.entries(this.sectionRanges).find(([, r]) => age >= r.min && age <= r.max);
             if (match) this.$refs.class_name.value = match[0];
         },

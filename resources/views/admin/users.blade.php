@@ -278,12 +278,7 @@
             </div>
             <div id="addStudentYearSection" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('Academic year') }}</label>
-                <select name="academic_year"
-                    class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-                    @foreach($academicYears as $year)
-                        <option value="{{ $year }}" @selected($year === \App\Models\Student::currentAcademicYear())>{{ $year }}@if($year === \App\Models\Student::currentAcademicYear()) ({{ __('current') }})@endif</option>
-                    @endforeach
-                </select>
+                <x-academic-year-input name="academic_year" id="addAcademicYear" :value="\App\Models\Student::currentAcademicYear()" class="px-4 py-3" />
             </div>
             <div id="addStudentHandSection" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('student.hand_label') }}</label>
@@ -385,12 +380,7 @@
 
             <div id="editYearField" class="hidden">
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('Academic year') }}</label>
-                <select name="academic_year" id="editAcademicYear" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-                    <option value="">{{ __('admin_ui.not_set') }}</option>
-                    @foreach($academicYears as $year)
-                        <option value="{{ $year }}">{{ $year }}</option>
-                    @endforeach
-                </select>
+                <x-academic-year-input name="academic_year" id="editAcademicYear" class="px-4 py-3" />
             </div>
 
             <div id="editHandField" class="hidden">

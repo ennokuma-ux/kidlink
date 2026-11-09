@@ -105,7 +105,7 @@ class StudentController extends Controller
             'date_of_birth' => $request->date_of_birth,
             'address' => $request->address,
             'class_name' => $request->class_name ?: SectionPlacement::forDateOfBirth($request->date_of_birth),
-            'academic_year' => $request->academic_year ?: Student::currentAcademicYear(),
+            'academic_year' => \App\Support\AcademicYear::store($request->academic_year) ?: Student::currentAcademicYear(),
             'dominant_hand' => $request->dominant_hand ?? 'Not yet established',
             'parent_id' => $parentIds[0] ?? null,
             'teacher_id' => auth()->id(),
@@ -242,7 +242,7 @@ class StudentController extends Controller
             'class_name' => ($validated['class_name'] ?? null)
                 ?: SectionPlacement::forDateOfBirth($validated['date_of_birth'] ?? null),
             'academic_year' => $role === 'student'
-                ? (($validated['academic_year'] ?? null) ?: Student::currentAcademicYear())
+                ? (\App\Support\AcademicYear::store($validated['academic_year'] ?? null) ?: Student::currentAcademicYear())
                 : null,
             'dominant_hand' => $validated['dominant_hand'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
@@ -279,16 +279,4 @@ class StudentController extends Controller
             ->with('open_view', 'requests');
     }
 
-    /**
-     * "2026-2027" is valid, "2026-2029" is not: the second year must follow
-     * the first, so a typo cannot create a year nobody will ever filter by.
-     */
-    private function consecutiveYears(): \Closure
-    {
-        return function (string $attribute, mixed $value, \Closure $fail) {
-            if ($value !== null && $value !== '' && ! Student::isValidAcademicYear((string) $value)) {
-                $fail(__('The academic year must be two consecutive years, such as 2026-2027.'));
-            }
-        };
-    }
 }

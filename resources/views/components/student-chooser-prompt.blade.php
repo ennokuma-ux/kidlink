@@ -24,7 +24,7 @@
     </div>
     <div class="bg-white rounded-xl shadow-sm p-3 border-l-4 border-[#1982c4]">
         <p class="text-[#5f6873] text-sm">{{ __('teacher.age') }}</p>
-        <p class="text-base font-bold text-[#182438]">{{ $selectedStudent->age }} {{ __('teacher.yrs') }}</p>
+        <p class="text-base font-bold text-[#182438]">{{ \App\Models\Student::ageLabel($selectedStudent->age) }}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-3 border-l-4 border-[#8ac926]">
         <p class="text-[#5f6873] text-sm">{{ __('teacher.parent') }}</p>

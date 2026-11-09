@@ -55,7 +55,7 @@
 @php
     $filterSections = collect(\App\Models\Student::SECTIONS)->filter(fn ($sec) => $students->contains('class_name', $sec))->values();
     $hasUnassigned = $students->contains(fn ($st) => ! $st->class_name);
-    $filterAges = $students->map(fn ($st) => $st->age)->unique()->sort()->values();
+    $filterAges = \App\Models\Student::ageFilterOptions($students->map(fn ($st) => $st->age));
     $filterYears = collect($academicYears)->filter(fn ($year) => $students->contains('academic_year', $year))->values();
     $hasNoYear = $students->contains(fn ($st) => ! $st->academic_year);
     $filterHands = collect(\App\Models\Student::handLabels())->filter(fn ($label, $key) => $students->contains('dominant_hand', $key));
@@ -80,7 +80,7 @@
         <label class="block text-xs font-semibold text-[#5f6873]">{{ __('Age') }}
             <select data-sf="age" class="{{ $filterClass }} mt-1 block">
                 <option value="">{{ __('All ages') }}</option>
-                @foreach($filterAges as $age)<option value="{{ $age }}">{{ $age }} {{ __('teacher.yrs') }}</option>@endforeach
+                @foreach($filterAges as $age)<option value="{{ $age }}">{{ \App\Models\Student::ageLabel($age) }}</option>@endforeach
             </select>
         </label>
         @if($filterHands->count() > 1)
@@ -150,7 +150,7 @@
                             <span class="font-medium text-[#182438]">{{ $student->name }}</span>
                         </div>
                     </td>
-<td class="px-6 py-4 text-[#5f6873]">{{ $student->age }} {{ __('teacher.yrs') }}</td>
+<td class="px-6 py-4 text-[#5f6873]">{{ \App\Models\Student::ageLabel($student->age) }}</td>
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $student->class_name ? 'bg-[#fff0e6] text-[#ff8555]' : 'bg-[#f1e7cc] text-[#8b949d]' }}">
                             {{ $student->class_name ?? __('teacher.unassigned') }}

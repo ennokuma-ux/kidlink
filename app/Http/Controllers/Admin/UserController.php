@@ -132,7 +132,7 @@ class UserController extends Controller
                 'date_of_birth' => Student::dateOfBirthForSection($request->class_name),
                 'address' => '',
                 'class_name' => $request->class_name,
-                'academic_year' => $request->academic_year ?: Student::currentAcademicYear(),
+                'academic_year' => \App\Support\AcademicYear::store($request->academic_year) ?: Student::currentAcademicYear(),
                 'dominant_hand' => $request->dominant_hand ?? 'Not yet established',
                 'parent_id' => $request->parent_ids[0] ?? null,
                 'teacher_id' => $teacherId,
@@ -221,7 +221,7 @@ class UserController extends Controller
                 $student->update([
                     'is_active' => $request->boolean('is_active'),
                     'class_name' => $validated['class_name'] ?? $student->class_name,
-                    'academic_year' => ($validated['academic_year'] ?? null) ?: $student->academic_year,
+                    'academic_year' => \App\Support\AcademicYear::store($validated['academic_year'] ?? null) ?: $student->academic_year,
                     'dominant_hand' => $validated['dominant_hand'] ?? $student->dominant_hand,
                 ]);
             }
@@ -254,12 +254,4 @@ class UserController extends Controller
             ->with('success', $archiving ? 'Account archived.' : 'Account restored.');
     }
 
-    private function consecutiveYears(): \Closure
-    {
-        return function (string $attribute, mixed $value, \Closure $fail) {
-            if ($value !== null && $value !== '' && ! Student::isValidAcademicYear((string) $value)) {
-                $fail(__('The academic year must be two consecutive years, such as 2026-2027.'));
-            }
-        };
-    }
 }
