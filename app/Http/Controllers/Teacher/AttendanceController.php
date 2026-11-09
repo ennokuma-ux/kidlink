@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
 class AttendanceController extends Controller
@@ -94,6 +95,19 @@ class AttendanceController extends Controller
             'late' => $countStatus('Late'),
         ];
 
+        // Keep the full filtered set for totals, but render at most 10 rows.
+        $perPage = 10;
+        $page = max(1, LengthAwarePaginator::resolveCurrentPage('page'));
+        $studentsPage = $filtered->forPage($page, $perPage)->values();
+        $students = new LengthAwarePaginator(
+            $studentsPage,
+            $filtered->count(),
+            $perPage,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'pageName' => 'page']
+        );
+        $students->appends($request->query());
+
         // One small grouped query for the calendar dots: how each recent day went.
         $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($students) {
             $days = [];
@@ -119,7 +133,7 @@ class AttendanceController extends Controller
 
         return view('teacher.attendance', [
             'calendarDays' => $calendarDays,
-            'students' => $filtered,
+            'students' => $students,
             'totalStudents' => $students->count(),
             'attendance' => $attendance,
             'date' => $date,

@@ -55,7 +55,7 @@
 @php
     $filterSections = collect(\App\Models\Student::SECTIONS)->filter(fn ($sec) => $students->contains('class_name', $sec))->values();
     $hasUnassigned = $students->contains(fn ($st) => ! $st->class_name);
-    $filterAges = collect([0, 1, 2, 3, 4, 5]);
+    $filterAges = $students->map(fn ($st) => $st->age)->unique()->sort()->values();
     $filterYears = collect($academicYears)->filter(fn ($year) => $students->contains('academic_year', $year))->values();
     $hasNoYear = $students->contains(fn ($st) => ! $st->academic_year);
     $filterHands = collect(\App\Models\Student::handLabels())->filter(fn ($label, $key) => $students->contains('dominant_hand', $key));
@@ -80,7 +80,7 @@
         <label class="block text-xs font-semibold text-[#5f6873]">{{ __('Age') }}
             <select data-sf="age" class="{{ $filterClass }} mt-1 block">
                 <option value="">{{ __('All ages') }}</option>
-                @foreach($filterAges as $age)<option value="{{ $age }}">{{ $age === 0 ? __('Below one') : $age.' '.__('teacher.yrs') }}</option>@endforeach
+                @foreach($filterAges as $age)<option value="{{ $age }}">{{ $age }} {{ __('teacher.yrs') }}</option>@endforeach
             </select>
         </label>
         @if($filterHands->count() > 1)

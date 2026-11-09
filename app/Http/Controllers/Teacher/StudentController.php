@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AccountRequest;
 use App\Models\Student;
 use App\Models\User;
+use App\Rules\AcademicYear;
 use App\Support\SectionPlacement;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -35,11 +36,13 @@ class StudentController extends Controller
 
         $students = $order($scope(Student::with('parents')))
             ->where('is_active', true)
-            ->get();
+            ->paginate(10, ['*'], 'students_page')
+            ->withQueryString();
 
         $archivedStudents = $order($scope(Student::with('parents')))
             ->where('is_active', false)
-            ->get();
+            ->paginate(10, ['*'], 'archived_page')
+            ->withQueryString();
 
         // Also backs the "connect parent account" pickers in the add/edit modals.
         $parents = User::where('role', 'parent')
@@ -81,7 +84,7 @@ class StudentController extends Controller
             'date_of_birth' => 'required|date',
             'address' => 'nullable|string',
             'class_name' => ['nullable', 'string', 'max:255', Rule::in(Student::SECTIONS)],
-            'academic_year' => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/', $this->consecutiveYears()],
+            'academic_year' => ['nullable', 'string', new AcademicYear],
             'dominant_hand' => ['nullable', 'string', 'max:255', Rule::in(Student::HANDS)],
             'father_name' => 'nullable|string',
             'father_contact' => 'nullable|string',
@@ -200,7 +203,7 @@ class StudentController extends Controller
                 'date_of_birth' => 'required|date',
                 'address' => 'nullable|string|max:1000',
                 'class_name' => ['nullable', 'string', 'max:255', Rule::in(Student::SECTIONS)],
-                'academic_year' => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/', $this->consecutiveYears()],
+                'academic_year' => ['nullable', 'string', new AcademicYear],
                 'dominant_hand' => ['nullable', 'string', 'max:255', Rule::in(Student::HANDS)],
                 'father_name' => 'nullable|string|max:255',
                 'father_contact' => 'nullable|string|max:255',
