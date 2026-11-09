@@ -1,9 +1,9 @@
 /* Shared KidLink orange action palette and accessible interaction states. */
 :root {
-  --kidlink-orange: #f4773f;
-  --kidlink-orange-hover: #df6030;
-  --kidlink-orange-soft: #fff0e8;
-  --kidlink-orange-ring: rgba(244, 119, 63, .28);
+  --kidlink-orange: #ff6b35;
+  --kidlink-orange-hover: #ed5524;
+  --kidlink-orange-soft: #fff1e9;
+  --kidlink-orange-ring: rgba(255, 107, 53, .30);
 }
 button[class*="bg-orange-"], a[class*="bg-orange-"],
 button[class*="bg-[#ff8555]"], a[class*="bg-[#ff8555]"],
@@ -60,24 +60,7 @@ input[type="submit"]:disabled {
 }
 
 
-/* Primary orange actions: cover links, buttons and submit controls consistently. */
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#ff8555]"],
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#f47548]"],
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#f4773f]"],
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-400"],
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-500"],
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-600"] {
-  background-color: var(--kidlink-orange) !important;
-  border-color: var(--kidlink-orange) !important;
-  color: #fff !important;
-  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
-}
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#ff8555]"]:hover:not(:disabled),
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#f47548]"]:hover:not(:disabled),
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class*="bg-[#f4773f]"]:hover:not(:disabled),
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-400"]:hover:not(:disabled),
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-500"]:hover:not(:disabled),
-:where(button, a, input[type="submit"], input[type="button"], [role="button"])[class~="bg-orange-600"]:hover:not(:disabled) {
-  background-color: var(--kidlink-orange-hover) !important;
-  border-color: var(--kidlink-orange-hover) !important;
-}
+/* KidLink vibrant brand accents (avoid brown/muddy burnt-orange overrides). */
+:root { --kidlink-brand-orange: #ff6b35; --kidlink-brand-orange-hover: #ed5524; }
+.kidlink-brand-orange { color: var(--kidlink-brand-orange) !important; }
+.kidlink-brand-orange-bg { background-color: var(--kidlink-brand-orange) !important; }

@@ -19,7 +19,7 @@
 
         <div class="text-center mb-8">
             <a href="{{ route('home') }}" class="text-2xl font-extrabold tracking-tight inline-block mb-4" style="color: #182438;">
-                Kid<span style="color: #ff8555;">Link</span>
+                Kid<span style="color: #ff6b35;">Link</span>
             </a>
             <h2 class="text-3xl font-extrabold tracking-tight" style="color: #182438;">{{ __('login.welcome_back') }}</h2>
         </div>
@@ -31,7 +31,7 @@
                 <input type="email" name="email" value="{{ old('email') }}" required autofocus
                     class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2"
                     style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
-                    onfocus="this.style.borderColor='#ff8555'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
+                    onfocus="this.style.borderColor='#ff6b35'; this.style.boxShadow='0 0 0 3px rgba(255,107,53,0.18)'"
                     onblur="this.style.borderColor='#f1e7cc'; this.style.boxShadow='none'"
                     placeholder="{{ __('login.email_placeholder') }}">
             </div>
@@ -41,7 +41,7 @@
                     <input type="password" name="password" id="password" required
                         class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2 pr-12"
                         style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
-                        onfocus="this.style.borderColor='#ff8555'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
+                        onfocus="this.style.borderColor='#ff6b35'; this.style.boxShadow='0 0 0 3px rgba(255,107,53,0.18)'"
                         onblur="this.style.borderColor='#f1e7cc'; this.style.boxShadow='none'"
                         placeholder="{{ __('login.password_placeholder') }}">
                     <button type="button" onclick="togglePassword('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b949d] hover:text-[#5f6873]" aria-label="{{ __('login.show_password') }}">
@@ -51,15 +51,15 @@
             </div>
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-sm" style="color: #5f6873;">
-                    <input type="checkbox" name="remember" class="rounded" style="accent-color: #ff8555;">
+                    <input type="checkbox" name="remember" class="rounded" style="accent-color: #ff6b35;">
                     {{ __('login.remember') }}
                 </label>
             </div>
             <button type="submit"
                 class="w-full text-white py-3 rounded-lg font-semibold transition transform hover:scale-[1.02]"
-                style="background: #ff8555; box-shadow: 0 4px 12px rgba(255,133,85,0.2);"
-                onmouseover="this.style.background='#f47548'"
-                onmouseout="this.style.background='#ff8555'">
+                style="background: #ff6b35; box-shadow: 0 4px 12px rgba(255,107,53,0.24);"
+                onmouseover="this.style.background='#ed5524'"
+                onmouseout="this.style.background='#ff6b35'">
                 {{ __('login.submit') }}
             </button>
         </form>
