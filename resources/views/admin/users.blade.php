@@ -526,7 +526,7 @@ document.querySelectorAll('.edit-user-btn').forEach(btn => {
         classField.classList.toggle('hidden', d.role !== 'student');
 
         const yearField = document.getElementById('editYearField');
-        document.getElementById('editAcademicYear').value = d.academic_year || '';
+        window.setAcademicYear(document.getElementById('editAcademicYear'), d.academic_year || '');
         yearField.classList.toggle('hidden', d.role !== 'student');
 
         const handField = document.getElementById('editHandField');

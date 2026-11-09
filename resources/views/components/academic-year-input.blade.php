@@ -1,73 +1,100 @@
 {{--
-    Academic year field that accepts the year however it is typed and tidies it
-    to "2025-2026" when the field loses focus (the server does the same with
-    App\Support\AcademicYear::normalize(), so nothing depends on this script).
+    Academic year as two year boxes, "From" and "To". They are joined into the
+    hidden field `name` as "2025-2026", which the server stores through
+    App\Support\AcademicYear::store(). Typing only the first year fills in the
+    next one. Years are not forced to be consecutive.
 
         <x-academic-year-input name="academic_year" :value="$student->academic_year ?? null" />
 
-    Typing 2025, 25-26, 2025/26 or "SY 2025-2026" all become 2025-2026. Anything
-    else ("Summer 2026") is kept exactly as typed. Suggestions are a convenience.
+    A custom label saved earlier (e.g. "Summer 2026") is kept as is until the
+    boxes are edited. To set the value from script use
+    window.setAcademicYear(hiddenInput, '2025-2026').
 --}}
 @props(['name' => 'academic_year', 'value' => null, 'id' => null, 'required' => false])
 
 @php
     $id = $id ?: $name;
-    $current = old($name, $value);
-    $listId = $id.'-options';
+    $current = (string) old($name, $value);
+    $years = \App\Support\AcademicYear::parse($current);
+    $min = \App\Support\AcademicYear::MIN_YEAR;
+    $max = \App\Support\AcademicYear::MAX_YEAR;
+    $box = 'w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none';
 @endphp
 
-<input type="text"
-       name="{{ $name }}"
-       id="{{ $id }}"
-       value="{{ $current }}"
-       list="{{ $listId }}"
-       autocomplete="off"
-       maxlength="{{ \App\Support\AcademicYear::MAX_LENGTH }}"
-       placeholder="{{ __('e.g. 2025-2026 or Summer 2026') }}"
-       @required($required)
-       data-academic-year
-       {{ $attributes->merge(['class' => 'w-full px-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none']) }}>
-<datalist id="{{ $listId }}">
-    @foreach(\App\Support\AcademicYear::options() as $option)
-        <option value="{{ $option }}"></option>
-    @endforeach
-</datalist>
+<div data-academic-year-field>
+    <input type="hidden" name="{{ $name }}" id="{{ $id }}" value="{{ $current }}" data-academic-year-value {{ $attributes->only('x-ref') }}>
+    <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+            <span class="block text-xs font-semibold text-[#5f6873] mb-1">{{ __('From year') }}</span>
+            <input type="number" inputmode="numeric" min="{{ $min }}" max="{{ $max }}" step="1"
+                   value="{{ $years['start'] ?? '' }}" placeholder="{{ now()->year }}"
+                   data-academic-year-start aria-label="{{ __('Academic year starts') }}"
+                   @required($required) class="{{ $box }}">
+        </label>
+        <label class="block">
+            <span class="block text-xs font-semibold text-[#5f6873] mb-1">{{ __('To year') }}</span>
+            <input type="number" inputmode="numeric" min="{{ $min }}" max="{{ $max }}" step="1"
+                   value="{{ $years['end'] ?? '' }}" placeholder="{{ now()->year + 1 }}"
+                   data-academic-year-end aria-label="{{ __('Academic year ends') }}"
+                   @required($required) class="{{ $box }}">
+        </label>
+    </div>
+    <p class="mt-1 text-xs text-[#8b949d]" data-academic-year-note @if($current === '' || $years) hidden @endif>
+        {{ __('Saved as') }}: <span data-academic-year-saved>{{ $current }}</span>
+    </p>
+</div>
 
 @once
 <script>
 (function () {
-    // Mirrors App\Support\AcademicYear::resolve(). Returns "2025-2026" for a standard year, else null (a custom label is left alone).
-    function tidy(raw) {
-        var text = String(raw || '').trim();
-        if (!text) return null;
-        var bare = text.replace(/^(?:a\.?\s*y\.?|s\.?\s*y\.?|academic\s+year|school\s+year)\s*:?\s*/i, '');
-        var compact = bare.match(/^(\d{8}|\d{6})$/);
-        var pair = bare.match(/^(\d{1,4})(?:\s*(?:-|\u2013|\u2014|\/|to)\s*(\d{1,4}))?$/i);
-        var groups = compact ? [compact[1].slice(0, 4), compact[1].slice(4)] : (pair ? [pair[1], pair[2]].filter(Boolean) : []);
-        if (groups.length < 1 || groups.length > 2) return null;
-
-        function full(digits, after) {
-            var n = parseInt(digits, 10);
-            if (digits.length === 4) return n;
-            if (after === null) return digits.length === 2 ? 2000 + n : null;
-            if (digits.length === 2) { var y = Math.floor(after / 100) * 100 + n; return y <= after ? y + 100 : y; }
-            if (digits.length === 1) { var z = Math.floor(after / 10) * 10 + n; return z <= after ? z + 10 : z; }
-            return null;
-        }
-
-        var start = full(groups[0], null);
-        if (start === null) return null;
-        var end = groups.length === 1 ? start + 1 : full(groups[1], start);
-        if (end === null || start < {{ \App\Support\AcademicYear::MIN_YEAR }} || end > {{ \App\Support\AcademicYear::MAX_YEAR }} || end !== start + 1) return null;
-        return start + '-' + end;
+    function fields(root) {
+        return {
+            hidden: root.querySelector('[data-academic-year-value]'),
+            start: root.querySelector('[data-academic-year-start]'),
+            end: root.querySelector('[data-academic-year-end]'),
+            note: root.querySelector('[data-academic-year-note]'),
+        };
     }
 
-    document.addEventListener('change', function (event) {
+    function compose(root, changed) {
+        var f = fields(root);
+        var s = f.start.value.trim(), e = f.end.value.trim();
+        // Typing the first year suggests the next one until the end year is set by hand.
+        if (changed === 'start' && /^\d{4}$/.test(s) && (e === '' || f.end.dataset.auto === '1')) {
+            f.end.value = String(parseInt(s, 10) + 1);
+            f.end.dataset.auto = '1';
+            e = f.end.value;
+        }
+        if (changed === 'end') f.end.dataset.auto = '';
+        f.hidden.value = s && e ? s + '-' + e : (s || '');
+        if (f.note) f.note.hidden = true;
+    }
+
+    document.addEventListener('input', function (event) {
         var input = event.target;
-        if (!input.matches || !input.matches('input[data-academic-year]')) return;
-        var cleaned = tidy(input.value);
-        if (cleaned) input.value = cleaned;
+        if (!input.matches) return;
+        var root = input.closest('[data-academic-year-field]');
+        if (!root) return;
+        if (input.matches('[data-academic-year-start]')) compose(root, 'start');
+        else if (input.matches('[data-academic-year-end]')) compose(root, 'end');
     });
+
+    window.setAcademicYear = function (hidden, value) {
+        if (!hidden) return;
+        var root = hidden.closest('[data-academic-year-field]');
+        var f = fields(root);
+        var text = String(value || '').trim();
+        var m = text.match(/^(\d{4})\s*[-–\/]\s*(\d{4})$/);
+        hidden.value = text;
+        f.start.value = m ? m[1] : '';
+        f.end.value = m ? m[2] : '';
+        f.end.dataset.auto = '';
+        if (f.note) {
+            f.note.hidden = !text || !!m;
+            var saved = f.note.querySelector('[data-academic-year-saved]');
+            if (saved) saved.textContent = text;
+        }
+    };
 })();
 </script>
 @endonce

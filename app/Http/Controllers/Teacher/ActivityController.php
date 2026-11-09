@@ -219,7 +219,7 @@ class ActivityController extends Controller
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
             'target_mode' => ['required', 'in:section,individual'],
-            'group_name' => ['nullable', 'required_if:target_mode,section', 'string', 'max:255'],
+            'group_name' => ['nullable', 'string', 'max:255'],
             'target_student_ids' => ['nullable', 'required_if:target_mode,individual', 'array', 'min:1'],
             'target_student_ids.*' => ['integer', 'distinct', 'exists:students,id'],
             'week' => ['nullable', 'date_format:Y-m-d'],

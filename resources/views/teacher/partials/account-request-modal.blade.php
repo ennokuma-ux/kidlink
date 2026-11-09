@@ -173,6 +173,10 @@ window.accountRequestForm = function (role, reopen) {
                  'address', 'father_name', 'mother_name'].forEach(key => {
                     const el = this.$refs[key];
                     if (!el) return;
+                    if (key === 'academic_year') {
+                        window.setAcademicYear(el, fresh ? blank.academic_year : (d.academic_year || ''));
+                        return;
+                    }
                     if (fresh) el.value = blank[key] !== undefined ? blank[key] : '';
                     else if (d[key] !== undefined && d[key] !== null) el.value = d[key];
                 });

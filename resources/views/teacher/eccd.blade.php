@@ -41,14 +41,11 @@
 @php
 $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
 @endphp
-@php
-$eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
-@endphp
 <div class="flex flex-wrap gap-2 mb-4" aria-label="Filter ECCD evaluation domains">
     <button type="button" data-eccd-filter="all" aria-pressed="true" class="eccd-filter px-3 py-1.5 rounded-full border border-[#1982c4] bg-[#1982c4] text-white text-sm font-semibold">All domains</button>
     @foreach($domains as $domainIndex => $domain)
     @php $domainColor = $eccdPalette[$domainIndex % count($eccdPalette)]; @endphp
-    <button type="button" data-eccd-filter="{{ \\Illuminate\\Support\\Str::slug($domain) }}" data-domain-color="{{ $domainColor }}" aria-pressed="false"
+    <button type="button" data-eccd-filter="{{ \Illuminate\Support\Str::slug($domain) }}" data-domain-color="{{ $domainColor }}" aria-pressed="false"
        class="eccd-filter px-3 py-1.5 rounded-full border bg-white text-sm font-semibold text-[#182438] transition"
        style="border-color: {{ $domainColor }}">
         <span class="inline-block w-2 h-2 rounded-full mr-1.5" style="background: {{ $domainColor }}"></span>{{ $labels['domains'][$domain] ?? $domain }}
@@ -62,10 +59,10 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
     <div class="bg-white rounded-xl shadow-sm p-3 border-t-4" style="border-color: {{ $domainColor }}">
         <div class="flex items-center justify-between mb-3">
             <h4 class="font-semibold text-[#182438]">{{ $labels['domains'][$domain] ?? $domain }}</h4>
-            <span class="text-sm font-bold" style="color: {{ $domainColor }}" data-score-pct="{{ \\Illuminate\\Support\\Str::slug($domain) }}">{{ $scores[$domain] ?? 0 }}%</span>
+            <span class="text-sm font-bold" style="color: {{ $domainColor }}" data-score-pct="{{ \Illuminate\Support\Str::slug($domain) }}">{{ $scores[$domain] ?? 0 }}%</span>
         </div>
         <div class="w-full bg-[#f1e7cc] rounded-full h-1.5 mb-2">
-            <div class="h-1.5 rounded-full transition-all" data-score-bar="{{ \\Illuminate\\Support\\Str::slug($domain) }}" style="width: {{ min($scores[$domain] ?? 0, 100) }}%; background-color: {{ $domainColor }}"></div>
+            <div class="h-1.5 rounded-full transition-all" data-score-bar="{{ \Illuminate\Support\Str::slug($domain) }}" style="width: {{ min($scores[$domain] ?? 0, 100) }}%; background-color: {{ $domainColor }}"></div>
         </div>
     </div>
     @endforeach
@@ -91,6 +88,19 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
     <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
     <input type="hidden" name="evaluation" value="{{ $evaluationNumber }}">
     <input type="hidden" name="next" value="" id="eccdNext">
+
+    {{-- Changes are staged on the page and only written when Save is confirmed. --}}
+    <div id="eccdSaveBar" class="sticky top-3 z-20 mb-4 px-4 py-3 bg-white/95 backdrop-blur border-2 border-[#d8d2c4] rounded-xl shadow-[0_4px_12px_rgba(24,36,56,0.08)]">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p id="eccdSaveStatus" class="text-sm text-[#5f6873]" role="status" aria-live="polite">{{ __('All changes saved.') }}</p>
+            <button type="submit" id="eccdSaveButton" disabled
+                class="inline-flex items-center justify-center gap-2 bg-[#ff8555] hover:bg-[#f47548] disabled:bg-[#f1e7cc] disabled:text-[#8b949d] disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg transition font-semibold">
+                {{ __('Save changes') }}
+                <span id="eccdSaveCount" class="hidden rounded-full bg-white/25 px-2 py-0.5 text-xs font-bold"></span>
+            </button>
+        </div>
+    </div>
+
 
 @foreach($domains as $domainIndex => $domain)
 @php
@@ -150,17 +160,6 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
 </div>
 @endforeach
 
-    {{-- Changes are staged on the page and only written when Save is confirmed. --}}
-    <div id="eccdSaveBar" class="sticky bottom-3 z-20 px-4 py-3 bg-white/95 backdrop-blur border-2 border-[#d8d2c4] rounded-xl shadow-[0_-4px_12px_rgba(24,36,56,0.08)]">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <p id="eccdSaveStatus" class="text-sm text-[#5f6873]" role="status" aria-live="polite">{{ __('All changes saved.') }}</p>
-            <button type="submit" id="eccdSaveButton" disabled
-                class="inline-flex items-center justify-center gap-2 bg-[#ff8555] hover:bg-[#f47548] disabled:bg-[#f1e7cc] disabled:text-[#8b949d] disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg transition font-semibold">
-                {{ __('Save changes') }}
-                <span id="eccdSaveCount" class="hidden rounded-full bg-white/25 px-2 py-0.5 text-xs font-bold"></span>
-            </button>
-        </div>
-    </div>
 </form>
 
 @elseif($students->isNotEmpty())

@@ -80,6 +80,8 @@
                      data-start="{{ substr($activity->start_time, 0, 5) }}"
                      data-end="{{ substr($activity->end_time, 0, 5) }}"
                      data-group="{{ $activity->group_name }}"
+                     data-mode="{{ $activity->target_mode ?? 'section' }}"
+                     data-students='@json(array_map("intval", $activity->target_student_ids ?? []))'
                      data-update-url="{{ route('teacher.activities.update', $activity) }}">
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-semibold text-[#182438]">{{ $activity->title }}</span>
@@ -93,7 +95,12 @@
                         </span>
                     </div>
                     <p class="text-[#5f6873] text-xs">{{ substr($activity->start_time, 0, 5) }} - {{ substr($activity->end_time, 0, 5) }}</p>
-                    @if($activity->group_name)<p class="text-[#8b949d] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>@endif
+                    @if(($activity->target_mode ?? 'section') === 'individual')
+                        @php($count = count($activity->target_student_ids ?? []))
+                        <p class="text-[#8b949d] text-xs mt-1">{{ __('Students') }}: {{ $count }}</p>
+                    @elseif($activity->group_name)
+                        <p class="text-[#8b949d] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>
+                    @endif
                     <div class="flex items-center justify-between mt-2 pt-2 border-t">
                         <form method="POST" action="{{ route('teacher.activities.toggle', $activity) }}" class="inline">
                             @csrf @method('PUT')
@@ -204,10 +211,7 @@
                     <input type="time" name="end_time" required value="{{ old('end_time') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.group_optional') }}</label>
-                <input type="text" name="group_name" maxlength="255" value="{{ old('group_name') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-            </div>
+            @include('teacher.partials.activity-target', ['prefix' => 'add'])
             <p class="text-xs text-[#8b949d]">
                 {{ __('teacher.scheduled_for_week', ['date' => $weekStart->format('M j, Y')]) }}
             </p>
@@ -271,10 +275,7 @@
                     <input type="time" name="end_time" id="editEnd" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.group_optional') }}</label>
-                <input type="text" name="group_name" id="editGroup" maxlength="255" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
-            </div>
+            @include('teacher.partials.activity-target', ['prefix' => 'edit'])
             <div class="flex justify-end gap-3 pt-4">
                 <button type="button" onclick="this.closest('#editActivityModal').classList.add('hidden')" class="px-6 py-2.5 border border-[#f1e7cc] rounded-lg text-[#182438] hover:bg-[#fffbf0] transition">{{ __('teacher.cancel') }}</button>
                 <button type="submit" class="px-6 py-2.5 bg-[#ff8555] text-white rounded-lg hover:bg-[#f47548] transition font-medium">{{ __('teacher.save_changes') }}</button>
@@ -282,6 +283,7 @@
         </form>
     </div>
 </div>
+@include('teacher.partials.activity-student-picker')
 @endsection
 
 @push('scripts')
@@ -322,6 +324,176 @@ window.activityCalendar = function (days, weekStart, baseUrl, labels) {
     };
 };
 
+// ---- Who the activity is for: a group, or individual students ---------------
+window.activityTarget = (function () {
+    const STUDENTS = @json($students->map(fn ($st) => [
+        'id' => $st->id,
+        'name' => $st->name,
+        'section' => $st->class_name ?: '',
+        'year' => $st->academic_year ?: '',
+        'age' => (int) $st->age,
+    ])->values());
+    const AGE_LABEL = age => age < 1 ? @json(__('Below 1')) : age + ' ' + @json(__('teacher.yrs'));
+    const byId = new Map(STUDENTS.map(st => [st.id, st]));
+
+    const modal = document.getElementById('studentPickerModal');
+    const $ = id => document.getElementById(id);
+    const list = $('pickerList'), search = $('pickerSearch');
+    const fSection = $('pickerSection'), fYear = $('pickerYear'), fAge = $('pickerAge');
+    let activeRoot = null;
+    let working = new Set();
+
+    const ON = ['bg-[#ff8555]', 'text-white', 'shadow-sm'];
+    const OFF = ['text-[#5f6873]', 'hover:bg-white'];
+
+    function idsOf(root) { return Array.from(root.querySelectorAll('[data-target-ids] input')).map(i => +i.value); }
+
+    function renderRoot(root) {
+        const mode = root.querySelector('[data-target-mode]').value;
+        root.querySelectorAll('[data-mode-button]').forEach(btn => {
+            const on = btn.dataset.modeButton === mode;
+            ON.forEach(c => btn.classList.toggle(c, on));
+            OFF.forEach(c => btn.classList.toggle(c, !on));
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        root.querySelector('[data-panel="section"]').hidden = mode !== 'section';
+        root.querySelector('[data-panel="individual"]').hidden = mode !== 'individual';
+
+        const ids = idsOf(root);
+        root.querySelector('[data-target-count]').textContent = ids.length;
+        const chips = root.querySelector('[data-target-chips]');
+        chips.innerHTML = '';
+        ids.forEach(id => {
+            const st = byId.get(id); if (!st) return;
+            const chip = document.createElement('span');
+            chip.className = 'inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-[#fff0e6] text-[#9a3f12] text-xs font-semibold';
+            chip.append(st.name);
+            const x = document.createElement('button');
+            x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', @json(__('Remove')) + ' ' + st.name);
+            x.className = 'w-5 h-5 rounded-full hover:bg-[#ffd9c2] leading-none';
+            x.addEventListener('click', () => { writeIds(root, idsOf(root).filter(i => i !== id)); });
+            chip.append(x); chips.append(chip);
+        });
+    }
+
+    function writeIds(root, ids) {
+        const box = root.querySelector('[data-target-ids]');
+        box.innerHTML = '';
+        ids.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = 'target_student_ids[]'; input.value = id;
+            box.append(input);
+        });
+        root.querySelector('[data-target-error]').hidden = true;
+        renderRoot(root);
+    }
+
+    function setMode(root, mode) {
+        root.querySelector('[data-target-mode]').value = mode;
+        renderRoot(root);
+    }
+
+    function set(root, mode, group, ids) {
+        if (!root) return;
+        const select = root.querySelector('[data-target-group]');
+        if (group && !Array.from(select.options).some(o => o.value === group)) {
+            select.add(new Option(group, group));       // an older free-text group still shows
+        }
+        select.value = group || '';
+        writeIds(root, (ids || []).map(Number).filter(id => byId.has(id)));
+        setMode(root, mode === 'individual' ? 'individual' : 'section');
+    }
+
+    // ---- the picker pop-up ----------------------------------------------------
+    function fillFilters() {
+        const sections = [...new Set(STUDENTS.map(s => s.section).filter(Boolean))].sort();
+        const years = [...new Set(STUDENTS.map(s => s.year).filter(Boolean))].sort().reverse();
+        const ages = [...new Set([0, 1, 2, 3, 4, 5, ...STUDENTS.map(s => s.age)])].sort((a, b) => a - b);
+        sections.forEach(v => fSection.add(new Option(v, v)));
+        years.forEach(v => fYear.add(new Option(v, v)));
+        ages.forEach(v => fAge.add(new Option(AGE_LABEL(v), String(v))));
+    }
+
+    function visible() {
+        const q = search.value.trim().toLowerCase();
+        return STUDENTS.filter(s =>
+            (!q || s.name.toLowerCase().includes(q))
+            && (!fSection.value || s.section === fSection.value)
+            && (!fYear.value || s.year === fYear.value)
+            && (fAge.value === '' || s.age === +fAge.value));
+    }
+
+    function renderList() {
+        const rows = visible();
+        list.innerHTML = '';
+        rows.forEach(s => {
+            const li = document.createElement('li');
+            const label = document.createElement('label');
+            label.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[#fffbf0]';
+            const box = document.createElement('input');
+            box.type = 'checkbox'; box.value = s.id; box.checked = working.has(s.id);
+            box.className = 'w-4 h-4 accent-[#ff8555]';
+            box.addEventListener('change', () => { box.checked ? working.add(s.id) : working.delete(s.id); counts(); });
+            const text = document.createElement('span');
+            text.className = 'min-w-0 flex-1';
+            const name = document.createElement('span');
+            name.className = 'block text-sm font-semibold text-[#182438] truncate'; name.textContent = s.name;
+            const meta = document.createElement('span');
+            meta.className = 'block text-xs text-[#8b949d] truncate';
+            meta.textContent = [s.section, s.year, AGE_LABEL(s.age)].filter(Boolean).join(' · ');
+            text.append(name, meta); label.append(box, text); li.append(label); list.append(li);
+        });
+        $('pickerEmpty').hidden = rows.length > 0;
+        $('pickerShownCount').textContent = rows.length;
+        counts();
+    }
+
+    function counts() { $('pickerSelectedCount').textContent = working.size; }
+
+    function openPicker(root) {
+        activeRoot = root;
+        working = new Set(idsOf(root));
+        search.value = ''; fSection.value = ''; fYear.value = ''; fAge.value = '';
+        renderList();
+        modal.classList.remove('hidden');
+        setTimeout(() => search.focus(), 0);
+    }
+
+    function closePicker() { modal.classList.add('hidden'); activeRoot = null; }
+
+    document.addEventListener('click', event => {
+        const modeBtn = event.target.closest('[data-mode-button]');
+        if (modeBtn) { setMode(modeBtn.closest('[data-activity-target]'), modeBtn.dataset.modeButton); return; }
+        const open = event.target.closest('[data-open-picker]');
+        if (open) openPicker(open.closest('[data-activity-target]'));
+    });
+
+    [search, fSection, fYear, fAge].forEach(el => el.addEventListener('input', renderList));
+    $('pickerSelectShown').addEventListener('click', () => { visible().forEach(s => working.add(s.id)); renderList(); });
+    $('pickerClear').addEventListener('click', () => { working.clear(); renderList(); });
+    $('pickerDone').addEventListener('click', () => {
+        if (activeRoot) writeIds(activeRoot, STUDENTS.filter(s => working.has(s.id)).map(s => s.id));
+        closePicker();
+    });
+    modal.querySelectorAll('[data-picker-close]').forEach(b => b.addEventListener('click', closePicker));
+    modal.addEventListener('click', e => { if (e.target === modal) closePicker(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closePicker(); });
+
+    // A form set to "individual" needs at least one student before it is sent.
+    document.addEventListener('submit', event => {
+        const root = event.target.querySelector && event.target.querySelector('[data-activity-target]');
+        if (!root) return;
+        if (root.querySelector('[data-target-mode]').value === 'individual' && idsOf(root).length === 0) {
+            event.preventDefault();
+            root.querySelector('[data-target-error]').hidden = false;
+        }
+    });
+
+    fillFilters();
+    document.querySelectorAll('[data-activity-target]').forEach(renderRoot);
+    return { set, setMode };
+})();
+
 function filterActivities() {
     const type = document.getElementById('typeFilter').value;
     document.querySelectorAll('.activity-card').forEach(card => {
@@ -338,7 +510,9 @@ function openEditModal(button) {
     document.getElementById('editDay').value = card.dataset.day || 'Monday';
     document.getElementById('editStart').value = card.dataset.start || '';
     document.getElementById('editEnd').value = card.dataset.end || '';
-    document.getElementById('editGroup').value = card.dataset.group || '';
+    let ids = [];
+    try { ids = JSON.parse(card.dataset.students || '[]'); } catch (e) {}
+    activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), card.dataset.mode || 'section', card.dataset.group || '', ids);
     document.getElementById('editActivityModal').classList.remove('hidden');
 }
 
@@ -352,15 +526,11 @@ function openEditModal(button) {
         document.getElementById('editDay').value = @json(old('day_of_week'));
         document.getElementById('editStart').value = @json(old('start_time'));
         document.getElementById('editEnd').value = @json(old('end_time'));
-        document.getElementById('editGroup').value = @json(old('group_name'));
         document.getElementById('editWeek').value = @json(old('week'));
-        const editTarget = document.querySelector('#editActivityModal [data-activity-target]');
-        editTarget.querySelector('[data-target-mode]').value = @json(old('target_mode', 'section'));
-        const oldTargetIds = @json(old('target_student_ids', [] )).map(String);
-        Array.from(document.getElementById('editTargetStudents').options).forEach(option => option.selected = oldTargetIds.includes(option.value));
-        syncActivityTarget(editTarget);
+        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
         document.getElementById('editActivityModal').classList.remove('hidden');
     @else
+        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
         document.getElementById('addActivityModal').classList.remove('hidden');
     @endif
 @endif
