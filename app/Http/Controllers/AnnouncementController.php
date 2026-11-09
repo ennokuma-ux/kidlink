@@ -145,10 +145,16 @@ class AnnouncementController extends Controller
                 'exception' => $exception->getMessage(),
             ]);
 
-            return back()->withInput()->with(
-                'error',
-                'Your announcement was not saved because the announcement database is not up to date. Please ask the administrator to run the pending database migrations, then try again.'
-            );
+            $sqlState = (string) ($exception->errorInfo[0] ?? $exception->getCode());
+            $message = match ($sqlState) {
+                '42P01', '42S02' => 'The announcements table is missing. The database migrations must be completed before announcements can be published.',
+                '42703', '42S22' => 'The announcements database is missing a required column. Please run the pending database migrations.',
+                '23503', '23000' => 'The announcement could not be linked to your account. Please sign out, sign in again, and retry. If it continues, contact an administrator.',
+                '23505' => 'This announcement appears to have already been submitted. Refresh the board before trying again.',
+                default => 'The database rejected the announcement. Please try again; if the problem continues, ask an administrator to check the deployment migrations.',
+            };
+
+            return back()->withInput()->with('error', $message);
         } catch (Throwable $exception) {
             Log::error('Announcement publishing failed.', [
                 'user_id' => $request->user()->id,

@@ -367,7 +367,12 @@ var pointerDownAt = 0;
         } else {
             stats.appendChild(el('p', 'kl-finish__perfect', fin.perfect));
         }
-        stats.appendChild(richLine(fill(fin.accuracy_line, { percent: accuracy(score, total, mistakes) })));
+        var finalAccuracy = accuracy(score, total, mistakes);
+        stats.appendChild(richLine(fill(fin.accuracy_line, { percent: finalAccuracy })));
+        stats.appendChild(richLine(fill(
+            fin.final_score_line || 'Final score: <b>{score}/100</b>',
+            { score: finalAccuracy }
+        )));
         stats.appendChild(richLine(fill(fin.time_line, { time: formatTime(seconds) })));
         card.appendChild(stats);
 
@@ -402,7 +407,7 @@ var pointerDownAt = 0;
             } else if (kind === 'ok') {
                 status.textContent = fin.saved;
             } else if (kind === 'bad') {
-                status.textContent = fin.save_failed;
+                status.textContent = fin.save_failed || 'Your score could not be saved. Please try again.';
             }
         }
 
@@ -431,7 +436,7 @@ var pointerDownAt = 0;
             nextBtn.addEventListener('click', function () { go(urls.next, true); });
         }
 
-        function settle(data) {
+        function settle(data, errorMessage) {
             saving = false;
             retryBtn.hidden = !!data;
             [mapBtn, homeBtn, nextBtn].forEach(function (btn) {
@@ -451,7 +456,8 @@ var pointerDownAt = 0;
                     nextBtn.hidden = true;
                 }
             } else {
-                setStatus('bad');
+                status.className = 'kl-finish__status is-bad';
+                status.textContent = errorMessage || fin.save_failed || 'Your score could not be saved. Please try again.';
                 points.textContent = '';
                 // The save failed, so the next level is not unlocked: do not offer it.
                 if (nextBtn) {
@@ -490,15 +496,43 @@ var pointerDownAt = 0;
                 body: JSON.stringify(body),
             })
                 .then(function (response) {
-                    return response.json().then(function (data) {
-                        return { ok: response.ok, data: data };
+                    return response.text().then(function (raw) {
+                        var data = {};
+                        try {
+                            data = raw ? JSON.parse(raw) : {};
+                        } catch (parseError) {
+                            data = {};
+                        }
+
+                        var validationMessage = data.errors
+                            ? Object.keys(data.errors).reduce(function (message, key) {
+                                if (message) return message;
+                                var value = data.errors[key];
+                                return Array.isArray(value) ? value[0] : String(value || '');
+                            }, '')
+                            : '';
+
+                        var message = validationMessage || data.message || data.error || '';
+                        if (!response.ok && !message) {
+                            message = response.status === 419
+                                ? 'Your session expired. Refresh the page and sign in again.'
+                                : response.status === 401
+                                    ? 'Your session has ended. Sign in again to save your score.'
+                                    : response.status === 403
+                                        ? 'This game is no longer assigned to your account.'
+                                        : response.status === 429
+                                            ? 'Too many requests. Wait a moment, then retry.'
+                                            : 'The server could not save your score (HTTP ' + response.status + '). Please retry.';
+                        }
+
+                        return { ok: response.ok, data: data, message: message };
                     });
                 })
                 .then(function (result) {
-                    settle(result.ok ? result.data : null);
+                    settle(result.ok && result.data && (result.data.success || result.data.ok) ? result.data : null, result.message);
                 })
                 .catch(function () {
-                    settle(null);
+                    settle(null, 'Could not reach the server. Check your internet connection and tap Retry.');
                 });
         }
 

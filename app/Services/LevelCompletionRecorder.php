@@ -89,7 +89,7 @@ class LevelCompletionRecorder
                 // finished before points existed (or one improved on) is credited once,
                 // and replaying the same result can never farm more.
                 $topUp = 0;
-                $attemptPoints = $this->pointsFor($expectedTotal, $mistakes);
+                $attemptPoints = $this->pointsFor($score, $expectedTotal, $mistakes);
                 $alreadyPaid = (int) Point::where('student_id', $student->id)
                     ->where('game_type', $gameType)
                     ->where('level', $level)
@@ -137,7 +137,7 @@ class LevelCompletionRecorder
                 'time_taken' => $timeTaken,
             ]);
 
-            $pointsEarned = $this->pointsFor($expectedTotal, $mistakes);
+            $pointsEarned = $this->pointsFor($score, $expectedTotal, $mistakes);
 
             Point::awardPoints(
                 studentId: $student->id,
@@ -172,9 +172,11 @@ class LevelCompletionRecorder
      * Every wrong attempt lowers accuracy; there is no bonus that can push the
      * final score above the 100-point maximum.
      */
-    private function pointsFor(int $total, int $mistakes): int
+    private function pointsFor(int $score, int $total, int $mistakes): int
     {
-        return min(100, max(0, $this->percentage($total, $total, $mistakes)));
+        // Accuracy is correct answers divided by all attempts (correct answers
+        // plus mistakes). A completed level can therefore earn at most 100.
+        return min(100, max(0, $this->percentage($score, $total, $mistakes)));
     }
 
     private function percentage(int $score, int $total, int $mistakes): int

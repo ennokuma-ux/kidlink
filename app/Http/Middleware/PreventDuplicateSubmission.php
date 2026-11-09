@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -39,12 +40,27 @@ class PreventDuplicateSubmission
         ]));
 
         // Cache::add is atomic: only the first request in the window gets true.
-        if (! Cache::add($key, true, self::WINDOW_SECONDS)) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Already submitted.'], 409);
-            }
+        // A cache outage must not prevent users from creating announcements or
+        // submitting other forms; the database transaction remains authoritative.
+        try {
+            if (! Cache::add($key, true, self::WINDOW_SECONDS)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'ok' => false,
+                        'message' => 'This form was already submitted. Wait a few seconds before trying again.',
+                    ], 409);
+                }
 
-            return redirect()->back()->withInput()->with('info', 'This form was already submitted. Please wait a moment before trying again.');
+                return redirect()->back()->withInput()->with(
+                    'info',
+                    'This form was already submitted. Wait a few seconds before trying again.'
+                );
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Duplicate-submission cache is unavailable; allowing request to continue.', [
+                'path' => $request->path(),
+                'exception' => $exception->getMessage(),
+            ]);
         }
 
         return $next($request);
