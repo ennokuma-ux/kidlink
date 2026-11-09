@@ -60,7 +60,7 @@
             });
         }
     }" @keydown.escape.window="close()">
-    <button type="button" @click="openPicker()" class="flex items-center gap-2 bg-[#8ac926] hover:bg-[#6fa51c] text-[#182438] px-4 py-2 rounded-lg text-sm font-semibold transition">
+    <button type="button" @click="openPicker()" class="flex items-center gap-2 bg-[#ff8555] hover:bg-[#f47548] text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         {{ __('child.mode') }}
     </button>
@@ -101,17 +101,17 @@
                 </div>
             </div>
 
-            <div class="max-h-80 overflow-y-auto p-2">
+            <div class="max-h-80 overflow-y-auto p-2 space-y-2">
                 <template x-for="a in filtered" :key="a.id">
                     <form method="POST" :action="a.url">
                         @csrf
-                        <button type="submit" class="kidlink-child-option w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-orange-50 transition flex items-center gap-3">
-                            <span class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style="background: linear-gradient(135deg, #1982c4, #ff8555);" x-text="a.initial"></span>
+                        <button type="submit" class="kidlink-child-option w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-700 border border-gray-200 bg-white transition flex items-center gap-3">
+                            <span class="kidlink-avatar w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center bg-gray-100 text-gray-700 text-sm font-bold" x-text="a.initial"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="block font-semibold text-[#182438] truncate" x-text="a.name"></span>
                                 <span class="block text-xs text-gray-400 truncate" x-text="a.class_name || labels.noSection"></span>
                             </span>
-                            <span class="text-xs font-semibold text-[#ff8555] flex-shrink-0">{{ __('child.play') }}</span>
+                            <span class="text-xs font-semibold text-gray-500 flex-shrink-0">{{ __('child.play') }}</span>
                         </button>
                     </form>
                 </template>

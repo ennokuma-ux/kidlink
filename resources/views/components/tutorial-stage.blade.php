@@ -175,7 +175,10 @@ window.addEventListener('load', function () {
             }
             return null;
         },
-        'color-vision': function () { return PROBES['colors'](); },
+        'color-vision': function () {
+            var right = $$('#answerRow .answer-btn[data-correct="1"]:not(:disabled)');
+            return right.length ? { key: 'tap', els: [right[0]] } : null;
+        },
         'colors-sort': function () {
             var items = $$('#trayRow .tray-item:not(.used)');
             if (!items.length) return null;

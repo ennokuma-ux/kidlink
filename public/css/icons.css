@@ -70,3 +70,29 @@
     filter: drop-shadow(0 6px 10px rgba(24, 36, 56, 0.25));
 }
 .celebration .ico-party-popper { color: #ff595e; }
+
+/*
+ * "Abc" is a text icon (used by the Letters games). It is not a mask like the
+ * rest, so it drops the mask and draws the three letters in the current text
+ * colour. It scales with font-size like every other icon.
+ */
+.ico.ico-abc {
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+    width: auto;
+    height: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    vertical-align: baseline;
+}
+.ico.ico-abc::before {
+    content: 'Abc';
+    font-family: 'Fredoka One', 'Nunito', system-ui, sans-serif;
+    font-size: 0.72em;
+}

@@ -32,12 +32,12 @@
             </div>
             <div class="max-h-64 overflow-y-auto py-1">
                 <button type="button" role="option" @click="pick('')"
-                        class="w-full text-left px-4 py-2.5 text-sm text-[#182438] hover:bg-[#fff3ec] transition" :class="selectedId === '' ? 'bg-[#fff3ec]' : ''">
+                        class="w-full text-left px-4 py-2.5 text-sm text-[#182438] hover:bg-gray-50 transition" :class="selectedId === '' ? 'bg-gray-50' : ''">
                     {{ __('analytics.all_students') }}
                 </button>
                 <template x-for="student in filtered" :key="student.id">
                     <button type="button" role="option" @click="pick(student.id)"
-                            class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#fff3ec] transition" :class="selectedId === student.id ? 'bg-[#fff3ec]' : ''">
+                            class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition" :class="selectedId === student.id ? 'bg-gray-50' : ''">
                         <span class="font-semibold text-[#182438]" x-text="student.name"></span>
                         <span class="text-xs text-[#8b949d]" x-show="student.section" x-text="' — ' + student.section"></span>
                     </button>

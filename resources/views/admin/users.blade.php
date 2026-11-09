@@ -69,7 +69,7 @@
             <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>{{ __('admin_ui.student') }}</option>
             <option value="super_admin" {{ request('role') == 'super_admin' ? 'selected' : '' }}>{{ __('admin_ui.super_admin') }}</option>
         </select>
-        <button type="submit" class="bg-[#182438] text-white px-5 py-2.5 rounded-lg transition font-medium">{{ __('admin_ui.filter') }}</button>
+        <button type="submit" class="bg-[#ff8555] hover:bg-[#f47548] text-white px-5 py-2.5 rounded-lg transition font-medium">{{ __('admin_ui.filter') }}</button>
     </form>
 </div>
 

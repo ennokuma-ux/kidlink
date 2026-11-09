@@ -30,7 +30,7 @@ class GameCatalog
                 'name' => 'Letters',
                 'desc' => 'Learn the alphabet!',
                 'gradient' => 'linear-gradient(135deg, #ff8555, #f47548)',
-                'icon' => 'language',
+                'icon' => 'abc',
             ],
             [
                 'topic' => 'numbers',
@@ -68,7 +68,7 @@ class GameCatalog
                 'topic' => 'colors',
                 'slug' => 'color-vision',
                 'name' => 'Color Check',
-                'desc' => 'A gentle color vision check - tap the circles that match!',
+                'desc' => 'A gentle color check - find the number hiding in the dots!',
                 'gradient' => 'linear-gradient(135deg, #c026d3, #9d1fb0)',
                 'icon' => 'eye',
             ],

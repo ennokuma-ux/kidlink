@@ -45,7 +45,7 @@
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">@foreach($games as $game)
                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 transition hover:border-orange-300 hover:bg-orange-50/40"><input type="checkbox" name="games[]" value="{{ $game['slug'] }}" class="mt-1 rounded border-gray-300 text-orange-500 focus:ring-orange-300"><span><span class="block font-bold text-gray-800">{{ $game['name'] }}</span><span class="mt-0.5 block text-xs text-gray-500">{{ $game['desc'] }}</span></span></label>
             @endforeach</div>
-            <button class="rounded-xl bg-[#ff8555] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600">Save class assignments</button>
+            <button class="rounded-xl bg-[#ff8555] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#f47548]">Save class assignments</button>
             <p class="text-xs text-gray-400">Saving replaces the selected class's current game list. Leave every game unchecked to remove all class assignments.</p>
         </form>
         @endif
@@ -88,7 +88,7 @@
                         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">@foreach($games as $game)
                             <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 transition hover:border-orange-300 hover:bg-orange-50/40"><input type="checkbox" name="games[]" value="{{ $game['slug'] }}" @checked(in_array($game['slug'], $directSlugs, true)) class="mt-1 rounded border-gray-300 text-orange-500 focus:ring-orange-300"><span><span class="block font-bold text-gray-800">{{ $game['name'] }}</span><span class="mt-0.5 block text-xs text-gray-500">{{ in_array($game['slug'], $classSlugs, true) ? 'Also assigned to class' : $game['desc'] }}</span></span></label>
                         @endforeach</div>
-                        <button class="rounded-xl bg-[#182438] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#263750]">Save student assignments</button>
+                        <button class="rounded-xl bg-[#ff8555] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#f47548]">Save student assignments</button>
                         <p class="text-xs text-gray-400">This saves direct assignments only. Class assignments remain in effect. Leave all unchecked to remove this student's direct assignments.</p>
                     </form>
                 </div>

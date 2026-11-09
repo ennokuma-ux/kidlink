@@ -3,8 +3,8 @@
     <div class="flex items-center gap-3 mb-2">
         <span class="text-sm font-semibold text-[#5f6873]">{{ __('child.viewing') }}</span>
         <div class="relative" @click.outside="open = false">
-            <button @click="open = !open" class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-orange-300 transition shadow-sm">
-                <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background: linear-gradient(135deg, #1982c4, #ff8555);">
+            <button @click="open = !open" class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-gray-400 transition shadow-sm">
+                <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-700">
                     {{ strtoupper(substr($child->first_name, 0, 1)) }}
                 </span>
                 {{ $child->first_name }} {{ $child->last_name }}
@@ -19,15 +19,15 @@
                 </div>
                 <div class="max-h-64 overflow-y-auto py-1">
                     <template x-for="c in filtered" :key="c.id">
-                        <a :href="'?child_id=' + c.id" class="flex items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-orange-50" :class="{ 'bg-orange-50': c.id == {{ $child->id }} }">
-                            <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" :style="'background: linear-gradient(135deg, ' + (c.id == {{ $child->id }} ? '#ff8555, #f47548' : '#1982c4, #146aa3') + ')'">
+                        <a :href="'?child_id=' + c.id" class="flex items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-gray-50" :class="{ 'bg-gray-50': c.id == {{ $child->id }} }">
+                            <span class="kidlink-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-700 flex-shrink-0">
                                 <span x-text="c.initials"></span>
                             </span>
                             <div class="flex-1 min-w-0">
                                 <p class="font-semibold text-gray-700 truncate" x-text="c.name"></p>
                                 <p class="text-xs text-gray-400" x-text="labels.age + c.age + (c.class_name ? ' · ' + c.class_name : '')"></p>
                             </div>
-                            <svg x-show="c.id == {{ $child->id }}" class="w-5 h-5 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            <svg x-show="c.id == {{ $child->id }}" class="w-5 h-5 text-gray-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                         </a>
                     </template>
                     <p x-show="filtered.length === 0" class="px-4 py-3 text-sm text-gray-400 text-center">{{ __('child.no_matching_children') }}</p>

@@ -144,7 +144,7 @@ class ColorVisionGameController extends Controller
         ]);
     }
 
-    /** How many circles the child has to match across a level. The server owns this. */
+    /** How many plates the child has to read across a level. The server owns this. */
     public function totalForLevel(int $level): int
     {
         return $this->getLevelData($level)['questions'];
@@ -162,41 +162,48 @@ class ColorVisionGameController extends Controller
     }
 
     /**
-     * Color Check is a screening game, not a lesson. It plays exactly like the
-     * Colors game (tap every circle that matches the square), but each level is
-     * built around colors that look the same to one kind of color vision
-     * difficulty and clearly different to everyone else. A child who taps the
-     * wrong circle on a level is telling us something about that level's axis,
-     * so the level numbers below double as the screening map (AXIS_BY_LEVEL).
+     * Color Check is an Ishihara-style screening game. Each plate is a disc of
+     * colored dots with a number hidden in it: the number is made of dots in one
+     * family of colors, the background of dots in another. Dot sizes and
+     * lightness are mixed inside each family, so the number can only be found by
+     * telling the two color families apart, never by brightness or dot size.
      *
-     * It is a quick check, never a diagnosis: a grown-up should follow up with
-     * an eye-care professional for a proper test.
+     * Every plate type below is built around one kind of color vision
+     * difficulty (AXIS_BY_PLATE). Typical color vision reads all of them; a child
+     * who has trouble with one kind of plate is telling us something about that
+     * axis. The warm-up plates use colors everyone can tell apart, so a child who
+     * misses those has simply not understood the game yet.
+     *
+     * It is a quick check, never a diagnosis: a grown-up should follow up with an
+     * eye-care professional for a proper test.
      */
-    public const AXIS_BY_LEVEL = [
-        2 => 'red-green',
-        3 => 'red-green',
-        4 => 'red-green',
-        5 => 'red-green',
-        6 => 'red-green',
-        7 => 'blue-yellow',
+    public const AXIS_BY_PLATE = [
+        'warmup' => 'control',
+        'orange-on-green' => 'red-green',
+        'green-on-orange' => 'red-green',
+        'red-on-olive' => 'red-green',
+        'pink-on-grey' => 'red-green',
+        'blue-on-green' => 'blue-yellow',
+        'violet-on-yellow' => 'blue-yellow',
     ];
 
     protected function getLevelData(int $level): array
     {
         $levelData = [
-            1 => ['title' => 'Warm-up', 'description' => 'Easy colors first - tap the circles that match the square!'],
-            2 => ['title' => 'Red and Green', 'description' => 'Look closely and tap every circle that matches!'],
-            3 => ['title' => 'Orange and Green', 'description' => 'Look closely and tap every circle that matches!'],
-            4 => ['title' => 'Pink and Grey', 'description' => 'Look closely and tap every circle that matches!'],
-            5 => ['title' => 'Blue and Purple', 'description' => 'Look closely and tap every circle that matches!'],
-            6 => ['title' => 'Teal and Green', 'description' => 'Look closely and tap every circle that matches!'],
-            7 => ['title' => 'Light and Bright', 'description' => 'Look closely and tap every circle that matches!'],
+            1 => ['title' => 'Warm-up', 'description' => 'Easy colors first - find the hidden number!'],
+            2 => ['title' => 'Orange and Green', 'description' => 'Look closely - which number is hiding in the dots?'],
+            3 => ['title' => 'Green and Orange', 'description' => 'Look closely - which number is hiding in the dots?'],
+            4 => ['title' => 'Red and Olive', 'description' => 'Look closely - which number is hiding in the dots?'],
+            5 => ['title' => 'Pink and Grey', 'description' => 'Look closely - which number is hiding in the dots?'],
+            6 => ['title' => 'Blue and Green', 'description' => 'Look closely - which number is hiding in the dots?'],
+            7 => ['title' => 'Violet and Yellow', 'description' => 'Look closely - which number is hiding in the dots?'],
             8 => ['title' => 'Color Check Finale', 'description' => 'A mix of everything - you are almost done!'],
         ];
 
         $data = $levelData[$level] ?? $levelData[1];
         $data['rounds'] = $this->roundsForLevel($level);
-        $data['questions'] = $data['rounds'] * $this->matchesForLevel($level);
+        // One hidden number per plate, so one question per plate.
+        $data['questions'] = $data['rounds'];
 
         return $data;
     }
@@ -206,133 +213,124 @@ class ColorVisionGameController extends Controller
         return 3 + intdiv($level - 1, 2);
     }
 
-    /** How many circles the child has to find in each round. */
-    protected function matchesForLevel(int $level): int
-    {
-        return 1 + intdiv($level - 1, 3);
-    }
-
-    protected function circleCountForLevel(int $level): int
-    {
-        return match (true) {
-            $level <= 1 => 4,
-            $level <= 3 => 5,
-            $level <= 7 => 6,
-            default => 8,
-        };
-    }
-
     /**
-     * Color families. Within a family every color has the same lightness, so
-     * the only way to tell them apart is the hue. Each pair is clearly different
-     * for typical color vision but falls close together when simulated for the
-     * color vision difficulty named in the comment. 'control' colors are
-     * different for everyone, so the game does not feel like every circle is a
-     * trick.
+     * Dot colors for each plate type. 'figure' makes the number, 'ground' makes
+     * the background. Both groups mix light and dark shades on purpose.
      *
-     * @return array<string, array{colors: array<string, string>, control?: array<string, string>}>
+     * @return array<string, array{figure: string[], ground: string[]}>
      */
-    protected function families(): array
+    protected function plates(): array
     {
         return [
-            // Everyone should get these right: it shows the child understood the game.
-            'warmup' => ['colors' => ['red' => '#CE3E33', 'blue' => '#0069C7', 'yellow' => '#F2D73C']],
-            // Red / green / olive: the classic red-green confusion.
-            'red-green' => ['colors' => ['red' => '#CF5546', 'green' => '#448B3D', 'olive' => '#8B7C35'], 'control' => ['blue' => '#0069C7']],
-            // Orange / green / yellow-green.
-            'orange-green' => ['colors' => ['orange' => '#E1963C', 'lime' => '#7CB556', 'moss' => '#A9AB39'], 'control' => ['purple' => '#6C56A2']],
-            // Pink / grey / lilac.
-            'pink-grey' => ['colors' => ['pink' => '#D38CA1', 'grey' => '#9EA1A4', 'lilac' => '#AA97CF'], 'control' => ['yellow' => '#F2D73C']],
-            // Blue / violet / magenta.
-            'blue-purple' => ['colors' => ['blue' => '#0068A8', 'violet' => '#6C56A2', 'magenta' => '#9F3E84'], 'control' => ['yellow' => '#F2D73C']],
-            // Teal / sage / grey.
-            'teal-grey' => ['colors' => ['teal' => '#2F9A92', 'sage' => '#519A67', 'stone' => '#878C8C'], 'control' => ['red' => '#CE3E33']],
-            // Blue-yellow axis (the rarer kind): butter / pale pink / light grey.
-            'light' => ['colors' => ['butter' => '#E6DA6D', 'blush' => '#FBCBD3', 'mist' => '#D8D7D3'], 'control' => ['blue' => '#0069C7']],
-            // Blue-yellow axis: steel blue / deep teal / slate.
-            'blue-teal' => ['colors' => ['steel' => '#3176B2', 'deepteal' => '#008083', 'slate' => '#6F7275'], 'control' => ['red' => '#CE3E33']],
+            // Everyone can read these: deep blue number on warm sand.
+            'warmup' => [
+                'figure' => ['#2B5FA8', '#3A72BE', '#234E8C', '#4A82CC'],
+                'ground' => ['#E3D2A8', '#EBDDB9', '#D4C195', '#F0E4C4'],
+            ],
+            // The classic: an orange number among greens.
+            'orange-on-green' => [
+                'figure' => ['#F08A4B', '#F6A35C', '#E8743B', '#F3B46F'],
+                'ground' => ['#9DBD5F', '#B5CC72', '#86A94F', '#C3D68C', '#A2B85A'],
+            ],
+            // The same trap turned around: a green number among oranges.
+            'green-on-orange' => [
+                'figure' => ['#8FB45A', '#A6C66E', '#7AA14A', '#B7D083'],
+                'ground' => ['#EAA05A', '#F2B980', '#DD8A45', '#F0C08A', '#E59550'],
+            ],
+            // A red number among olive and khaki.
+            'red-on-olive' => [
+                'figure' => ['#D2574A', '#C4473D', '#E0695B', '#CF6A52'],
+                'ground' => ['#8A8A5A', '#9B9B6A', '#767650', '#A9A97A', '#8F8C4E'],
+            ],
+            // A pink number among greys.
+            'pink-on-grey' => [
+                'figure' => ['#E29AA6', '#D98896', '#EEB0BA', '#DE9FA0'],
+                'ground' => ['#A7A7A2', '#B8B8B2', '#8F8F8A', '#C4C4BD', '#ABABA3'],
+            ],
+            // The rarer blue-yellow kind: blue among greens.
+            'blue-on-green' => [
+                'figure' => ['#4C8FD6', '#5FA0E2', '#3F7FC4', '#6AAEE8'],
+                'ground' => ['#78B85A', '#8EC86E', '#63A548', '#A2D283', '#6FB452'],
+            ],
+            // ... and violet among yellows.
+            'violet-on-yellow' => [
+                'figure' => ['#8A67C4', '#9C7BD2', '#7855B3', '#A88BDA'],
+                'ground' => ['#D4C24A', '#E2D160', '#C4B23A', '#ECE07F', '#D8C84E'],
+            ],
         ];
     }
 
-    /** The families a level draws its rounds from. */
-    protected function familiesForLevel(int $level): array
+    /** The plate types a level draws its rounds from. */
+    protected function platesForLevel(int $level): array
     {
         return match ($level) {
             1 => ['warmup'],
-            2 => ['red-green'],
-            3 => ['orange-green'],
-            4 => ['pink-grey'],
-            5 => ['blue-purple'],
-            6 => ['teal-grey'],
-            7 => ['light', 'blue-teal'],
-            default => ['red-green', 'orange-green', 'pink-grey', 'blue-purple', 'teal-grey', 'light', 'blue-teal'],
+            2 => ['orange-on-green'],
+            3 => ['green-on-orange'],
+            4 => ['red-on-olive'],
+            5 => ['pink-on-grey'],
+            6 => ['blue-on-green'],
+            7 => ['violet-on-yellow'],
+            default => ['orange-on-green', 'green-on-orange', 'red-on-olive', 'pink-on-grey', 'blue-on-green', 'violet-on-yellow'],
         };
     }
 
     protected function getGameData(int $level): array
     {
-        $families = $this->families();
-        $familyKeys = $this->familiesForLevel($level);
-
+        $plates = $this->plates();
+        $types = $this->platesForLevel($level);
         $rounds = $this->roundsForLevel($level);
-        $circleCount = $this->circleCountForLevel($level);
-        $matches = $this->matchesForLevel($level);
 
-        // Walk the level's families in a shuffled order so each shows up before
-        // any repeats (matters on the final level, which mixes them all).
+        // Walk the level's plate types in a shuffled order so each shows up
+        // before any repeats (matters on the finale, which mixes them all).
         $order = [];
         while (count($order) < $rounds) {
-            $batch = $familyKeys;
+            $batch = $types;
             shuffle($batch);
             $order = array_merge($order, $batch);
         }
 
+        // The warm-up sticks to the easiest numbers.
+        $pool = $level === 1 ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        shuffle($pool);
+
         $allRounds = [];
+        $previous = null;
         for ($r = 0; $r < $rounds; $r++) {
-            $family = $families[$order[$r]];
-            $colors = $family['colors'];
-            $control = $family['control'] ?? [];
-            $palette = $colors + $control;
+            $type = $order[$r];
 
-            // The target is always one of the look-alike colors, never the control.
-            $targetKey = array_rand($colors);
-            $lookAlikes = array_values(array_diff(array_keys($colors), [$targetKey]));
-            $wrongCount = $circleCount - $matches;
-
-            // Wrong circles: every look-alike at least once, then filler cycled
-            // from the look-alikes and the control so no color hogs the board.
-            $wrongKeys = $lookAlikes;
-            $filler = array_merge($lookAlikes, array_keys($control));
-            shuffle($filler);
-            for ($i = 0; count($wrongKeys) < $wrongCount; $i++) {
-                $wrongKeys[] = $filler[$i % count($filler)];
+            // Never the same number twice in a row.
+            $answer = null;
+            foreach ($pool as $k => $candidate) {
+                if ($candidate !== $previous) {
+                    $answer = $candidate;
+                    unset($pool[$k]);
+                    break;
+                }
             }
-            $wrongKeys = array_slice($wrongKeys, 0, $wrongCount);
-
-            $circleKeys = array_merge(array_fill(0, $matches, $targetKey), $wrongKeys);
-            shuffle($circleKeys);
-
-            $circles = [];
-            foreach ($circleKeys as $key) {
-                $circles[] = [
-                    'type' => $key,
-                    // No color names anywhere: naming a color would let a child
-                    // answer from the word instead of the hue, which is exactly
-                    // what the check is measuring.
-                    'name' => '',
-                    'hex' => $palette[$key],
-                    'marker' => '',
-                    'isMatch' => $key === $targetKey,
-                ];
+            if ($answer === null) {
+                $answer = $pool ? array_shift($pool) : random_int(1, 9);
             }
+            if (!$pool) {
+                $pool = range(1, $level === 1 ? 5 : 9);
+                shuffle($pool);
+            }
+            $previous = $answer;
+
+            // Three different wrong numbers to choose from.
+            $wrong = array_values(array_diff($level === 1 ? range(1, 5) : range(1, 9), [$answer]));
+            shuffle($wrong);
+            $options = array_merge([$answer], array_slice($wrong, 0, 3));
+            shuffle($options);
 
             $allRounds[] = [
-                'target' => $targetKey,
-                'targetName' => '',
-                'targetHex' => $palette[$targetKey],
-                'targetMarker' => '',
-                'matchesNeeded' => $matches,
-                'circles' => $circles,
+                'plate' => $type,
+                'axis' => self::AXIS_BY_PLATE[$type],
+                'figure' => $plates[$type]['figure'],
+                'ground' => $plates[$type]['ground'],
+                'answer' => $answer,
+                'options' => $options,
+                'seed' => random_int(1, 2147483646),
             ];
         }
 
