@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Color Check (color vision screening) plays like the Colors game but is kept
+ * under its own game_type so its scores never mix with Colors. Databases that
+ * already have the widened game_scores check constraint get the new slot added
+ * on top of the previous extensions.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (! $this->supportsCheckConstraints()) {
+            return;
+        }
+
+        DB::statement('ALTER TABLE game_scores DROP CONSTRAINT IF EXISTS game_scores_game_type_check');
+        DB::statement("ALTER TABLE game_scores ADD CONSTRAINT game_scores_game_type_check CHECK (game_type IN ('letters', 'numbers', 'colors', 'colors-sort', 'color-vision', 'whats-missing', 'shapes', 'animals', 'animals-memory', 'animals-match', 'shapes-bingo'))");
+    }
+
+    public function down(): void
+    {
+        if (! $this->supportsCheckConstraints()) {
+            return;
+        }
+
+        DB::statement('ALTER TABLE game_scores DROP CONSTRAINT IF EXISTS game_scores_game_type_check');
+        DB::statement("ALTER TABLE game_scores ADD CONSTRAINT game_scores_game_type_check CHECK (game_type IN ('letters', 'numbers', 'colors', 'colors-sort', 'whats-missing', 'shapes', 'animals', 'animals-memory', 'animals-match', 'shapes-bingo'))");
+    }
+
+    /**
+     * SQLite cannot add or drop a CHECK constraint in place, so the backstop is
+     * skipped there; fresh SQLite databases already get the widened list from
+     * the original creation migration.
+     */
+    private function supportsCheckConstraints(): bool
+    {
+        return DB::getDriverName() !== 'sqlite';
+    }
+};

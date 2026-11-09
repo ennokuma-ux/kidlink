@@ -32,6 +32,17 @@
 .ico-color-palette     { --ico: url('../assets/icons/color-palette.svg'); }
 .ico-target            { --ico: url('../assets/icons/target.svg'); }
 .ico-lightbulb         { --ico: url('../assets/icons/lightbulb.svg'); }
+.ico-language          { --ico: url('../assets/icons/language.svg'); }
+.ico-paw               { --ico: url('../assets/icons/paw.svg'); }
+.ico-calculator        { --ico: url('../assets/icons/calculator.svg'); }
+.ico-shapes            { --ico: url('../assets/icons/shapes.svg'); }
+.ico-grid              { --ico: url('../assets/icons/grid.svg'); }
+.ico-eye               { --ico: url('../assets/icons/eye.svg'); }
+.ico-copy              { --ico: url('../assets/icons/copy.svg'); }
+.ico-water             { --ico: url('../assets/icons/water.svg'); }
+.ico-lock-closed       { --ico: url('../assets/icons/lock-closed.svg'); }
+.ico-flag              { --ico: url('../assets/icons/flag.svg'); }
+.ico-checkmark         { --ico: url('../assets/icons/checkmark.svg'); }
 
 /* Default colours for the floating celebration / spark effects in the games */
 .celebration .ico-star, .fruit-pop .ico-star { color: #ffca3a; }

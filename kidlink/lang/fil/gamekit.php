@@ -30,6 +30,11 @@ return [
                 'Hanapin ang :name. Ang mga nanginginig na bilog ay tama!',
             ],
         ],
+        'color-vision' => [
+            'tap' => [
+                'Tingnan ang kulay ng parisukat. Alin sa mga bilog ang eksaktong kapareho?',
+            ],
+        ],
         'colors-sort' => [
             'drag' => [
                 'Kunin ang patak ng pintura at hanapin ang timba na kapareho ng kulay.',

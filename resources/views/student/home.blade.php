@@ -122,8 +122,9 @@
                     <div class="relative h-32 flex items-center justify-center overflow-hidden" style="background: {{ $game['gradient'] }};">
                         <div class="absolute inset-0 opacity-50" style="background: radial-gradient(circle at 30% 15%, rgba(255,255,255,0.55), transparent 60%);"></div>
                         <div class="absolute -bottom-8 -left-6 w-24 h-24 rounded-full bg-white/15"></div>
-                        <img src="{{ asset('storage/img/'.$game['img']) }}" alt="{{ $game['name'] }}"
-                             class="relative w-20 h-20 object-contain drop-shadow-xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                        <span class="relative inline-flex drop-shadow-xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" role="img" aria-label="{{ $game['name'] }}">
+                            <i class="ico ico-{{ $game['icon'] }}" style="font-size: 4.25rem; color: #fff;" aria-hidden="true"></i>
+                        </span>
                         @if($game['played'] > 0)
                         <span class="absolute top-3 right-3 inline-flex items-center gap-1 bg-white/95 rounded-full px-2.5 py-1 text-xs font-bold text-gray-700 shadow-sm"><i class="ico ico-star text-[#ffca3a]" aria-hidden="true"></i> {{ number_format($game['points']) }}</span>
                         @else
@@ -178,25 +179,24 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
             @foreach($recentActivity as $activity)
             <div class="flex items-center gap-4 px-5 py-3 {{ !$loop->last ? 'border-b border-gray-50' : '' }}">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style="background: {{ match($activity->game_type) {
-                    'shapes' => '#fee2e2',
-                    'colors' => '#ecf7d6',
-                    'letters' => '#fff7ed',
-                    'numbers' => '#d6eaf7',
-                    'animals' => '#fef9c3',
-                    default => '#f3f4f6',
-                } }}">
-                    {!! match($activity->game_type) {
-                        'shapes' => '<img src="' . asset('assets/icons/calendar.svg') . '" alt="" class="h-6 w-6">',
-                        'colors' => '<img src="' . asset('assets/icons/pencil.svg') . '" alt="" class="h-6 w-6">',
-                        'letters' => '<img src="' . asset('assets/icons/language.svg') . '" alt="" class="h-6 w-6">',
-                        'numbers' => '<img src="' . asset('assets/icons/clipboard.svg') . '" alt="" class="h-6 w-6">',
-                        'animals' => '<img src="' . asset('assets/icons/people.svg') . '" alt="" class="h-6 w-6">',
-                        default => '<i class="ico ico-game-controller" aria-hidden="true"></i>',
-                    } !!}
+                @php
+                    $activityGame = \App\Games\GameCatalog::game($activity->game_type);
+                    $activityTint = match($activity->game_type) {
+                        'shapes', 'shapes-bingo' => ['#fee2e2', '#e8454a'],
+                        'colors', 'colors-sort' => ['#ecf7d6', '#6fa51c'],
+                        'color-vision' => ['#fae8ff', '#a21caf'],
+                        'letters' => ['#fff7ed', '#f47548'],
+                        'numbers', 'whats-missing' => ['#d6eaf7', '#1982c4'],
+                        'animals' => ['#fef9c3', '#b8942e'],
+                        'animals-match' => ['#ccfbf1', '#0d9488'],
+                        default => ['#f3f4f6', '#6b7280'],
+                    };
+                @endphp
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style="background: {{ $activityTint[0] }}; color: {{ $activityTint[1] }};">
+                    <i class="ico ico-{{ $activityGame['icon'] ?? 'game-controller' }}" style="font-size: 1.4rem;" aria-hidden="true"></i>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-semibold text-gray-700 capitalize">{{ $activity->game_type }} - {{ __('student.level') }} {{ $activity->level }}</p>
+                    <p class="text-sm font-semibold text-gray-700">{{ $activityGame['name'] ?? ucfirst($activity->game_type) }} - {{ __('student.level') }} {{ $activity->level }}</p>
                     <p class="text-xs text-gray-400">{{ $activity->created_at->diffForHumans() }}</p>
                 </div>
                 <div class="text-right">

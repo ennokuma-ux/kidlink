@@ -30,7 +30,9 @@
         ->mapWithKeys(fn ($game) => [$game['slug'] => [
             'name' => $game['name'],
             'gradient' => $game['gradient'],
-            'img' => asset('storage/img/'.$game['img']),
+            'icon' => $game['icon'],
+            // First colour of the gradient, used to tint the badge icon.
+            'accent' => preg_match('/#[0-9a-fA-F]{3,8}/', $game['gradient'], $hex) ? $hex[0] : '#ff8555',
         ]])
         ->all();
 
@@ -69,7 +71,7 @@
     #kl-transition .klt-figure{position:relative;box-sizing:border-box;width:min(44vw,190px);height:min(44vw,190px);display:flex;align-items:center;justify-content:center;border-radius:50%;background:#fff;border:6px solid #ff8555;box-shadow:0 0 0 6px #fff,0 0 0 11px #ffd9a0,0 14px 30px rgba(0,0,0,.28)}
     #kl-transition .klt-mascot{position:relative;width:84%;height:84%;object-fit:contain;animation:klt-bounce .9s ease-in-out infinite}
     #kl-transition .klt-badge{position:absolute;right:-6%;bottom:2%;width:34%;height:34%;border-radius:22%;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.25);display:none;align-items:center;justify-content:center;transform:rotate(8deg);animation:klt-pop .5s cubic-bezier(.3,1.6,.5,1) .15s both}
-    #kl-transition .klt-badge img{width:70%;height:70%;object-fit:contain}
+    #kl-transition .klt-badge .ico{font-size:clamp(26px,7vw,46px);color:var(--klt-accent,#ff8555)}
     #kl-transition .klt-title{margin:10px 0 0;font-family:'Fredoka One',cursive,sans-serif;font-weight:400;font-size:clamp(30px,7vw,52px);line-height:1.1;text-shadow:0 3px 0 rgba(0,0,0,.18)}
     #kl-transition .klt-sub{margin:0;font-size:clamp(16px,3.4vw,22px);font-weight:700;opacity:.95}
     #kl-transition .klt-dots{display:flex;gap:10px;margin-top:14px}
@@ -102,7 +104,7 @@
     <div class="klt-body">
         <div class="klt-figure">
             <img class="klt-mascot" alt="" decoding="async">
-            <span class="klt-badge"><img alt="" decoding="async"></span>
+            <span class="klt-badge"><i class="ico" aria-hidden="true"></i></span>
         </div>
         <h2 class="klt-title"></h2>
         <p class="klt-sub"></p>
@@ -129,7 +131,7 @@
     var subEl = root.querySelector('.klt-sub');
     var mascotEl = root.querySelector('.klt-mascot');
     var badgeEl = root.querySelector('.klt-badge');
-    var badgeImg = badgeEl.querySelector('img');
+    var badgeIcon = badgeEl.querySelector('.ico');
     var leaving = false;
     var hideTimer = null;
 
@@ -181,8 +183,9 @@
         subEl.textContent = info.sub;
         mascotEl.src = cfg.mascot[info.mascot] || cfg.mascot.wave;
         root.style.setProperty('--klt-bg', game ? game.gradient : cfg.gradient);
+        root.style.setProperty('--klt-accent', game ? game.accent : '#ff8555');
         if (game) {
-            badgeImg.src = game.img;
+            badgeIcon.className = 'ico ico-' + game.icon;
             badgeEl.style.display = 'flex';
         } else {
             badgeEl.style.display = 'none';
@@ -294,10 +297,9 @@
         if (event.persisted) reset();
     });
 
-    // Have the mascots and game icons ready so they are there when it counts.
+    // Have the mascots ready so they are there when it counts (game icons are CSS masks).
     window.addEventListener('load', function () {
         var urls = [cfg.mascot.wave, cfg.mascot.cheer];
-        for (var id in cfg.games) urls.push(cfg.games[id].img);
         urls.forEach(function (src) { var img = new Image(); img.src = src; });
     });
 })();

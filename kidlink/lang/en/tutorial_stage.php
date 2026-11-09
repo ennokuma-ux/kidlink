@@ -38,6 +38,13 @@ return [
             'tap' => 'Tap the circle that has the same color as the square.',
             'solo' => 'Your turn! Tap the circles with the matching color.',
         ],
+        'color-vision' => [
+            'name' => 'Color Check',
+            'goal' => 'Tap every circle that has the same color as the big square.',
+            'steps' => ['Look at the color of the big square.', 'Find the circles with the same color.', 'Tap each match!'],
+            'tap' => 'Tap the circle that has the same color as the square.',
+            'solo' => 'Your turn! Tap the circles with the matching color.',
+        ],
         'colors-sort' => [
             'name' => 'Color Sort',
             'goal' => 'Drag each paint drop into the bucket that has the same color.',

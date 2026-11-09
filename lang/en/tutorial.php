@@ -33,6 +33,12 @@ return [
             'practice' => ['question' => 'Tap the red one!', 'options' => ['🍌', '🫐', '🍎'], 'answer' => 2],
             'tip' => 'Take your time. You can look at every choice before you tap.',
         ],
+        'color-vision' => [
+            'name' => 'Color Check',
+            'goal' => 'Look closely at the colors and tap the ones that match!',
+            'practice' => ['question' => 'Tap the blue one!', 'options' => ['🍌', '🫐', '🍎'], 'answer' => 1],
+            'tip' => 'Take your time. Look at every circle before you tap.',
+        ],
         'colors-sort' => [
             'name' => 'Color Sort',
             'goal' => 'Put each thing in the basket with the same color!',

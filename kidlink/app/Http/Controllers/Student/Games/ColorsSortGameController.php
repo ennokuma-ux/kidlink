@@ -150,30 +150,8 @@ class ColorsSortGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.colors-sort.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('colors-sort', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
@@ -183,9 +161,9 @@ class ColorsSortGameController extends Controller
             2 => ['title' => 'Color Sorter', 'description' => 'Two buckets - sort the colors!'],
             3 => ['title' => 'Color Sorter Pro', 'description' => 'Three buckets to fill - you can do it!'],
             4 => ['title' => 'Color Sorter Pro', 'description' => 'More buckets, more colors to sort!'],
-            5 => ['title' => 'Color Sorter Master', 'description' => 'Four buckets - pour them all in!'],
-            6 => ['title' => 'Color Sorter Master', 'description' => 'Sharpen your sorting skills!'],
-            7 => ['title' => 'Ultimate Sorter', 'description' => 'Five buckets to fill - great job!'],
+            5 => ['title' => 'Color Sorter Master', 'description' => 'Four buckets and a new color: purple!'],
+            6 => ['title' => 'Color Sorter Master', 'description' => 'Sky blue joins the buckets!'],
+            7 => ['title' => 'Ultimate Sorter', 'description' => 'Every color is here - five buckets to fill!'],
             8 => ['title' => 'Ultimate Sorter', 'description' => 'The ultimate color sorting challenge!'],
         ];
 
@@ -220,16 +198,19 @@ class ColorsSortGameController extends Controller
             'black'  => ['name' => 'Black',  'hex' => '#000000', 'marker' => 'Black'],
         ];
 
+        // One new colour per level, keeping the earlier ones: all eight colours
+        // are in play by level 7.
         $pools = [
             1 => ['red', 'blue', 'yellow'],
             2 => ['red', 'blue', 'yellow'],
             3 => ['red', 'blue', 'yellow', 'green'],
-            4 => ['red', 'blue', 'yellow', 'green'],
-            5 => ['red', 'blue', 'yellow', 'green', 'orange'],
-            6 => ['red', 'blue', 'yellow', 'green', 'orange'],
-            7 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
-            8 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+            4 => ['red', 'blue', 'yellow', 'green', 'orange'],
+            5 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+            6 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky'],
+            7 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky', 'black'],
+            8 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky', 'black'],
         ];
+        $newColor = [3 => 'green', 4 => 'orange', 5 => 'purple', 6 => 'sky', 7 => 'black'][$level] ?? null;
 
         $poolKeys = $pools[$level] ?? $pools[1];
         $poolColors = [];
@@ -247,6 +228,10 @@ class ColorsSortGameController extends Controller
             $shuffledKeys = $poolKeys;
             shuffle($shuffledKeys);
             $roundKeys = array_slice($shuffledKeys, 0, $bucketCount);
+            // The colour this level introduced is always part of the round.
+            if ($newColor !== null && ! in_array($newColor, $roundKeys, true)) {
+                $roundKeys[0] = $newColor;
+            }
 
             $buckets = [];
             foreach ($roundKeys as $key) {

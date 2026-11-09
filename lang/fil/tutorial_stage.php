@@ -34,6 +34,13 @@ return [
             'tap' => 'Pindutin ang bilog na kapareho ng kulay ng parisukat.',
             'solo' => 'Ikaw naman! Pindutin ang mga bilog na kapareho ng kulay.',
         ],
+        'color-vision' => [
+            'name' => 'Color Check',
+            'goal' => 'Pindutin ang bawat bilog na kapareho ng kulay ng malaking parisukat.',
+            'steps' => ['Tingnan ang kulay ng malaking parisukat.', 'Hanapin ang mga bilog na kapareho ng kulay.', 'Pindutin ang bawat tugma!'],
+            'tap' => 'Pindutin ang bilog na kapareho ng kulay ng parisukat.',
+            'solo' => 'Ikaw naman! Pindutin ang mga bilog na kapareho ng kulay.',
+        ],
         'colors-sort' => [
             'name' => 'Pagbukod ng Kulay',
             'goal' => 'I-drag ang bawat patak ng pintura sa balde na kapareho ng kulay.',

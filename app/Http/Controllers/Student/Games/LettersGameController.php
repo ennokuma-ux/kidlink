@@ -156,75 +156,54 @@ class LettersGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'color' => $pos['color'] ?? 'red',
-                'route' => route('student.games.letters.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('letters', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
     {
+        // Each level adds a few new letters and keeps the earlier ones, so by
+        // level 7 the whole alphabet is in play. Level 8 is a full-alphabet mix.
         $levelData = [
             1 => [
-                'title' => 'Letter A-E',
-                'description' => 'Match big and small letters A, B, C, D, E!',
-                'objectives' => ['A', 'B', 'C', 'D', 'E'],
+                'title' => 'Letter A-D',
+                'description' => 'Match big and small letters A through D!',
+                'objectives' => ['A', 'B', 'C', 'D'],
             ],
             2 => [
-                'title' => 'Letter F-J',
-                'description' => 'Match big and small letters F through J!',
-                'objectives' => ['F', 'G', 'H', 'I', 'J'],
+                'title' => 'Letter E-H',
+                'description' => 'New letters E through H, plus the ones you already know!',
+                'objectives' => ['E', 'F', 'G', 'H', 'Review'],
             ],
             3 => [
-                'title' => 'Letter K-O',
-                'description' => 'Match big and small letters K through O!',
-                'objectives' => ['K', 'L', 'M', 'N', 'O'],
+                'title' => 'Letter I-L',
+                'description' => 'New letters I through L, plus the ones you already know!',
+                'objectives' => ['I', 'J', 'K', 'L', 'Review'],
             ],
             4 => [
-                'title' => 'Letter P-T',
-                'description' => 'Match big and small letters P through T!',
-                'objectives' => ['P', 'Q', 'R', 'S', 'T'],
+                'title' => 'Letter M-P',
+                'description' => 'New letters M through P, plus the ones you already know!',
+                'objectives' => ['M', 'N', 'O', 'P', 'Review'],
             ],
             5 => [
-                'title' => 'Letter U-Z',
-                'description' => 'Match big and small letters U through Z!',
-                'objectives' => ['U', 'V', 'W', 'X', 'Y', 'Z'],
+                'title' => 'Letter Q-T',
+                'description' => 'New letters Q through T, plus the ones you already know!',
+                'objectives' => ['Q', 'R', 'S', 'T', 'Review'],
             ],
             6 => [
-                'title' => 'Mixed Match 1',
-                'description' => 'Big and small letters in a bigger mix!',
-                'objectives' => ['All', 'Mixed', 'Review'],
+                'title' => 'Letter U-X',
+                'description' => 'New letters U through X, plus the ones you already know!',
+                'objectives' => ['U', 'V', 'W', 'X', 'Review'],
             ],
             7 => [
-                'title' => 'Mixed Match 2',
-                'description' => 'Everything mixed together!',
-                'objectives' => ['All', 'Mixed', 'Review'],
+                'title' => 'Letter Y-Z',
+                'description' => 'The last letters, Y and Z! Now you know the whole alphabet!',
+                'objectives' => ['Y', 'Z', 'Review'],
             ],
             8 => [
                 'title' => 'Letter Master',
-                'description' => 'The ultimate big & small letter challenge!',
-                'objectives' => ['All', 'Mixed', 'Speed'],
+                'description' => 'The whole alphabet, all mixed up!',
+                'objectives' => ['A-Z', 'Mixed', 'Speed'],
             ],
         ];
 
@@ -242,19 +221,30 @@ class LettersGameController extends Controller
 
     protected function getGameData(int $level): array
     {
-        // Letters available per level (objectives); levels 6+ review the whole alphabet
-        $pools = [
-            1 => ['A', 'B', 'C', 'D', 'E'],
-            2 => ['F', 'G', 'H', 'I', 'J'],
-            3 => ['K', 'L', 'M', 'N', 'O'],
-            4 => ['P', 'Q', 'R', 'S', 'T'],
-            5 => ['U', 'V', 'W', 'X', 'Y', 'Z'],
-            6 => ['A', 'E', 'I', 'O', 'U', 'B', 'D', 'G', 'M', 'P', 'S', 'T'],
-            7 => ['A', 'B', 'C', 'G', 'L', 'N', 'R', 'S', 'T', 'W', 'Y', 'Z'],
-            8 => ['A', 'B', 'E', 'F', 'K', 'M', 'N', 'O', 'P', 'R', 'S', 'V', 'W', 'X', 'Z'],
+        // New letters introduced by each level. The pool grows level by level (the
+        // new letters plus every earlier one) and is the full A-Z by level 7.
+        $groups = [
+            1 => ['A', 'B', 'C', 'D'],
+            2 => ['E', 'F', 'G', 'H'],
+            3 => ['I', 'J', 'K', 'L'],
+            4 => ['M', 'N', 'O', 'P'],
+            5 => ['Q', 'R', 'S', 'T'],
+            6 => ['U', 'V', 'W', 'X'],
+            7 => ['Y', 'Z'],
         ];
 
-        $letters = $pools[$level] ?? $pools[1];
+        if ($level >= 8) {
+            $letters = range('A', 'Z');
+            $focus = [];
+        } else {
+            $level = max(1, $level);
+            $letters = [];
+            for ($g = 1; $g <= $level; $g++) {
+                $letters = array_merge($letters, $groups[$g]);
+            }
+            $focus = $groups[$level];
+        }
+
         $colors = [
             'A' => '#ec4899', 'B' => '#f59e0b', 'C' => '#10b981',
             'D' => '#258cc5', 'E' => '#8b5cf6', 'F' => '#f05d56',
@@ -268,11 +258,19 @@ class LettersGameController extends Controller
         ];
 
         $rounds = $this->roundsForLevel($level);
-        $startOffset = ($level - 1) % count($letters);
+
+        // Targets: this level's new letters first, then a mix of letters learned
+        // earlier. (Level 8 has no new letters, so it is a random mix of all 26.)
+        $newTargets = $focus;
+        shuffle($newTargets);
+        $reviewTargets = array_values(array_diff($letters, $focus));
+        shuffle($reviewTargets);
+        $targets = array_slice(array_merge($newTargets, $reviewTargets), 0, $rounds);
+        shuffle($targets);
 
         $allRounds = [];
         for ($r = 0; $r < $rounds; $r++) {
-            $target = $letters[($startOffset + $r) % count($letters)];
+            $target = $targets[$r];
             $others = array_values(array_diff($letters, [$target]));
 
             $pool = [];

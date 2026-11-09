@@ -156,30 +156,8 @@ class ColorsGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.colors.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('colors', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
@@ -187,11 +165,11 @@ class ColorsGameController extends Controller
         $levelData = [
             1 => ['title' => 'Primary Colors', 'description' => 'Tap the circles that match the square!'],
             2 => ['title' => 'Primary Colors', 'description' => 'Find every circle that matches the square!'],
-            3 => ['title' => 'Secondary Colors', 'description' => 'Orange, green and purple are hiding here!'],
-            4 => ['title' => 'Secondary Colors', 'description' => 'Pick out every circle of that colour!'],
-            5 => ['title' => 'Rainbow Colors', 'description' => 'All the colors of the rainbow!'],
-            6 => ['title' => 'Rainbow Colors', 'description' => 'Can you match them all?'],
-            7 => ['title' => 'Color Expert', 'description' => 'Show your color skills!'],
+            3 => ['title' => 'Green Joins In', 'description' => 'A new color: green!'],
+            4 => ['title' => 'Orange Joins In', 'description' => 'Orange is here too!'],
+            5 => ['title' => 'Purple Joins In', 'description' => 'Say hello to purple!'],
+            6 => ['title' => 'Sky Blue Joins In', 'description' => 'Sky blue and blue look a bit alike - look closely!'],
+            7 => ['title' => 'All the Colors', 'description' => 'Every color is here now!'],
             8 => ['title' => 'Color Master', 'description' => 'The ultimate color challenge!'],
         ];
 
@@ -249,16 +227,21 @@ class ColorsGameController extends Controller
             'black'  => ['name' => 'Black',  'hex' => '#000000', 'marker' => 'Black'],
         ];
 
+        // One new colour per level, keeping every earlier one: the pool is all
+        // eight colours by level 7.
         $pools = [
             1 => ['red', 'blue', 'yellow'],
             2 => ['red', 'blue', 'yellow'],
-            3 => ['orange', 'green', 'purple'],
-            4 => ['orange', 'green', 'purple'],
-            5 => ['red', 'blue', 'yellow', 'orange', 'green', 'purple'],
-            6 => ['red', 'blue', 'yellow', 'orange', 'green', 'purple'],
-            7 => ['red', 'blue', 'yellow', 'orange', 'green', 'purple', 'sky'],
-            8 => ['red', 'blue', 'yellow', 'orange', 'green', 'purple', 'sky', 'black'],
+            3 => ['red', 'blue', 'yellow', 'green'],
+            4 => ['red', 'blue', 'yellow', 'green', 'orange'],
+            5 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+            6 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky'],
+            7 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky', 'black'],
+            8 => ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'sky', 'black'],
         ];
+
+        // The colour a level introduces comes up as the target more often.
+        $newColor = [3 => 'green', 4 => 'orange', 5 => 'purple', 6 => 'sky', 7 => 'black'][$level] ?? null;
 
         $poolKeys = $pools[$level] ?? $pools[1];
         $poolColors = [];
@@ -275,7 +258,9 @@ class ColorsGameController extends Controller
 
         $allRounds = [];
         for ($r = 0; $r < $rounds; $r++) {
-            $targetKey = $poolKeys[array_rand($poolKeys)];
+            $targetKey = ($newColor !== null && random_int(0, 1) === 1)
+                ? $newColor
+                : $poolKeys[array_rand($poolKeys)];
             $distractorKeys = array_values(array_diff($poolKeys, [$targetKey]));
             shuffle($distractorKeys);
             $distractorKeys = array_slice($distractorKeys, 0, $circleCount - $matches);

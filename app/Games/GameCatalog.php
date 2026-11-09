@@ -5,6 +5,11 @@ namespace App\Games;
 /**
  * The single registry of student games.
  *
+ * Every game carries an 'icon': the name of an icon in public/assets/icons,
+ * drawn with <i class="ico ico-NAME"> (see public/css/icons.css). Game art is
+ * never a PNG here, so the home grid, the game switcher and the loading screens
+ * all share one set of icons that take the surrounding colour.
+ *
  * A game belongs to a topic (Shapes, Colors, Letters, Animals, Numbers) and a
  * topic may hold several games, each with its own gameplay, slug, levels and
  * scoring. Adding a new entry here (plus its controller, views and routes)
@@ -25,7 +30,7 @@ class GameCatalog
                 'name' => 'Letters',
                 'desc' => 'Learn the alphabet!',
                 'gradient' => 'linear-gradient(135deg, #ff8555, #f47548)',
-                'img' => 'alphabet.png',
+                'icon' => 'language',
             ],
             [
                 'topic' => 'numbers',
@@ -33,7 +38,7 @@ class GameCatalog
                 'name' => 'Numbers',
                 'desc' => 'Count and calculate!',
                 'gradient' => 'linear-gradient(135deg, #1982c4, #146aa3)',
-                'img' => 'numbers.png',
+                'icon' => 'calculator',
             ],
             [
                 'topic' => 'numbers',
@@ -41,7 +46,7 @@ class GameCatalog
                 'name' => 'What\'s Missing?',
                 'desc' => 'Find the missing number in the sequence!',
                 'gradient' => 'linear-gradient(135deg, #1982c4, #146aa3)',
-                'img' => 'bulb.png',
+                'icon' => 'lightbulb',
             ],
             [
                 'topic' => 'colors',
@@ -49,7 +54,7 @@ class GameCatalog
                 'name' => 'Colors',
                 'desc' => 'Identify colors!',
                 'gradient' => 'linear-gradient(135deg, #8ac926, #6fa51c)',
-                'img' => 'rainbow.png',
+                'icon' => 'color-palette',
             ],
             [
                 'topic' => 'colors',
@@ -57,7 +62,15 @@ class GameCatalog
                 'name' => 'Color Sort',
                 'desc' => 'Drag each paint drop into its matching bucket!',
                 'gradient' => 'linear-gradient(135deg, #ff595e, #e8454a)',
-                'img' => 'art.png',
+                'icon' => 'water',
+            ],
+            [
+                'topic' => 'colors',
+                'slug' => 'color-vision',
+                'name' => 'Color Check',
+                'desc' => 'A gentle color vision check - tap the circles that match!',
+                'gradient' => 'linear-gradient(135deg, #c026d3, #9d1fb0)',
+                'icon' => 'eye',
             ],
             [
                 'topic' => 'shapes',
@@ -65,7 +78,7 @@ class GameCatalog
                 'name' => 'Shapes',
                 'desc' => 'Find the shapes!',
                 'gradient' => 'linear-gradient(135deg, #ff595e, #e8454a)',
-                'img' => 'shapes.png',
+                'icon' => 'shapes',
             ],
             [
                 'topic' => 'shapes',
@@ -73,7 +86,7 @@ class GameCatalog
                 'name' => 'Shape Bingo',
                 'desc' => 'Dab the called shapes and shout Bingo!',
                 'gradient' => 'linear-gradient(135deg, #6a4c93, #523a75)',
-                'img' => 'confetti.png',
+                'icon' => 'grid',
             ],
             [
                 'topic' => 'animals',
@@ -81,7 +94,7 @@ class GameCatalog
                 'name' => 'Animals',
                 'desc' => 'Name the animals!',
                 'gradient' => 'linear-gradient(135deg, #ffca3a, #b8942e)',
-                'img' => 'elephant.png',
+                'icon' => 'paw',
             ],
             [
                 'topic' => 'animals',
@@ -89,7 +102,7 @@ class GameCatalog
                 'name' => 'Animal Match',
                 'desc' => 'Drag each animal onto its matching twin!',
                 'gradient' => 'linear-gradient(135deg, #14b8a6, #0d9488)',
-                'img' => 'match.png',
+                'icon' => 'copy',
             ],
         ];
     }

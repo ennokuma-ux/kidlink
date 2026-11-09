@@ -147,30 +147,8 @@ class WhatsMissingGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.whats-missing.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('whats-missing', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
@@ -178,12 +156,12 @@ class WhatsMissingGameController extends Controller
         $levelData = [
             1 => ['title' => 'Number Detective', 'description' => 'One number is hiding - find it!'],
             2 => ['title' => 'Number Detective', 'description' => 'A longer sequence - spot the gap!'],
-            3 => ['title' => 'Number Detective Pro', 'description' => 'Bigger numbers, same trick!'],
+            3 => ['title' => 'Number Detective Pro', 'description' => 'Numbers up to 10 now!'],
             4 => ['title' => 'Number Detective Pro', 'description' => 'Five spots and one is missing!'],
             5 => ['title' => 'Missing Number Master', 'description' => 'Count along - the numbers get bigger!'],
             6 => ['title' => 'Missing Number Master', 'description' => 'Six numbers and one sneaked away!'],
-            7 => ['title' => 'Ultimate Counter', 'description' => 'Skip counting now - count by twos!'],
-            8 => ['title' => 'Ultimate Counter', 'description' => 'The ultimate missing number challenge!'],
+            7 => ['title' => 'Ultimate Counter', 'description' => 'Every number up to 20 is in play!'],
+            8 => ['title' => 'Ultimate Counter', 'description' => 'Skip counting now - count by twos!'],
         ];
 
         $data = $levelData[$level] ?? $levelData[1];
@@ -216,7 +194,8 @@ class WhatsMissingGameController extends Controller
     }
 
     /**
-     * How big each level's sequences are: length of the sequence, the step
+     * How big each level's sequences are (the highest number grows from 5 to
+     * the full 20 by level 7): length of the sequence, the step
      * between numbers, the highest number allowed, and how many choices the
      * child picks from.
      */
@@ -224,13 +203,14 @@ class WhatsMissingGameController extends Controller
     {
         $shape = [
             1 => ['length' => 3, 'step' => 1, 'max' => 5,  'choices' => 3],
-            2 => ['length' => 4, 'step' => 1, 'max' => 6,  'choices' => 3],
+            2 => ['length' => 4, 'step' => 1, 'max' => 8,  'choices' => 3],
             3 => ['length' => 4, 'step' => 1, 'max' => 10, 'choices' => 3],
-            4 => ['length' => 5, 'step' => 1, 'max' => 10, 'choices' => 3],
+            4 => ['length' => 5, 'step' => 1, 'max' => 12, 'choices' => 3],
             5 => ['length' => 5, 'step' => 1, 'max' => 15, 'choices' => 4],
-            6 => ['length' => 6, 'step' => 1, 'max' => 20, 'choices' => 4],
-            7 => ['length' => 6, 'step' => 2, 'max' => 20, 'choices' => 4],
-            8 => ['length' => 7, 'step' => 2, 'max' => 24, 'choices' => 4],
+            6 => ['length' => 6, 'step' => 1, 'max' => 18, 'choices' => 4],
+            // Level 7 opens the full 1-20 range; level 8 keeps it and skip counts.
+            7 => ['length' => 6, 'step' => 1, 'max' => 20, 'choices' => 4],
+            8 => ['length' => 7, 'step' => 2, 'max' => 20, 'choices' => 4],
         ];
 
         return $shape[$level] ?? $shape[1];

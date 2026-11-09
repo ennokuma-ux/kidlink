@@ -157,30 +157,8 @@ class ShapesGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.shapes.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('shapes', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
@@ -223,19 +201,12 @@ class ShapesGameController extends Controller
                 'hue' => 330,
                 'image' => 'assets/images/game/shapes/shape imgs/Circle.png',
             ],
-            'heart' => [
-                'type' => 'heart',
-                'name' => 'Heart',
-                'color' => '#ef4444',
-                'hue' => 0,
-                'image' => 'assets/images/game/shapes/shape imgs/Heart.png',
-            ],
-            'star' => [
-                'type' => 'star',
-                'name' => 'Star',
-                'color' => '#f59e0b',
-                'hue' => 40,
-                'image' => 'assets/images/game/shapes/shape imgs/Star.png',
+            'square' => [
+                'type' => 'square',
+                'name' => 'Square',
+                'color' => '#6366f1',
+                'hue' => 230,
+                'image' => 'assets/images/game/shapes/shape imgs/Square.png',
             ],
             'triangle' => [
                 'type' => 'triangle',
@@ -244,16 +215,26 @@ class ShapesGameController extends Controller
                 'hue' => 160,
                 'image' => 'assets/images/game/shapes/shape imgs/Triangle.png',
             ],
-            'square' => [
-                'type' => 'square',
-                'name' => 'Square',
-                'color' => '#6366f1',
-                'hue' => 230,
-                'image' => 'assets/images/game/shapes/shape imgs/Square.png',
+            'star' => [
+                'type' => 'star',
+                'name' => 'Star',
+                'color' => '#f59e0b',
+                'hue' => 40,
+                'image' => 'assets/images/game/shapes/shape imgs/Star.png',
+            ],
+            'heart' => [
+                'type' => 'heart',
+                'name' => 'Heart',
+                'color' => '#ef4444',
+                'hue' => 0,
+                'image' => 'assets/images/game/shapes/shape imgs/Heart.png',
             ],
         ];
 
-        $types = array_keys($shapes);
+        // Shapes in the order they are introduced: two to start, one more at
+        // levels 2, 4 and 5, so all five are in play from level 5.
+        $introduced = [1 => 2, 2 => 3, 3 => 3, 4 => 4];
+        $types = array_slice(array_keys($shapes), 0, $introduced[$level] ?? 5);
         $rounds = $this->roundsForLevel($level);
         $holeCount = $this->holesForLevel($level);
 

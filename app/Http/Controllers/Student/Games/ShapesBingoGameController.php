@@ -155,30 +155,8 @@ class ShapesBingoGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.shapes-bingo.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('shapes-bingo', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
@@ -186,9 +164,9 @@ class ShapesBingoGameController extends Controller
         $levelData = [
             1 => ['title' => 'Shape Bingo', 'description' => 'Dab every shape as it is called!'],
             2 => ['title' => 'Shape Bingo', 'description' => 'Keep dabbing to fill your card!'],
-            3 => ['title' => 'Bingo Builder', 'description' => 'A bigger card of shapes to cover!'],
-            4 => ['title' => 'Bingo Builder', 'description' => 'More calls, more dabbing!'],
-            5 => ['title' => 'Bingo Champion', 'description' => 'A full card of shapes!'],
+            3 => ['title' => 'Bingo Builder', 'description' => 'A bigger card, and triangles join in!'],
+            4 => ['title' => 'Bingo Builder', 'description' => 'Stars are on the card now!'],
+            5 => ['title' => 'Bingo Champion', 'description' => 'Hearts too - every shape is here!'],
             6 => ['title' => 'Bingo Champion', 'description' => 'Stay sharp and dab them all!'],
             7 => ['title' => 'Bingo Master', 'description' => 'The biggest card yet!'],
             8 => ['title' => 'Bingo Legend', 'description' => 'The ultimate shape bingo!'],
@@ -223,18 +201,22 @@ class ShapesBingoGameController extends Controller
     protected function shapes(): array
     {
         return [
+            // In the order they are introduced (see getGameData).
             'circle'   => ['name' => 'Circle',   'file' => 'Circle.png',   'color' => '#ec4899'],
-            'heart'    => ['name' => 'Heart',    'file' => 'Heart.png',    'color' => '#ef4444'],
-            'star'     => ['name' => 'Star',     'file' => 'Star.png',     'color' => '#f59e0b'],
-            'triangle' => ['name' => 'Triangle', 'file' => 'Triangle.png', 'color' => '#10b981'],
             'square'   => ['name' => 'Square',   'file' => 'Square.png',   'color' => '#6366f1'],
+            'triangle' => ['name' => 'Triangle', 'file' => 'Triangle.png', 'color' => '#10b981'],
+            'star'     => ['name' => 'Star',     'file' => 'Star.png',     'color' => '#f59e0b'],
+            'heart'    => ['name' => 'Heart',    'file' => 'Heart.png',    'color' => '#ef4444'],
         ];
     }
 
     protected function getGameData(int $level): array
     {
         $shapes = $this->shapes();
-        $types = array_keys($shapes);
+        // Two shapes to start, then one more at levels 3, 4 and 5: the whole set
+        // of five is on the card from level 5 on.
+        $introduced = [1 => 2, 2 => 2, 3 => 3, 4 => 4];
+        $types = array_slice(array_keys($shapes), 0, $introduced[$level] ?? 5);
         shuffle($types);
 
         $count = $this->cellsForLevel($level);

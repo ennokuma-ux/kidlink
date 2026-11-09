@@ -21,6 +21,7 @@ use App\Http\Middleware\PreventDuplicateSubmission;
 use App\Http\Controllers\Parent\DashboardController as ParentDashboardController;
 use App\Http\Controllers\Student\Games\ShapesGameController;
 use App\Http\Controllers\Student\Games\ColorsGameController;
+use App\Http\Controllers\Student\Games\ColorVisionGameController;
 use App\Http\Controllers\Student\Games\ColorsSortGameController;
 use App\Http\Controllers\Student\Games\LettersGameController;
 use App\Http\Controllers\Student\Games\AnimalsGameController;
@@ -213,6 +214,13 @@ Route::middleware(['auth', 'active', 'role:student'])->prefix('student')->name('
         Route::get('/', [ColorsSortGameController::class, 'stageSelect'])->name('stage-select');
         Route::get('/play/{level}', [ColorsSortGameController::class, 'play'])->name('play');
         Route::post('/submit/{level}', [ColorsSortGameController::class, 'submit'])->name('submit');
+    });
+
+    // Color Check (color vision screening, same mechanics as Colors)
+    Route::prefix('games/color-vision')->middleware(EnsureGameAssigned::class.':color-vision')->name('games.color-vision.')->group(function () {
+        Route::get('/', [ColorVisionGameController::class, 'stageSelect'])->name('stage-select');
+        Route::get('/play/{level}', [ColorVisionGameController::class, 'play'])->name('play');
+        Route::post('/submit/{level}', [ColorVisionGameController::class, 'submit'])->name('submit');
     });
 
     // Letters Game

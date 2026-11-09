@@ -166,42 +166,20 @@ class AnimalsMatchGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.animals-match.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('animals-match', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
     {
         $levelData = [
             1 => ['title' => 'Farm Pairs', 'description' => 'Drag each farm animal onto its twin!'],
-            2 => ['title' => 'Farm Pairs', 'description' => 'More farm animals to match!'],
-            3 => ['title' => 'Wild Pairs', 'description' => 'Drag each wild animal onto its twin!'],
-            4 => ['title' => 'Wild Pairs', 'description' => 'More wild animals to match!'],
+            2 => ['title' => 'Farm Pairs', 'description' => 'Horse joins the farm - match them all!'],
+            3 => ['title' => 'Wild Pairs', 'description' => 'Lions, elephants and giraffes to match!'],
+            4 => ['title' => 'Wild Pairs', 'description' => 'Zebra and monkey join the wild ones!'],
             5 => ['title' => 'Ocean Pairs', 'description' => 'Drag each ocean creature onto its twin!'],
             6 => ['title' => 'Sky Pairs', 'description' => 'Drag each bird onto its twin!'],
-            7 => ['title' => 'Animal Expert', 'description' => 'Match even more tricky animals!'],
+            7 => ['title' => 'Forest Pairs', 'description' => 'Bear and fox are here - every animal is in!'],
             8 => ['title' => 'Animal Master', 'description' => 'The ultimate matching challenge!'],
         ];
 
@@ -241,21 +219,29 @@ class AnimalsMatchGameController extends Controller
             'fox'       => ['name' => 'Fox',       'emoji' => asset('assets/icons/fox.svg')],
         ];
 
-        $pools = [
-            1 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
-            2 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
-            3 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
-            4 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
-            5 => ['dolphin', 'whale', 'shark', 'octopus', 'bear', 'fox'],
-            6 => ['eagle', 'parrot', 'owl', 'penguin', 'bear', 'fox'],
-            7 => ['cow', 'lion', 'dolphin', 'eagle', 'monkey', 'shark', 'parrot', 'bear'],
-            8 => array_keys($allAnimals),
+        // Each level adds new animals and keeps the earlier ones, so all 20 are in
+        // play by level 7.
+        $introduced = [
+            1 => ['cow', 'pig', 'chicken', 'sheep'],
+            2 => ['horse'],
+            3 => ['lion', 'elephant', 'giraffe'],
+            4 => ['zebra', 'monkey'],
+            5 => ['dolphin', 'whale', 'shark', 'octopus'],
+            6 => ['eagle', 'parrot', 'owl', 'penguin'],
+            7 => ['bear', 'fox'],
         ];
+        $poolKeys = [];
+        for ($l = 1; $l <= min(max($level, 1), 7); $l++) {
+            $poolKeys = array_merge($poolKeys, $introduced[$l]);
+        }
+        $newKeys = $introduced[$level] ?? [];
 
-        $poolKeys = $pools[$level] ?? $pools[1];
-        $poolKeys = array_values($poolKeys);
-        shuffle($poolKeys);
-        $chosen = array_slice($poolKeys, 0, $this->pairsForLevel($level));
+        // This level's new animals are always in the round; earlier ones fill the rest.
+        $newPick = $newKeys;
+        shuffle($newPick);
+        $rest = array_values(array_diff($poolKeys, $newKeys));
+        shuffle($rest);
+        $chosen = array_slice(array_merge($newPick, $rest), 0, $this->pairsForLevel($level));
 
         $targets = [];
         $tray = [];

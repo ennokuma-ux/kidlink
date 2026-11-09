@@ -34,6 +34,11 @@ return [
                 'Look for :name. The wiggling circles are matches!',
             ],
         ],
+        'color-vision' => [
+            'tap' => [
+                'Look at the color of the square. Which circles look exactly the same?',
+            ],
+        ],
         'colors-sort' => [
             'drag' => [
                 'Pick up a paint drop and look for the bucket with the same color.',

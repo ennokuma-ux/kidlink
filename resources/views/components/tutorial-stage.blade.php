@@ -26,7 +26,7 @@
 
     if ($valid) {
         $mascotKey = \App\Support\Mascot::forCurrentStudent();
-        $guided = ['numbers' => 1, 'letters' => 2, 'colors' => 2, 'colors-sort' => 2, 'shapes' => 2, 'animals' => 1, 'animals-match' => 1, 'whats-missing' => 1, 'shapes-bingo' => 2][$game] ?? 1;
+        $guided = ['numbers' => 1, 'letters' => 2, 'colors' => 2, 'color-vision' => 2, 'colors-sort' => 2, 'shapes' => 2, 'animals' => 1, 'animals-match' => 1, 'whats-missing' => 1, 'shapes-bingo' => 2][$game] ?? 1;
 
         $config = [
             'game' => $game,
@@ -175,6 +175,7 @@ window.addEventListener('load', function () {
             }
             return null;
         },
+        'color-vision': function () { return PROBES['colors'](); },
         'colors-sort': function () {
             var items = $$('#trayRow .tray-item:not(.used)');
             if (!items.length) return null;

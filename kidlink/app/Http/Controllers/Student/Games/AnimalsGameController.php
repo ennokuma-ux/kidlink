@@ -162,42 +162,20 @@ class AnimalsGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.animals.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('animals', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
     {
         $levelData = [
             1 => ['title' => 'Farm Animals', 'description' => 'Meet the friendly farm animals!'],
-            2 => ['title' => 'Farm Animals', 'description' => 'Match the farm animals!'],
+            2 => ['title' => 'Farm Animals', 'description' => 'Horse joins the farm!'],
             3 => ['title' => 'Wild Animals', 'description' => 'Explore the wild kingdom!'],
-            4 => ['title' => 'Wild Animals', 'description' => 'Match the wild animals!'],
+            4 => ['title' => 'Wild Animals', 'description' => 'Zebra and monkey join in!'],
             5 => ['title' => 'Ocean Creatures', 'description' => 'Dive into the deep blue sea!'],
             6 => ['title' => 'Birds of the Sky', 'description' => 'Meet our feathered friends!'],
-            7 => ['title' => 'Animal Expert', 'description' => 'Show your animal skills!'],
+            7 => ['title' => 'Forest Friends', 'description' => 'Bear and fox are here - every animal is in!'],
             8 => ['title' => 'Animal Master', 'description' => 'The ultimate animal challenge!'],
         ];
 
@@ -243,24 +221,32 @@ class AnimalsGameController extends Controller
             'fox'       => ['name' => 'Fox',       'emoji' => asset('assets/icons/fox.svg')],
         ];
 
-        $pools = [
-            1 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
-            2 => ['cow', 'pig', 'chicken', 'sheep', 'horse'],
-            3 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
-            4 => ['lion', 'elephant', 'giraffe', 'zebra', 'monkey'],
-            5 => ['dolphin', 'whale', 'shark', 'octopus', 'bear', 'fox'],
-            6 => ['eagle', 'parrot', 'owl', 'penguin', 'bear', 'fox'],
-            7 => ['cow', 'lion', 'dolphin', 'eagle', 'monkey', 'shark', 'parrot', 'bear'],
-            8 => array_keys($allAnimals),
+        // Each level adds new animals and keeps the earlier ones, so all 20 are in
+        // play by level 7.
+        $introduced = [
+            1 => ['cow', 'pig', 'chicken', 'sheep'],
+            2 => ['horse'],
+            3 => ['lion', 'elephant', 'giraffe'],
+            4 => ['zebra', 'monkey'],
+            5 => ['dolphin', 'whale', 'shark', 'octopus'],
+            6 => ['eagle', 'parrot', 'owl', 'penguin'],
+            7 => ['bear', 'fox'],
         ];
+        $poolKeys = [];
+        for ($l = 1; $l <= min(max($level, 1), 7); $l++) {
+            $poolKeys = array_merge($poolKeys, $introduced[$l]);
+        }
+        $newKeys = $introduced[$level] ?? [];
 
-        $poolKeys = $pools[$level] ?? $pools[1];
         $rounds = $this->roundsForLevel($level);
         $optCount = $this->optionsForLevel($level);
 
         $allRounds = [];
         for ($r = 0; $r < $rounds; $r++) {
-            $targetKey = $poolKeys[array_rand($poolKeys)];
+            // The animals this level introduced are asked about more often.
+            $targetKey = (! empty($newKeys) && random_int(0, 2) > 0)
+                ? $newKeys[array_rand($newKeys)]
+                : $poolKeys[array_rand($poolKeys)];
             $distractorKeys = array_values(array_diff($poolKeys, [$targetKey]));
             shuffle($distractorKeys);
 

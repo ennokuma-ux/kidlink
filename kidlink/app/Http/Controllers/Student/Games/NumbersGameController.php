@@ -154,42 +154,21 @@ class NumbersGameController extends Controller
 
     protected function getLevelsData(int $currentLevel): array
     {
-        $positions = [
-            1 => ['left' => '9.19%', 'top' => '44.89%'],
-            2 => ['left' => '14.74%', 'top' => '22.36%'],
-            3 => ['left' => '28.98%', 'top' => '18.39%'],
-            4 => ['left' => '37.46%', 'top' => '38.34%'],
-            5 => ['left' => '38.03%', 'top' => '63.16%'],
-            6 => ['left' => '51.87%', 'top' => '61.66%'],
-            7 => ['left' => '52.52%', 'top' => '37.22%'],
-            8 => ['left' => '59.27%', 'top' => '19.2%'],
-        ];
-
-        $levels = [];
-        for ($i = 1; $i <= $this->totalLevels; $i++) {
-            $pos = $positions[$i] ?? ['left' => '50%', 'top' => '50%'];
-            $levels[] = [
-                'number' => $i,
-                'unlocked' => $i <= $currentLevel,
-                'completed' => $i < $currentLevel,
-                'left' => $pos['left'],
-                'top' => $pos['top'],
-                'route' => route('student.games.numbers.play', ['level' => $i]),
-            ];
-        }
-        return $levels;
+        // Positions and the road are shared by every game map (see StageMap).
+        return \App\Support\StageMap::levels('numbers', $currentLevel, $this->totalLevels);
     }
 
     protected function getLevelData(int $level): array
     {
+        // The counting range grows with every level and is the full 1-10 by level 7.
         $levelData = [
-            1 => ['title' => 'Count 1-5', 'description' => 'Count apples from 1 to 5!'],
-            2 => ['title' => 'Count 1-5', 'description' => 'Master counting to 5!'],
-            3 => ['title' => 'Count 1-10', 'description' => 'Count fruits from 1 to 10!'],
-            4 => ['title' => 'Count 1-10', 'description' => 'Count even faster!'],
-            5 => ['title' => 'Count 1-10', 'description' => 'More to count, more to choose from!'],
-            6 => ['title' => 'Count 1-10', 'description' => 'Count all the way to 10!'],
-            7 => ['title' => 'Number Expert', 'description' => 'Show your counting skills!'],
+            1 => ['title' => 'Count 1-4', 'description' => 'Count apples from 1 to 4!'],
+            2 => ['title' => 'Count 1-5', 'description' => 'One more to count: 5!'],
+            3 => ['title' => 'Count 1-6', 'description' => 'Count all the way to 6!'],
+            4 => ['title' => 'Count 1-7', 'description' => 'Now up to 7!'],
+            5 => ['title' => 'Count 1-8', 'description' => 'Count fruits up to 8!'],
+            6 => ['title' => 'Count 1-9', 'description' => 'Almost there: count to 9!'],
+            7 => ['title' => 'Count 1-10', 'description' => 'Count all the way to 10!'],
             8 => ['title' => 'Number Master', 'description' => 'The ultimate counting challenge!'],
         ];
 
@@ -207,9 +186,13 @@ class NumbersGameController extends Controller
 
     protected function getGameData(int $level): array
     {
-        // Numbers never go past 10: the first levels stay with 1-5 and every
-        // level after that uses the whole 1-10 range.
-        $pool = $level <= 2 ? range(1, 5) : range(1, self::MAX_NUMBER);
+        // Numbers never go past 10. The range starts at 1-4 and grows by one each
+        // level (and by two a little later), so level 7 already has the full 1-10.
+        $maxByLevel = [1 => 4, 2 => 5, 3 => 6, 4 => 7, 5 => 8, 6 => 9];
+        $max = min($maxByLevel[$level] ?? self::MAX_NUMBER, self::MAX_NUMBER);
+        $pool = range(1, $max);
+        // The number this level introduced; it comes up more often than the rest.
+        $newest = ($level >= 2 && $level <= 7) ? $max : null;
 
         $objects = [
             ['icon' => asset('assets/icons/apple.svg'), 'name' => 'apples'],
@@ -228,7 +211,9 @@ class NumbersGameController extends Controller
         $allRounds = [];
 
         for ($r = 0; $r < $rounds; $r++) {
-            $target = $pool[array_rand($pool)];
+            $target = ($newest !== null && random_int(0, 1) === 1)
+                ? $newest
+                : $pool[array_rand($pool)];
             $obj = $objects[array_rand($objects)];
 
             $distractors = array_values(array_diff($pool, [$target]));
