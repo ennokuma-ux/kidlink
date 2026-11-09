@@ -38,25 +38,34 @@
     </div>
 </div>
 
+@php
+$eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
+@endphp
+@php
+$eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
+@endphp
 <div class="flex flex-wrap gap-2 mb-4" aria-label="Filter ECCD evaluation domains">
-    <button type="button" data-eccd-filter="all" aria-pressed="true" class="eccd-filter px-3 py-1.5 rounded-full border border-[#ff8555] bg-[#ff8555] text-white text-sm font-medium">All domains</button>
-    @foreach($domains as $domain)
-    <button type="button" data-eccd-filter="{{ \Illuminate\Support\Str::slug($domain) }}" aria-pressed="false"
-       class="eccd-filter px-3 py-1.5 rounded-full border border-[#f1e7cc] bg-white text-sm font-medium text-[#182438] hover:border-[#ff8555] hover:text-[#f47548]">
-        {{ $labels['domains'][$domain] ?? $domain }}
+    <button type="button" data-eccd-filter="all" aria-pressed="true" class="eccd-filter px-3 py-1.5 rounded-full border border-[#1982c4] bg-[#1982c4] text-white text-sm font-semibold">All domains</button>
+    @foreach($domains as $domainIndex => $domain)
+    @php $domainColor = $eccdPalette[$domainIndex % count($eccdPalette)]; @endphp
+    <button type="button" data-eccd-filter="{{ \\Illuminate\\Support\\Str::slug($domain) }}" data-domain-color="{{ $domainColor }}" aria-pressed="false"
+       class="eccd-filter px-3 py-1.5 rounded-full border bg-white text-sm font-semibold text-[#182438] transition"
+       style="border-color: {{ $domainColor }}">
+        <span class="inline-block w-2 h-2 rounded-full mr-1.5" style="background: {{ $domainColor }}"></span>{{ $labels['domains'][$domain] ?? $domain }}
     </button>
     @endforeach
 </div>
 
 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
-    @foreach($domains as $domain)
-    <div class="bg-white rounded-xl shadow-sm p-3">
+    @foreach($domains as $domainIndex => $domain)
+    @php $domainColor = $eccdPalette[$domainIndex % count($eccdPalette)]; @endphp
+    <div class="bg-white rounded-xl shadow-sm p-3 border-t-4" style="border-color: {{ $domainColor }}">
         <div class="flex items-center justify-between mb-3">
             <h4 class="font-semibold text-[#182438]">{{ $labels['domains'][$domain] ?? $domain }}</h4>
-            <span class="text-sm font-bold text-[#ff8555]" data-score-pct="{{ \Illuminate\Support\Str::slug($domain) }}">{{ $scores[$domain] ?? 0 }}%</span>
+            <span class="text-sm font-bold" style="color: {{ $domainColor }}" data-score-pct="{{ \\Illuminate\\Support\\Str::slug($domain) }}">{{ $scores[$domain] ?? 0 }}%</span>
         </div>
         <div class="w-full bg-[#f1e7cc] rounded-full h-1.5 mb-2">
-            <div class="bg-gradient-to-r from-[#ff8555] to-[#f47548] h-1.5 rounded-full transition-all" data-score-bar="{{ \Illuminate\Support\Str::slug($domain) }}" style="width: {{ min($scores[$domain] ?? 0, 100) }}%"></div>
+            <div class="h-1.5 rounded-full transition-all" data-score-bar="{{ \\Illuminate\\Support\\Str::slug($domain) }}" style="width: {{ min($scores[$domain] ?? 0, 100) }}%; background-color: {{ $domainColor }}"></div>
         </div>
     </div>
     @endforeach
@@ -83,10 +92,13 @@
     <input type="hidden" name="evaluation" value="{{ $evaluationNumber }}">
     <input type="hidden" name="next" value="" id="eccdNext">
 
-@foreach($domains as $domain)
-@php $domainRecords = $records->get($domain, collect()); @endphp
+@foreach($domains as $domainIndex => $domain)
+@php
+    $domainRecords = $records->get($domain, collect());
+    $domainColor = $eccdPalette[$domainIndex % count($eccdPalette)];
+@endphp
 <div data-eccd-domain="{{ \Illuminate\Support\Str::slug($domain) }}" class="bg-white rounded-xl shadow-sm overflow-hidden mb-4 scroll-mt-24">
-    <div class="px-4 py-2 bg-[#182438] text-white flex items-center justify-between">
+    <div class="px-4 py-2 text-white flex items-center justify-between" style="background-color: {{ $domainColor }}">
         <div>
             <h3 class="font-semibold">{{ $labels['domains'][$domain] ?? $domain }}</h3>
             <p class="text-xs text-white/60">{{ __('teacher.evaluation_number') }}{{ $evaluationNumber }}</p>
@@ -176,10 +188,10 @@
             filterButtons.forEach(item => {
                 const active = item === button;
                 item.setAttribute('aria-pressed', active ? 'true' : 'false');
-                item.classList.toggle('bg-[#ff8555]', active);
-                item.classList.toggle('text-white', active);
-                item.classList.toggle('border-[#ff8555]', active);
-                item.classList.toggle('bg-white', !active);
+                const color = item.dataset.domainColor || '#1982c4';
+                item.style.backgroundColor = active ? color : '#ffffff';
+                item.style.borderColor = color;
+                item.style.color = active ? '#ffffff' : '#182438';
             });
         });
     });

@@ -83,3 +83,47 @@ input[type="submit"]:disabled {
   outline: 3px solid var(--kidlink-orange-ring);
   outline-offset: 2px;
 }
+
+
+/* KidLink refreshed palette: cream remains the neutral canvas. */
+:root {
+  --kidlink-red: #ff595e;
+  --kidlink-yellow: #ffca3a;
+  --kidlink-green: #8ac926;
+  --kidlink-blue: #1982c4;
+  --kidlink-purple: #6a4c93;
+  --kidlink-cream: #fff8e7;
+  --kidlink-orange: var(--kidlink-red);
+  --kidlink-orange-hover: #e94b50;
+  --kidlink-orange-soft: #fff0e9;
+  --kidlink-orange-ring: rgba(255, 89, 94, .28);
+  --kidlink-brand-orange: var(--kidlink-red);
+  --kidlink-brand-orange-hover: #e94b50;
+}
+
+/* Keep the student-selection cards clean and white rather than orange. */
+.kidlink-student-option,
+.kidlink-child-option {
+  background: #fff !important;
+  color: #182438 !important;
+  border-color: #e7dfcf !important;
+}
+.kidlink-student-option:hover,
+.kidlink-child-option:hover,
+.kidlink-student-option:focus,
+.kidlink-child-option:focus {
+  background: #fff !important;
+  border-color: var(--kidlink-blue) !important;
+}
+.kidlink-student-option [class*="bg-orange-"],
+.kidlink-child-option [class*="bg-orange-"] {
+  background: var(--kidlink-cream) !important;
+  color: var(--kidlink-red) !important;
+}
+
+/* Shared interactive accents now use the new palette instead of legacy orange. */
+:where(button, a, input[type="submit"], [role="button"]):focus-visible {
+  outline-color: rgba(25, 130, 196, .35);
+}
+.kidlink-brand-orange { color: var(--kidlink-red) !important; }
+.kidlink-brand-orange-bg { background-color: var(--kidlink-red) !important; }

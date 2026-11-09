@@ -18,8 +18,8 @@
 
     @if($variant === 'button')
         <button type="button" @click="show()"
-                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#ff6b35] hover:bg-[#fff6f0] transition">
-            <svg class="w-4 h-4 text-[#ff8555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4-4m-4 4l4 4"/></svg>
+                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#1982c4] hover:bg-[#fff8e7] transition">
+            <svg class="w-4 h-4 text-[#1982c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4-4m-4 4l4 4"/></svg>
             <span>{{ $selected ? __('analytics.chooser_switch') : __('analytics.chooser_button') }}</span>
             @if($selected)<span class="max-w-[10rem] truncate font-normal text-[#5f6873]">&middot; {{ $selected->name }}</span>@endif
         </button>
@@ -41,19 +41,19 @@
                     <svg class="w-4 h-4 text-[#8b949d] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="search" x-ref="q" x-model="search" @keydown.enter.prevent="pickFirst()" autocomplete="off"
                            placeholder="{{ __('analytics.chooser_search') }}"
-                           class="w-full rounded-lg border border-[#f1e7cc] pl-9 pr-3 py-2.5 text-sm focus:ring-2 focus:ring-[#ff6b35] outline-none">
+                           class="w-full rounded-lg border border-[#f1e7cc] pl-9 pr-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1982c4] outline-none">
                 </div>
                 <div class="max-h-[58vh] overflow-y-auto space-y-2 pr-1">
                     <template x-for="student in filtered" :key="student.id">
-                        <a :href="student.url" class="kidlink-student-option group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 transition duration-150 hover:border-[#ff6b35] hover:bg-orange-50/60 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b35]"
-                           :class="student.id === selectedId ? 'border-[#ff6b35] bg-orange-50 shadow-sm' : ''">
-                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-bold text-[#e85b2a]" x-text="student.name.trim().charAt(0).toUpperCase()"></span>
+                        <a :href="student.url" class="kidlink-student-option group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 transition duration-150 hover:border-[#1982c4] hover:bg-[#fff8e7] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1982c4]"
+                           :class="student.id === selectedId ? 'border-[#1982c4] bg-[#fff8e7] shadow-sm' : ''">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#fff8e7] text-sm font-bold text-[#1982c4]" x-text="student.name.trim().charAt(0).toUpperCase()"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="block truncate font-semibold text-slate-800" x-text="student.name"></span>
                                 <span class="mt-0.5 block truncate text-xs text-slate-500" x-text="student.section || 'Student'"></span>
                             </span>
-                            <span x-show="student.id === selectedId" class="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#d94d20]">{{ __('analytics.chooser_current') }}</span>
-                            <svg x-show="student.id !== selectedId" class="h-4 w-4 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#ff6b35]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/></svg>
+                            <span x-show="student.id === selectedId" class="shrink-0 rounded-full bg-[#fff8e7] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#1982c4]">{{ __('analytics.chooser_current') }}</span>
+                            <svg x-show="student.id !== selectedId" class="h-4 w-4 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#1982c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/></svg>
                         </a>
                     </template>
                     <p x-show="filtered.length === 0" class="text-sm text-[#8b949d] text-center py-4">{{ __('analytics.chooser_none') }}</p>
