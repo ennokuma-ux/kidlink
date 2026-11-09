@@ -37,7 +37,7 @@
 
         <div class="text-center mb-8">
             <a href="<?php echo e(route('home')); ?>" class="text-2xl font-extrabold tracking-tight inline-block mb-4" style="color: #182438;">
-                Kid<span style="color: #ff595e;">Link</span>
+                Kid<span style="color: #ff8555;">Link</span>
             </a>
             <h2 class="text-3xl font-extrabold tracking-tight" style="color: #182438;"><?php echo e(__('login.welcome_back')); ?></h2>
         </div>
@@ -49,7 +49,7 @@
                 <input type="email" name="email" value="<?php echo e(old('email')); ?>" required autofocus
                     class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2"
                     style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
-                    onfocus="this.style.borderColor='#ff595e'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
+                    onfocus="this.style.borderColor='#ff8555'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
                     onblur="this.style.borderColor='#f1e7cc'; this.style.boxShadow='none'"
                     placeholder="<?php echo e(__('login.email_placeholder')); ?>">
             </div>
@@ -59,7 +59,7 @@
                     <input type="password" name="password" id="password" required
                         class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2 pr-12"
                         style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
-                        onfocus="this.style.borderColor='#ff595e'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
+                        onfocus="this.style.borderColor='#ff8555'; this.style.boxShadow='0 0 0 3px rgba(255,133,85,0.15)'"
                         onblur="this.style.borderColor='#f1e7cc'; this.style.boxShadow='none'"
                         placeholder="<?php echo e(__('login.password_placeholder')); ?>">
                     <button type="button" onclick="togglePassword('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b949d] hover:text-[#5f6873]" aria-label="<?php echo e(__('login.show_password')); ?>">
@@ -69,16 +69,16 @@
             </div>
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-sm" style="color: #5f6873;">
-                    <input type="checkbox" name="remember" class="rounded" style="accent-color: #ff595e;">
+                    <input type="checkbox" name="remember" class="rounded" style="accent-color: #ff8555;">
                     <?php echo e(__('login.remember')); ?>
 
                 </label>
             </div>
             <button type="submit"
                 class="w-full text-white py-3 rounded-lg font-semibold transition transform hover:scale-[1.02]"
-                style="background: #ff595e; box-shadow: 0 4px 12px rgba(255,133,85,0.2);"
-                onmouseover="this.style.background='#e8454a'"
-                onmouseout="this.style.background='#ff595e'">
+                style="background: #ff8555; box-shadow: 0 4px 12px rgba(255,133,85,0.2);"
+                onmouseover="this.style.background='#f47548'"
+                onmouseout="this.style.background='#ff8555'">
                 <?php echo e(__('login.submit')); ?>
 
             </button>

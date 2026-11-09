@@ -22,9 +22,15 @@ return new class extends Migration
             }
         });
 
-        Schema::table('announcements', function (Blueprint $table) {
-            $table->index(['is_pinned', 'created_at']);
-        });
+        if (Schema::hasColumn('announcements', 'is_pinned')) {
+            Schema::table('announcements', function (Blueprint $table) {
+                // Keep the ordering index without duplicating it on a DB where
+                // this migration was partially applied by an earlier release.
+                if (! Schema::hasIndex('announcements', ['is_pinned', 'created_at'])) {
+                    $table->index(['is_pinned', 'created_at']);
+                }
+            });
+        }
     }
 
     public function down(): void

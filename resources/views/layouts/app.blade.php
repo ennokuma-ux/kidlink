@@ -8,6 +8,7 @@
     
     
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/kidlink-theme.css') }}" rel="stylesheet">
     <link href="{{ asset('css/mascot.css') }}" rel="stylesheet">
     <link href="{{ asset('css/icons.css') }}" rel="stylesheet">
     <script src="{{ asset('js/tailwind.min.js') }}"></script>
@@ -45,12 +46,17 @@
     @endif
     @if(session('error'))
     <script>
-        Swal.fire({ icon: 'info', title: @json(__('misc.notice_title')), text: @json(session('error')) });
+        Swal.fire({ icon: 'error', title: @json(__('misc.error_title')), text: @json(session('error')) });
     </script>
     @endif
     @if($errors->any())
     <script>
-        Swal.fire({ icon: 'error', title: @json(__('misc.error_title')), text: @json($errors->first()), timer: 5000, showConfirmButton: false });
+        Swal.fire({
+            icon: 'error',
+            title: @json(__('misc.error_title')),
+            text: @json(implode("\n", $errors->all())),
+            confirmButtonText: @json(__('OK'))
+        });
     </script>
     @endif
 </body>

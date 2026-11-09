@@ -28,6 +28,9 @@ class Point extends Model
 
     public static function awardPoints(int $studentId, string $gameType, int $level, int $points, string $source, array $metadata = []): self
     {
+        // A single completed level can never award more than 100 points.
+        $points = min(100, max(0, $points));
+
         $lastTotal = static::where('student_id', $studentId)
             ->where('game_type', $gameType)
             ->latest()

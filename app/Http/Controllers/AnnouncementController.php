@@ -63,6 +63,13 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
+        // Normalize whitespace before validation so a title/body made only of
+        // spaces cannot be saved as an apparently empty announcement.
+        $request->merge([
+            'title' => is_string($request->input('title')) ? trim($request->input('title')) : $request->input('title'),
+            'body' => is_string($request->input('body')) ? trim($request->input('body')) : $request->input('body'),
+        ]);
+
         $withPoll = $request->boolean('poll_enabled');
 
         // Blank option boxes are simply ignored rather than failing the form.
@@ -101,11 +108,16 @@ class AnnouncementController extends Controller
             'poll_options.max' => __('A poll can have at most :max options.', ['max' => AnnouncementPoll::MAX_OPTIONS]),
             'poll_options.*.distinct' => __('Each poll option must be different.'),
             'poll_closes_at.after' => __('The poll must close at a time in the future.'),
+            'title.required' => __('Please enter an announcement title.'),
+            'title.max' => __('The announcement title cannot exceed 255 characters.'),
+            'body.required' => __('Please write the announcement before publishing.'),
+            'body.max' => __('The announcement cannot exceed 5,000 characters.'),
+            'tag.in' => __('Please choose a valid announcement tag.'),
         ]);
 
         $pinned = $request->boolean('is_pinned');
 
-        DB::transaction(function () use ($request, $validated, $pinned, $withPoll) {
+        $announcement = DB::transaction(function () use ($request, $validated, $pinned, $withPoll) {
             $announcement = Announcement::create([
                 'author_id' => $request->user()->id,
                 'title' => $validated['title'],
@@ -126,10 +138,13 @@ class AnnouncementController extends Controller
                     $poll->options()->create(['label' => $label, 'position' => $position]);
                 }
             }
+
+            return $announcement;
         });
 
-        return redirect()->route('announcements.index')
-            ->with('success', 'Announcement published.');
+        return redirect()->to(route('announcements.index').'#announcement-'.$announcement->id)
+            ->with('success', 'Announcement published successfully.')
+            ->with('open_announcement', $announcement->id);
     }
 
     /**

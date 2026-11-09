@@ -17,6 +17,16 @@
 </div>
 
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-3xl">
+    @if($errors->any())
+        <div role="alert" class="mb-6 rounded-lg border border-[#ffb4b8] bg-[#fff5f5] p-4 text-sm text-[#9f1d24]">
+            <p class="font-semibold mb-2">{{ __('Please fix the following before publishing:') }}</p>
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form method="POST" action="{{ route('announcements.store') }}" class="space-y-6"
           x-data="{
               poll: @js((bool) old('poll_enabled')),

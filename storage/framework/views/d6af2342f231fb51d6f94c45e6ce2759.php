@@ -83,7 +83,7 @@ unset($__defined_vars, $__key, $__value); ?>
             text-transform: uppercase;
             color: #8a4b00;
             background: #fff4e0;
-            border: 1px solid #ffca3a;
+            border: 1px solid #ffd9a0;
             border-radius: 999px;
             padding: .2rem .6rem;
             margin-bottom: .9rem;
@@ -112,8 +112,8 @@ unset($__defined_vars, $__key, $__value); ?>
             padding: .65rem 1.1rem;
             cursor: pointer;
         }
-        .btn-primary { background: #ff595e; color: #fff; border: 1px solid #ff595e; }
-        .btn-primary:hover { background: #e8454a; border-color: #e8454a; }
+        .btn-primary { background: #ff8555; color: #fff; border: 1px solid #ff8555; }
+        .btn-primary:hover { background: #f47548; border-color: #f47548; }
         .btn-quiet { background: #fff; color: #1f2430; border: 1px solid #d5d8de; }
         .btn-quiet:hover { background: #f4f5f7; }
         .muted { color: #6b7280; font-size: .85rem; }

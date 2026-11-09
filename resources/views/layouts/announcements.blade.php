@@ -7,6 +7,7 @@
     <title>KidLink - @yield('title', __('page.announcements'))</title>
 
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/kidlink-theme.css') }}" rel="stylesheet">
     <link href="{{ asset('css/icons.css') }}" rel="stylesheet">
     <script src="{{ asset('js/tailwind.min.js') }}"></script>
     <x-stronger-shadows />

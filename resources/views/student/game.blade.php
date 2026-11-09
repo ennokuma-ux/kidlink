@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('student.game_title', ['type' => ucfirst($type)]))
 
@@ -42,7 +42,7 @@
                     <h3 class="text-2xl font-bold text-[#182438] text-center mb-8" id="questionText">{{ $gameQuestions[0]['question'] }}</h3>
                     <div class="grid grid-cols-2 gap-4" id="optionsContainer">
                         @foreach($gameQuestions[0]['options'] as $idx => $option)
-                        <button class="option-btn bg-[#ff8555] hover:bg-[#f47548] text-[#182438] text-xl font-semibold p-6 rounded-2xl" data-index="{{ $idx }}" onclick="checkAnswer({{ $idx }})">
+                        <button class="option-btn bg-[#ff8555] hover:bg-[#f47548] text-white text-xl font-semibold p-6 rounded-2xl" data-index="{{ $idx }}" onclick="checkAnswer({{ $idx }})">
                             {{ $option }}
                         </button>
                         @endforeach
@@ -58,7 +58,7 @@
         <div class="text-6xl mb-4 text-[#6a4c93]" id="celebrationEmoji"><i class="ico ico-sparkles" aria-hidden="true"></i></div>
         <h3 class="text-3xl font-bold text-[#182438] mb-2" id="celebrationTitle">{{ __('student.celebration_title') }}</h3>
         <p class="text-[#5f6873] mb-6" id="celebrationMessage">{{ __('student.celebration_message') }}</p>
-        <button onclick="nextQuestion()" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-[#182438] px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.next') }}</button>
+        <button onclick="nextQuestion()" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-white px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.next') }}</button>
     </div>
 </div>
 
@@ -67,7 +67,7 @@
         <div class="mb-4 flex justify-center"><img src="{{ asset('assets/icons/barbell.svg') }}" alt="" class="h-16 w-16" aria-hidden="true"></div>
         <h3 class="text-3xl font-bold text-[#182438] mb-2">{{ __('student.almost_there') }}</h3>
         <p class="text-[#5f6873] mb-6">{{ __('student.keep_trying') }}</p>
-        <button onclick="nextQuestion()" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-[#182438] px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.try_next') }}</button>
+        <button onclick="nextQuestion()" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-white px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.try_next') }}</button>
     </div>
 </div>
 
@@ -78,7 +78,7 @@
         <p class="text-5xl font-bold text-[#ff8555] my-4" id="finalScore">0%</p>
         <p class="text-[#5f6873] mb-6" id="finishMessage">{{ __('student.great_effort') }}</p>
         <div class="flex gap-4 justify-center">
-            <a href="{{ route('student.game.show', $type) }}" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-[#182438] px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.play_again') }}</a>
+            <a href="{{ route('student.game.show', $type) }}" class="bg-gradient-to-r from-[#ff8555] to-[#ff595e] text-white px-8 py-3 rounded-xl font-semibold hover:from-[#f47548] hover:to-[#e8454a] transition">{{ __('student.play_again') }}</a>
             <a href="{{ route('student.home') }}" class="border-2 border-[#ff8555] text-[#ff8555] px-8 py-3 rounded-xl font-semibold hover:bg-[#fff0e6] transition">{{ __('student.home') }}</a>
         </div>
     </div>
@@ -157,7 +157,7 @@ function nextQuestion() {
     container.innerHTML = '';
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'option-btn bg-[#ff8555] hover:bg-[#f47548] text-[#182438] text-xl font-semibold p-6 rounded-2xl';
+        btn.className = 'option-btn bg-[#ff8555] hover:bg-[#f47548] text-white text-xl font-semibold p-6 rounded-2xl';
         btn.textContent = opt;
         btn.dataset.index = idx;
         btn.onclick = () => checkAnswer(idx);

@@ -167,31 +167,17 @@ class LevelCompletionRecorder
         });
     }
 
-    /** Points a single correct answer is worth, so a level's total score is total x this. */
-    public const POINTS_PER_QUESTION = 10;
-
-    /** Extra points for a level finished without a single mistake. */
-    public const FLAWLESS_BONUS = 25;
-
     /**
-     * Points follow the accuracy percentage: the level's total score is every
-     * question at full value, and each mistake lowers the percentage of that
-     * total that is paid out (5 questions, 1 mistake = 83% of 50 points).
-     * A finished stage always answers every question, so only mistakes can
-     * take points away. A mistake-free stage also earns the flat bonus.
+     * A completed level is worth at most 100 points. Accuracy is calculated
+     * from correct answers divided by all attempts (correct + mistakes), so
+     * every wrong attempt reduces the final award. Replays can only top up to
+     * the best 100-point result for this level.
      */
     private function pointsFor(int $total, int $mistakes): int
     {
-        $levelTotal = $total * self::POINTS_PER_QUESTION;
-        $percentage = $this->percentage($total, $total, $mistakes);
+        $accuracy = $this->percentage($total, $total, $mistakes);
 
-        $points = (int) round($levelTotal * $percentage / 100);
-
-        if ($mistakes === 0) {
-            $points += self::FLAWLESS_BONUS;
-        }
-
-        return max(0, $points);
+        return min(100, max(0, (int) round($accuracy)));
     }
 
     private function percentage(int $score, int $total, int $mistakes): int

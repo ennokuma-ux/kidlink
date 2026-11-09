@@ -9,11 +9,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('announcements', function (Blueprint $table) {
-            // Pinned announcements stay at the top of the board until unpinned.
-            $table->boolean('is_pinned')->default(false)->index();
-            $table->timestamp('pinned_at')->nullable();
-            // Optional label: "urgent" or "emergency" (see Announcement::TAGS).
-            $table->string('tag', 20)->nullable();
+            // This overlaps with the follow-up pinning migration; guard each
+            // column so either migration can safely run first on upgraded DBs.
+            if (! Schema::hasColumn('announcements', 'is_pinned')) {
+                $table->boolean('is_pinned')->default(false)->index();
+            }
+            if (! Schema::hasColumn('announcements', 'pinned_at')) {
+                $table->timestamp('pinned_at')->nullable();
+            }
+            if (! Schema::hasColumn('announcements', 'tag')) {
+                $table->string('tag', 20)->nullable();
+            }
         });
     }
 
