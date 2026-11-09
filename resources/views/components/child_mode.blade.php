@@ -105,7 +105,7 @@
                 <template x-for="a in filtered" :key="a.id">
                     <form method="POST" :action="a.url">
                         @csrf
-                        <button type="submit" class="w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-orange-50 transition flex items-center gap-3">
+                        <button type="submit" class="kidlink-child-option w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-orange-50 transition flex items-center gap-3">
                             <span class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style="background: linear-gradient(135deg, #1982c4, #ff8555);" x-text="a.initial"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="block font-semibold text-[#182438] truncate" x-text="a.name"></span>

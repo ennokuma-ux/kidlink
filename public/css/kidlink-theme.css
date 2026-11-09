@@ -64,3 +64,22 @@ input[type="submit"]:disabled {
 :root { --kidlink-brand-orange: #ff6b35; --kidlink-brand-orange-hover: #ed5524; }
 .kidlink-brand-orange { color: var(--kidlink-brand-orange) !important; }
 .kidlink-brand-orange-bg { background-color: var(--kidlink-brand-orange) !important; }
+
+
+/* Student chooser options stay white; generic orange-action selectors must not recolor hover utility classes. */
+.kidlink-student-option,
+.kidlink-child-option {
+  background-color: #fff !important;
+  color: #182438 !important;
+  border-color: #e2e8f0 !important;
+}
+.kidlink-student-option:hover,
+.kidlink-child-option:hover {
+  background-color: #fffaf7 !important;
+  border-color: #ffb08f !important;
+}
+.kidlink-student-option:focus-visible,
+.kidlink-child-option:focus-visible {
+  outline: 3px solid var(--kidlink-orange-ring);
+  outline-offset: 2px;
+}

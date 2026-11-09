@@ -18,7 +18,7 @@
 
     @if($variant === 'button')
         <button type="button" @click="show()"
-                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#ff6b35] hover:bg-[#fff3eb] transition">
+                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#ff6b35] hover:bg-[#fff6f0] transition">
             <svg class="w-4 h-4 text-[#ff8555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4-4m-4 4l4 4"/></svg>
             <span>{{ $selected ? __('analytics.chooser_switch') : __('analytics.chooser_button') }}</span>
             @if($selected)<span class="max-w-[10rem] truncate font-normal text-[#5f6873]">&middot; {{ $selected->name }}</span>@endif
@@ -45,7 +45,7 @@
                 </div>
                 <div class="max-h-[58vh] overflow-y-auto space-y-2 pr-1">
                     <template x-for="student in filtered" :key="student.id">
-                        <a :href="student.url" class="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 transition duration-150 hover:border-[#ff6b35] hover:bg-orange-50/60 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b35]"
+                        <a :href="student.url" class="kidlink-student-option group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 transition duration-150 hover:border-[#ff6b35] hover:bg-orange-50/60 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b35]"
                            :class="student.id === selectedId ? 'border-[#ff6b35] bg-orange-50 shadow-sm' : ''">
                             <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-bold text-[#e85b2a]" x-text="student.name.trim().charAt(0).toUpperCase()"></span>
                             <span class="min-w-0 flex-1">
