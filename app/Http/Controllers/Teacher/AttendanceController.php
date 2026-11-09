@@ -60,7 +60,7 @@ class AttendanceController extends Controller
         $cacheKey = "teacher.{$teacherId}.attendance.{$date->format('Y-m-d')}";
         $attendance = Cache::remember($cacheKey, 60, function () use ($date, $students) {
             return Attendance::whereDate('date', $date)
-                ->whereIn('student_id', $allFilteredStudents->pluck('id'))
+                ->whereIn('student_id', $filteredStudentIds)
                 ->get(['id', 'student_id', 'date', 'status'])
                 ->keyBy('student_id');
         });
@@ -95,8 +95,11 @@ class AttendanceController extends Controller
             'late' => $countStatus('Late'),
         ];
 
-        // Keep the full filtered set for totals and calendar; render at most 10 rows.
-        $allFilteredStudents = $filtered;
+        // Keep the full filtered collection for calendar queries and totals.
+        $filteredStudentIds = $filtered->pluck('id')->all();
+        $filteredStudentCount = $filtered->count();
+
+        // Render at most 10 rows per page without losing the full filtered set.
         $perPage = 10;
         $page = max(1, LengthAwarePaginator::resolveCurrentPage('page'));
         $studentsPage = $filtered->forPage($page, $perPage)->values();
@@ -110,13 +113,13 @@ class AttendanceController extends Controller
         $students->appends($request->query());
 
         // One small grouped query for the calendar dots: how each recent day went.
-        $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($allFilteredStudents) {
+        $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($filteredStudentIds) {
             $days = [];
 
             Attendance::query()
                 ->select('date', 'status')
                 ->selectRaw('COUNT(*) as total')
-                ->whereIn('student_id', $allFilteredStudents->pluck('id'))
+                ->whereIn('student_id', $filteredStudentIds)
                 ->where('date', '>=', Carbon::today()->subMonths(12)->toDateString())
                 ->groupBy('date', 'status')
                 ->get()
@@ -135,7 +138,7 @@ class AttendanceController extends Controller
         return view('teacher.attendance', [
             'calendarDays' => $calendarDays,
             'students' => $students,
-            'totalStudents' => $filtered->count(),
+            'totalStudents' => $filteredStudentCount,
             'attendance' => $attendance,
             'date' => $date,
             'stats' => $stats,
