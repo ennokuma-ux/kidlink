@@ -8,6 +8,7 @@ use App\Models\AnnouncementPollVote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
 use Throwable;
 use Illuminate\Validation\Rule;
 
@@ -137,13 +138,24 @@ class AnnouncementController extends Controller
 
                 return $announcement;
             });
+        } catch (QueryException $exception) {
+            Log::error('Announcement publishing failed because of a database error.', [
+                'user_id' => $request->user()->id,
+                'sql_state' => $exception->errorInfo[0] ?? null,
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return back()->withInput()->with(
+                'error',
+                'Your announcement was not saved because the announcement database is not up to date. Please ask the administrator to run the pending database migrations, then try again.'
+            );
         } catch (Throwable $exception) {
             Log::error('Announcement publishing failed.', [
                 'user_id' => $request->user()->id,
                 'exception' => $exception->getMessage(),
             ]);
 
-            return back()->withInput()->with('error', 'Your announcement could not be published. Please try again. If the problem continues, contact an administrator.');
+            return back()->withInput()->with('error', 'Your announcement could not be published. Please check your connection and try again. If the problem continues, contact an administrator.');
         }
 
         return redirect()->route('announcements.index')

@@ -8,7 +8,7 @@
     
     
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/kidlink-theme.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/kidlink-theme.css') }}?v={{ filemtime(public_path('css/kidlink-theme.css')) }}" rel="stylesheet">
     <link href="{{ asset('css/mascot.css') }}" rel="stylesheet">
     <link href="{{ asset('css/icons.css') }}" rel="stylesheet">
     <script src="{{ asset('js/tailwind.min.js') }}"></script>
@@ -46,7 +46,7 @@
     @endif
     @if(session('error'))
     <script>
-        Swal.fire({ icon: 'info', title: @json(__('misc.notice_title')), text: @json(session('error')) });
+        Swal.fire({ icon: 'error', title: @json(__('misc.error_title')), text: @json(session('error')) });
     </script>
     @endif
     @if($errors->any())

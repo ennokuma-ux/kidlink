@@ -25,3 +25,36 @@ button[class*="bg-[#f4773f]"]:focus-visible, a[class*="bg-[#f4773f]"]:focus-visi
   outline-offset: 2px;
 }
 button:disabled, button[disabled] { cursor: not-allowed; opacity: .6; }
+
+
+/* Consistent primary actions across Tailwind utility variants and older views. */
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff8555]"],
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f47548]"],
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f4773f]"],
+:where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-500"],
+:where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-600"] {
+  background-color: var(--kidlink-orange) !important;
+  border-color: var(--kidlink-orange) !important;
+  color: #fff !important;
+}
+
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff8555]"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f47548]"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f4773f]"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-500"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-600"]:hover {
+  background-color: var(--kidlink-orange-hover) !important;
+  border-color: var(--kidlink-orange-hover) !important;
+}
+
+:where(button, a, input[type="submit"], [role="button"]):focus-visible {
+  outline: 3px solid var(--kidlink-orange-ring);
+  outline-offset: 2px;
+}
+
+button:disabled,
+button[disabled],
+input[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}

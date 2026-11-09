@@ -8,7 +8,7 @@
     
     
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/kidlink-theme.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/kidlink-theme.css') }}?v={{ filemtime(public_path('css/kidlink-theme.css')) }}" rel="stylesheet">
     <link href="{{ asset('css/icons.css') }}" rel="stylesheet">
     <script src="{{ asset('js/tailwind.min.js') }}"></script>
     <x-stronger-shadows />
@@ -70,6 +70,21 @@
     @endif
     @if(session('error'))
     <script>Swal.fire({ icon: 'error', title: @json(__('misc.oops_title')), text: @json(session('error')) });</script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: @json(__('misc.error_title')),
+            text: @json($errors->first()),
+            confirmButtonText: @json(__('OK')),
+        });
+    </script>
+    @endif
+
+    @if(session('info'))
+    <script>Swal.fire({ icon: 'info', title: @json(__('misc.notice_title')), text: @json(session('info')), timer: 3500, showConfirmButton: false });</script>
     @endif
 </body>
 </html>
