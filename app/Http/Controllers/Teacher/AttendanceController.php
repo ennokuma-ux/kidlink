@@ -60,7 +60,7 @@ class AttendanceController extends Controller
         $cacheKey = "teacher.{$teacherId}.attendance.{$date->format('Y-m-d')}";
         $attendance = Cache::remember($cacheKey, 60, function () use ($date, $students) {
             return Attendance::whereDate('date', $date)
-                ->whereIn('student_id', $students->pluck('id'))
+                ->whereIn('student_id', $allFilteredStudents->pluck('id'))
                 ->get(['id', 'student_id', 'date', 'status'])
                 ->keyBy('student_id');
         });
@@ -95,7 +95,8 @@ class AttendanceController extends Controller
             'late' => $countStatus('Late'),
         ];
 
-        // Keep the full filtered set for totals, but render at most 10 rows.
+        // Keep the full filtered set for totals and calendar; render at most 10 rows.
+        $allFilteredStudents = $filtered;
         $perPage = 10;
         $page = max(1, LengthAwarePaginator::resolveCurrentPage('page'));
         $studentsPage = $filtered->forPage($page, $perPage)->values();
@@ -109,13 +110,13 @@ class AttendanceController extends Controller
         $students->appends($request->query());
 
         // One small grouped query for the calendar dots: how each recent day went.
-        $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($students) {
+        $calendarDays = Cache::remember("teacher.{$teacherId}.attendance.calendar", 60, function () use ($allFilteredStudents) {
             $days = [];
 
             Attendance::query()
                 ->select('date', 'status')
                 ->selectRaw('COUNT(*) as total')
-                ->whereIn('student_id', $students->pluck('id'))
+                ->whereIn('student_id', $allFilteredStudents->pluck('id'))
                 ->where('date', '>=', Carbon::today()->subMonths(12)->toDateString())
                 ->groupBy('date', 'status')
                 ->get()
@@ -134,7 +135,7 @@ class AttendanceController extends Controller
         return view('teacher.attendance', [
             'calendarDays' => $calendarDays,
             'students' => $students,
-            'totalStudents' => $students->count(),
+            'totalStudents' => $filtered->count(),
             'attendance' => $attendance,
             'date' => $date,
             'stats' => $stats,

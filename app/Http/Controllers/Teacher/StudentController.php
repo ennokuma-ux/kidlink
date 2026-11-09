@@ -36,13 +36,11 @@ class StudentController extends Controller
 
         $students = $order($scope(Student::with('parents')))
             ->where('is_active', true)
-            ->paginate(10, ['*'], 'students_page')
-            ->withQueryString();
+            ->get();
 
         $archivedStudents = $order($scope(Student::with('parents')))
             ->where('is_active', false)
-            ->paginate(10, ['*'], 'archived_page')
-            ->withQueryString();
+            ->get();
 
         // Also backs the "connect parent account" pickers in the add/edit modals.
         $parents = User::where('role', 'parent')

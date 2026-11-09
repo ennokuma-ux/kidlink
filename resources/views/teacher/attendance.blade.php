@@ -148,6 +148,11 @@
             @endforelse
             </tbody>
         </table>
+        @if($students->hasPages())
+            <div class="border-t border-[#f1e7cc] px-4 py-3">
+                {{ $students->onEachSide(1)->links() }}
+            </div>
+        @endif
     </form>
 </div>
 <x-attendance-calendar :days="$calendarDays" :date="$date->format('Y-m-d')" :base-url="route('teacher.attendance.index')" :search="$search" :section="$section" :year="$year" />

@@ -18,7 +18,7 @@
 
     @if($variant === 'button')
         <button type="button" @click="show()"
-                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#ff6b35] hover:bg-[#fff6f0] transition">
+                class="inline-flex items-center gap-2 rounded-lg border border-[#f1e7cc] bg-white px-4 py-2.5 text-sm font-semibold text-[#182438] hover:border-[#ff6b35] hover:bg-[#fff3eb] transition">
             <svg class="w-4 h-4 text-[#ff8555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4-4m-4 4l4 4"/></svg>
             <span>{{ $selected ? __('analytics.chooser_switch') : __('analytics.chooser_button') }}</span>
             @if($selected)<span class="max-w-[10rem] truncate font-normal text-[#5f6873]">&middot; {{ $selected->name }}</span>@endif

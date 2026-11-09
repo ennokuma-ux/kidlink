@@ -389,7 +389,7 @@ function currentView() {
  * is told which rows match, in display order, and flips `hidden` only on rows
  * whose visibility actually changes.
  */
-const PAGE_SIZES = [10, 25, 50];
+const PAGE_SIZES = [10];
 
 function createPager(name, rowEls) {
     const el = document.querySelector('[data-pager="' + name + '"]');

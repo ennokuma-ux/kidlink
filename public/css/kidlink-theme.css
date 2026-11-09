@@ -6,20 +6,20 @@
   --kidlink-orange-ring: rgba(255, 107, 53, .30);
 }
 button[class*="bg-orange-"], a[class*="bg-orange-"],
-button[class*="bg-[#ff8555]"], a[class*="bg-[#ff8555]"],
+button[class*="bg-[#ff6b35]"], a[class*="bg-[#ff6b35]"],
 button[class*="bg-[#f4773f]"], a[class*="bg-[#f4773f]"] {
   background-color: var(--kidlink-orange) !important;
   color: #fff !important;
   border-color: var(--kidlink-orange) !important;
 }
 button[class*="bg-orange-"]:hover, a[class*="bg-orange-"]:hover,
-button[class*="bg-[#ff8555]"]:hover, a[class*="bg-[#ff8555]"]:hover,
+button[class*="bg-[#ff6b35]"]:hover, a[class*="bg-[#ff6b35]"]:hover,
 button[class*="bg-[#f4773f]"]:hover, a[class*="bg-[#f4773f]"]:hover {
   background-color: var(--kidlink-orange-hover) !important;
   border-color: var(--kidlink-orange-hover) !important;
 }
 button[class*="bg-orange-"]:focus-visible, a[class*="bg-orange-"]:focus-visible,
-button[class*="bg-[#ff8555]"]:focus-visible, a[class*="bg-[#ff8555]"]:focus-visible,
+button[class*="bg-[#ff6b35]"]:focus-visible, a[class*="bg-[#ff6b35]"]:focus-visible,
 button[class*="bg-[#f4773f]"]:focus-visible, a[class*="bg-[#f4773f]"]:focus-visible {
   outline: 3px solid var(--kidlink-orange-ring);
   outline-offset: 2px;
@@ -28,8 +28,8 @@ button:disabled, button[disabled] { cursor: not-allowed; opacity: .6; }
 
 
 /* Consistent primary actions across Tailwind utility variants and older views. */
-:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff8555]"],
-:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f47548]"],
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff6b35]"],
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f05a24]"],
 :where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f4773f]"],
 :where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-500"],
 :where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-600"] {
@@ -38,8 +38,8 @@ button:disabled, button[disabled] { cursor: not-allowed; opacity: .6; }
   color: #fff !important;
 }
 
-:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff8555]"]:hover,
-:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f47548]"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#ff6b35]"]:hover,
+:where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f05a24]"]:hover,
 :where(button, a, input[type="submit"], [role="button"])[class*="bg-[#f4773f]"]:hover,
 :where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-500"]:hover,
 :where(button, a, input[type="submit"], [role="button"])[class~="bg-orange-600"]:hover {

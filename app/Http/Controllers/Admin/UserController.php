@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\User;
+use App\Rules\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -88,7 +89,7 @@ class UserController extends Controller
             'dominant_hand' => $isStudent
                 ? ['nullable', 'string', 'max:255', Rule::in(Student::HANDS)]
                 : 'nullable|string|max:255',
-            'academic_year' => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/', $this->consecutiveYears()],
+            'academic_year' => ['nullable', 'string', new AcademicYear],
             'teacher_id' => [
                 'nullable',
                 Rule::exists('users', 'id')
@@ -183,7 +184,7 @@ class UserController extends Controller
             'student_ids' => 'nullable|array',
             'student_ids.*' => 'integer|exists:students,id',
             'class_name' => ['nullable', 'string', 'max:255', Rule::in(Student::SECTIONS)],
-            'academic_year' => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/', $this->consecutiveYears()],
+            'academic_year' => ['nullable', 'string', new AcademicYear],
             'dominant_hand' => ['nullable', 'string', 'max:255', Rule::in(Student::HANDS)],
         ]);
 
