@@ -161,8 +161,10 @@ Route::middleware(['auth', 'role:teacher'])
   });
 
   // Posting is limited to admins and teachers. Parents can read but never write.
-  Route::middleware(['auth', 'active', 'role:super_admin,admin,teacher', PreventDuplicateSubmission::class])->prefix('announcements')->name('announcements.')->group(function () {
+  Route::middleware(['auth', 'active', 'role:super_admin,admin,teacher'])->prefix('announcements')->name('announcements.')->group(function () {
     Route::get('/create', [AnnouncementController::class, 'create'])->name('create');
+    // Do not apply PreventDuplicateSubmission to announcement publishing:
+    // identical announcement text is valid and must be publishable more than once.
     Route::post('/', [AnnouncementController::class, 'store'])->name('store');
     // Only admins and teachers can see the archive. Defined before any
     // /{announcement} route so "archived" is never read as an id.

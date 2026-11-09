@@ -129,6 +129,7 @@ class WhatsMissingGameController extends Controller
             'total' => $result['total'],
             'mistakes' => $result['mistakes'],
             'percentage' => $result['percentage'],
+            'final_score' => $result['final_score'] ?? $result['percentage'],
             'points_earned' => $result['points_earned'],
             'next_level_unlocked' => $result['completed'] && $level < $this->totalLevels,
         ]);

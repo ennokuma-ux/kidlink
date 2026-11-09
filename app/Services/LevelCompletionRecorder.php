@@ -19,7 +19,7 @@ use InvalidArgumentException;
 class LevelCompletionRecorder
 {
     /**
-     * @return array{recorded: bool, completed: bool, improved: bool, score: int, total: int, mistakes: int, percentage: int, points_earned: int}
+     * @return array{recorded: bool, completed: bool, improved: bool, score: int, total: int, mistakes: int, percentage: int, final_score: int, points_earned: int}
      */
     public function record(
         Student $student,
@@ -55,7 +55,8 @@ class LevelCompletionRecorder
                 'score' => $score,
                 'total' => $expectedTotal,
                 'mistakes' => $mistakes,
-                'percentage' => $this->percentage($score, $expectedTotal, $mistakes),
+                'percentage' => min(100, max(0, $this->percentage($score, $expectedTotal, $mistakes))),
+                'final_score' => min(100, max(0, $this->percentage($score, $expectedTotal, $mistakes))),
                 'points_earned' => 0,
             ];
         }
@@ -89,7 +90,7 @@ class LevelCompletionRecorder
                 // finished before points existed (or one improved on) is credited once,
                 // and replaying the same result can never farm more.
                 $topUp = 0;
-                $attemptPoints = $this->pointsFor($score, $expectedTotal, $mistakes);
+                $attemptPoints = $this->pointsFor($expectedTotal, $mistakes);
                 $alreadyPaid = (int) Point::where('student_id', $student->id)
                     ->where('game_type', $gameType)
                     ->where('level', $level)
@@ -121,7 +122,8 @@ class LevelCompletionRecorder
                     'score' => $score,
                     'total' => $expectedTotal,
                     'mistakes' => $mistakes,
-                    'percentage' => $percentage,
+                    'percentage' => min(100, max(0, $percentage)),
+                    'final_score' => min(100, max(0, $percentage)),
                     'points_earned' => $topUp,
                 ];
             }
@@ -137,7 +139,7 @@ class LevelCompletionRecorder
                 'time_taken' => $timeTaken,
             ]);
 
-            $pointsEarned = $this->pointsFor($score, $expectedTotal, $mistakes);
+            $pointsEarned = $this->pointsFor($expectedTotal, $mistakes);
 
             Point::awardPoints(
                 studentId: $student->id,
@@ -161,7 +163,8 @@ class LevelCompletionRecorder
                 'score' => $score,
                 'total' => $expectedTotal,
                 'mistakes' => $mistakes,
-                'percentage' => $percentage,
+                'percentage' => min(100, max(0, $percentage)),
+                'final_score' => min(100, max(0, $percentage)),
                 'points_earned' => $pointsEarned,
             ];
         });
@@ -172,11 +175,9 @@ class LevelCompletionRecorder
      * Every wrong attempt lowers accuracy; there is no bonus that can push the
      * final score above the 100-point maximum.
      */
-    private function pointsFor(int $score, int $total, int $mistakes): int
+    private function pointsFor(int $total, int $mistakes): int
     {
-        // Accuracy is correct answers divided by all attempts (correct answers
-        // plus mistakes). A completed level can therefore earn at most 100.
-        return min(100, max(0, $this->percentage($score, $total, $mistakes)));
+        return min(100, max(0, $this->percentage($total, $total, $mistakes)));
     }
 
     private function percentage(int $score, int $total, int $mistakes): int
