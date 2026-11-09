@@ -75,5 +75,8 @@
     @if(session('error'))
     <script>Swal.fire({ icon: 'error', title: '{{ __('announcements.oops') }}', text: @json(session('error')) });</script>
     @endif
+    @if(session('info'))
+    <script>Swal.fire({ icon: 'info', title: '{{ __('announcements.success') }}', text: @json(session('info')), timer: 3500, showConfirmButton: false });</script>
+    @endif
 </body>
 </html>

@@ -54,8 +54,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('announcement_poll_votes');
-        Schema::dropIfExists('announcement_poll_options');
-        Schema::dropIfExists('announcement_polls');
+        // The primary poll migration owns these tables and their rollback.
     }
 };

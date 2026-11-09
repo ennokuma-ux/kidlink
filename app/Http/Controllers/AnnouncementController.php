@@ -7,6 +7,8 @@ use App\Models\AnnouncementPoll;
 use App\Models\AnnouncementPollVote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 use Illuminate\Validation\Rule;
 
 class AnnouncementController extends Controller
@@ -63,13 +65,6 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
-        // Normalize whitespace before validation so a title/body made only of
-        // spaces cannot be saved as an apparently empty announcement.
-        $request->merge([
-            'title' => is_string($request->input('title')) ? trim($request->input('title')) : $request->input('title'),
-            'body' => is_string($request->input('body')) ? trim($request->input('body')) : $request->input('body'),
-        ]);
-
         $withPoll = $request->boolean('poll_enabled');
 
         // Blank option boxes are simply ignored rather than failing the form.
@@ -102,49 +97,57 @@ class AnnouncementController extends Controller
         }
 
         $validated = $request->validate($rules, [
+            'title.required' => __('Please enter an announcement title.'),
+            'title.max' => __('The announcement title cannot exceed 255 characters.'),
+            'body.required' => __('Please write the announcement before publishing.'),
+            'body.max' => __('The announcement cannot exceed 5,000 characters.'),
+            'tag.in' => __('Please choose a valid announcement tag.'),
             'poll_question.required' => __('Enter the question for your poll.'),
             'poll_options.required' => __('Add at least :min options to the poll.', ['min' => AnnouncementPoll::MIN_OPTIONS]),
             'poll_options.min' => __('Add at least :min options to the poll.', ['min' => AnnouncementPoll::MIN_OPTIONS]),
             'poll_options.max' => __('A poll can have at most :max options.', ['max' => AnnouncementPoll::MAX_OPTIONS]),
             'poll_options.*.distinct' => __('Each poll option must be different.'),
             'poll_closes_at.after' => __('The poll must close at a time in the future.'),
-            'title.required' => __('Please enter an announcement title.'),
-            'title.max' => __('The announcement title cannot exceed 255 characters.'),
-            'body.required' => __('Please write the announcement before publishing.'),
-            'body.max' => __('The announcement cannot exceed 5,000 characters.'),
-            'tag.in' => __('Please choose a valid announcement tag.'),
         ]);
 
         $pinned = $request->boolean('is_pinned');
 
-        $announcement = DB::transaction(function () use ($request, $validated, $pinned, $withPoll) {
-            $announcement = Announcement::create([
-                'author_id' => $request->user()->id,
-                'title' => $validated['title'],
-                'body' => $validated['body'],
-                'tag' => ($validated['tag'] ?? null) ?: null,
-                'is_pinned' => $pinned,
-                'pinned_at' => $pinned ? now() : null,
-            ]);
-
-            if ($withPoll) {
-                $poll = $announcement->poll()->create([
-                    'question' => trim($validated['poll_question']),
-                    'allow_multiple' => $request->boolean('poll_multiple'),
-                    'closes_at' => ! empty($validated['poll_closes_at']) ? $validated['poll_closes_at'] : null,
+        try {
+            $announcement = DB::transaction(function () use ($request, $validated, $pinned, $withPoll) {
+                $announcement = Announcement::create([
+                    'author_id' => $request->user()->id,
+                    'title' => trim($validated['title']),
+                    'body' => trim($validated['body']),
+                    'tag' => ($validated['tag'] ?? null) ?: null,
+                    'is_pinned' => $pinned,
+                    'pinned_at' => $pinned ? now() : null,
                 ]);
 
-                foreach (array_values($validated['poll_options']) as $position => $label) {
-                    $poll->options()->create(['label' => $label, 'position' => $position]);
+                if ($withPoll) {
+                    $poll = $announcement->poll()->create([
+                        'question' => trim($validated['poll_question']),
+                        'allow_multiple' => $request->boolean('poll_multiple'),
+                        'closes_at' => ! empty($validated['poll_closes_at']) ? $validated['poll_closes_at'] : null,
+                    ]);
+
+                    foreach (array_values($validated['poll_options']) as $position => $label) {
+                        $poll->options()->create(['label' => trim($label), 'position' => $position]);
+                    }
                 }
-            }
 
-            return $announcement;
-        });
+                return $announcement;
+            });
+        } catch (Throwable $exception) {
+            Log::error('Announcement publishing failed.', [
+                'user_id' => $request->user()->id,
+                'exception' => $exception->getMessage(),
+            ]);
 
-        return redirect()->to(route('announcements.index').'#announcement-'.$announcement->id)
-            ->with('success', 'Announcement published successfully.')
-            ->with('open_announcement', $announcement->id);
+            return back()->withInput()->with('error', 'Your announcement could not be published. Please try again. If the problem continues, contact an administrator.');
+        }
+
+        return redirect()->route('announcements.index')
+            ->with('success', 'Announcement published successfully.');
     }
 
     /**

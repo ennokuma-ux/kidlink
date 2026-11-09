@@ -13,31 +13,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('announcements', function (Blueprint $table) {
-            if (! Schema::hasColumn('announcements', 'is_pinned')) {
-                $table->boolean('is_pinned')->default(false);
-            }
-            if (! Schema::hasColumn('announcements', 'pinned_at')) {
-                $table->timestamp('pinned_at')->nullable();
-            }
-        });
-
-        if (Schema::hasColumn('announcements', 'is_pinned')) {
+        if (! Schema::hasColumn('announcements', 'is_pinned')) {
             Schema::table('announcements', function (Blueprint $table) {
-                // Keep the ordering index without duplicating it on a DB where
-                // this migration was partially applied by an earlier release.
-                if (! Schema::hasIndex('announcements', ['is_pinned', 'created_at'])) {
-                    $table->index(['is_pinned', 'created_at']);
-                }
+                $table->boolean('is_pinned')->default(false)->index();
+            });
+        }
+
+        if (! Schema::hasColumn('announcements', 'pinned_at')) {
+            Schema::table('announcements', function (Blueprint $table) {
+                $table->timestamp('pinned_at')->nullable();
+            });
+        }
+
+        if (! Schema::hasColumn('announcements', 'tag')) {
+            Schema::table('announcements', function (Blueprint $table) {
+                $table->string('tag', 20)->nullable();
             });
         }
     }
 
     public function down(): void
     {
-        Schema::table('announcements', function (Blueprint $table) {
-            $table->dropIndex(['is_pinned', 'created_at']);
-            $table->dropColumn(['is_pinned', 'pinned_at']);
-        });
+        // Intentionally retain shared announcement columns on rollback.
     }
 };

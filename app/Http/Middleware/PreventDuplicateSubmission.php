@@ -44,7 +44,7 @@ class PreventDuplicateSubmission
                 return response()->json(['message' => 'Already submitted.'], 409);
             }
 
-            return redirect()->back()->with('error', 'This action was already submitted. Please wait a moment before trying again.');
+            return redirect()->back()->withInput()->with('info', 'This form was already submitted. Please wait a moment before trying again.');
         }
 
         return $next($request);

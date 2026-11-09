@@ -17,16 +17,17 @@
 </div>
 
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-3xl">
-    @if($errors->any())
-        <div role="alert" class="mb-6 rounded-lg border border-[#ffb4b8] bg-[#fff5f5] p-4 text-sm text-[#9f1d24]">
-            <p class="font-semibold mb-2">{{ __('Please fix the following before publishing:') }}</p>
-            <ul class="list-disc pl-5 space-y-1">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+    @if ($errors->any())
+        <div role="alert" aria-live="assertive" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+            <p class="font-bold">{{ __('Please correct the following before publishing:') }}</p>
+            <ul class="mt-2 list-inside list-disc space-y-1 text-sm">
+                @foreach ($errors->all() as $message)
+                    <li>{{ $message }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
+
     <form method="POST" action="{{ route('announcements.store') }}" class="space-y-6"
           x-data="{
               poll: @js((bool) old('poll_enabled')),

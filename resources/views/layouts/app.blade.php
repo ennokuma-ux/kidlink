@@ -46,17 +46,12 @@
     @endif
     @if(session('error'))
     <script>
-        Swal.fire({ icon: 'error', title: @json(__('misc.error_title')), text: @json(session('error')) });
+        Swal.fire({ icon: 'info', title: @json(__('misc.notice_title')), text: @json(session('error')) });
     </script>
     @endif
     @if($errors->any())
     <script>
-        Swal.fire({
-            icon: 'error',
-            title: @json(__('misc.error_title')),
-            text: @json(implode("\n", $errors->all())),
-            confirmButtonText: @json(__('OK'))
-        });
+        Swal.fire({ icon: 'error', title: @json(__('misc.error_title')), text: @json($errors->first()), timer: 5000, showConfirmButton: false });
     </script>
     @endif
 </body>

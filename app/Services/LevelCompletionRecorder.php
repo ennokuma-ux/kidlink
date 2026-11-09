@@ -168,16 +168,13 @@ class LevelCompletionRecorder
     }
 
     /**
-     * A completed level is worth at most 100 points. Accuracy is calculated
-     * from correct answers divided by all attempts (correct + mistakes), so
-     * every wrong attempt reduces the final award. Replays can only top up to
-     * the best 100-point result for this level.
+     * The final level score is the accuracy percentage, always between 0 and 100.
+     * Every wrong attempt lowers accuracy; there is no bonus that can push the
+     * final score above the 100-point maximum.
      */
     private function pointsFor(int $total, int $mistakes): int
     {
-        $accuracy = $this->percentage($total, $total, $mistakes);
-
-        return min(100, max(0, (int) round($accuracy)));
+        return min(100, max(0, $this->percentage($total, $total, $mistakes)));
     }
 
     private function percentage(int $score, int $total, int $mistakes): int

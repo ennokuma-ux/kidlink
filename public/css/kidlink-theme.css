@@ -1,20 +1,27 @@
-/* KidLink shared action palette: orange actions always use readable white text. */
-a[class*="bg-[#ff8555]"],
-button[class*="bg-[#ff8555]"],
-a[class*="from-[#ff8555]"],
-button[class*="from-[#ff8555]"] {
-    color: #fff !important;
+/* Shared KidLink orange action palette and accessible interaction states. */
+:root {
+  --kidlink-orange: #f4773f;
+  --kidlink-orange-hover: #df6030;
+  --kidlink-orange-soft: #fff0e8;
+  --kidlink-orange-ring: rgba(244, 119, 63, .28);
 }
-a[class*="bg-[#ff8555]"]:hover,
-button[class*="bg-[#ff8555]"]:hover,
-a[class*="from-[#ff8555]"]:hover,
-button[class*="from-[#ff8555]"]:hover {
-    filter: brightness(.94);
+button[class*="bg-orange-"], a[class*="bg-orange-"],
+button[class*="bg-[#ff8555]"], a[class*="bg-[#ff8555]"],
+button[class*="bg-[#f4773f]"], a[class*="bg-[#f4773f]"] {
+  background-color: var(--kidlink-orange) !important;
+  color: #fff !important;
+  border-color: var(--kidlink-orange) !important;
 }
-a[class*="bg-[#ff8555]"]:focus-visible,
-button[class*="bg-[#ff8555]"]:focus-visible,
-a[class*="from-[#ff8555]"]:focus-visible,
-button[class*="from-[#ff8555]"]:focus-visible {
-    outline: 3px solid rgba(255, 133, 85, .35);
-    outline-offset: 3px;
+button[class*="bg-orange-"]:hover, a[class*="bg-orange-"]:hover,
+button[class*="bg-[#ff8555]"]:hover, a[class*="bg-[#ff8555]"]:hover,
+button[class*="bg-[#f4773f]"]:hover, a[class*="bg-[#f4773f]"]:hover {
+  background-color: var(--kidlink-orange-hover) !important;
+  border-color: var(--kidlink-orange-hover) !important;
 }
+button[class*="bg-orange-"]:focus-visible, a[class*="bg-orange-"]:focus-visible,
+button[class*="bg-[#ff8555]"]:focus-visible, a[class*="bg-[#ff8555]"]:focus-visible,
+button[class*="bg-[#f4773f]"]:focus-visible, a[class*="bg-[#f4773f]"]:focus-visible {
+  outline: 3px solid var(--kidlink-orange-ring);
+  outline-offset: 2px;
+}
+button:disabled, button[disabled] { cursor: not-allowed; opacity: .6; }

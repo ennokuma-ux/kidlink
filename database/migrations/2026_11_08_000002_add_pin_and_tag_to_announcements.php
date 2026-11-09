@@ -8,26 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('announcements', function (Blueprint $table) {
-            // This overlaps with the follow-up pinning migration; guard each
-            // column so either migration can safely run first on upgraded DBs.
-            if (! Schema::hasColumn('announcements', 'is_pinned')) {
+        if (! Schema::hasColumn('announcements', 'is_pinned')) {
+            Schema::table('announcements', function (Blueprint $table) {
                 $table->boolean('is_pinned')->default(false)->index();
-            }
-            if (! Schema::hasColumn('announcements', 'pinned_at')) {
+            });
+        }
+
+        if (! Schema::hasColumn('announcements', 'pinned_at')) {
+            Schema::table('announcements', function (Blueprint $table) {
                 $table->timestamp('pinned_at')->nullable();
-            }
-            if (! Schema::hasColumn('announcements', 'tag')) {
+            });
+        }
+
+        if (! Schema::hasColumn('announcements', 'tag')) {
+            Schema::table('announcements', function (Blueprint $table) {
                 $table->string('tag', 20)->nullable();
-            }
-        });
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('announcements', function (Blueprint $table) {
-            $table->dropIndex(['is_pinned']);
-            $table->dropColumn(['is_pinned', 'pinned_at', 'tag']);
-        });
+        // Keep this migration reversible without dropping columns that may be
+        // shared with the guarded follow-up migration or existing installations.
     }
 };
