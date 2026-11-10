@@ -3,6 +3,13 @@
     'heading' => null,
 ])
 
+@php
+    // AnalyticsService::interventionFlags() returns a plain array, not a paginator.
+    // Normalize it once so the component can safely use Collection helpers.
+    $interventionItems = collect($interventions);
+    $interventionTotal = $interventionItems->count();
+@endphp
+
 {{--
     A student who is missing attendance records, or who has no scores at all for
     a topic, looks identical to a student doing fine once the numbers are
@@ -16,11 +23,11 @@
 --}}
 
 <div class="rounded-xl border-2 mb-8
-    {{ $interventions->isEmpty() ? 'bg-white border-[#b8e0c2]' : 'bg-[#fff5f7] border-[#ff595e]' }}">
+    {{ $interventionItems->isEmpty() ? 'bg-white border-[#b8e0c2]' : 'bg-[#fff5f7] border-[#ff595e]' }}">
     <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b
-        {{ $interventions->isEmpty() ? 'border-[#f1e7cc]' : 'border-[#f5c6cf]' }}">
+        {{ $interventionItems->isEmpty() ? 'border-[#f1e7cc]' : 'border-[#f5c6cf]' }}">
         <div class="flex items-center gap-3">
-            @if($interventions->isEmpty())
+            @if($interventionItems->isEmpty())
                 <span class="w-9 h-9 rounded-full bg-[#ecf7d6] text-[#8ac926] flex items-center justify-center text-lg font-bold" aria-hidden="true">&check;</span>
             @else
                 <span class="w-9 h-9 rounded-full bg-[#ff595e] text-white flex items-center justify-center font-bold" aria-hidden="true">!</span>
@@ -33,15 +40,15 @@
                 </p>
             </div>
         </div>
-        @if($interventions->total() > 0)
+        @if($interventionTotal > 0)
             <span class="px-3 py-1.5 rounded-full bg-[#ff595e] text-white text-xs font-bold uppercase tracking-wide">
-                {{ trans_choice('intervention.count', $interventions->total(), ['count' => $interventions->total()]) }}
+                {{ trans_choice('intervention.count', $interventionTotal, ['count' => $interventionTotal]) }}
                 
             </span>
         @endif
     </div>
 
-    @if($interventions->isEmpty())
+    @if($interventionItems->isEmpty())
         <div class="px-6 py-8 text-center">
             <p class="text-[#182438] font-semibold">{{ __('intervention.nothing_missing') }}</p>
             <p class="text-sm text-[#5f6873] mt-1">
@@ -49,11 +56,8 @@
             </p>
         </div>
     @else
-        @if($interventions->hasPages())
-            @include('components.intervention-pager', ['interventions' => $interventions, 'position' => 'top'])
-        @endif
         <div class="divide-y divide-[#f1e7cc]">
-            @foreach ($interventions as $flag)
+            @foreach ($interventionItems as $flag)
                 <div class="px-6 py-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <div class="flex items-center gap-2">
@@ -93,11 +97,9 @@
                 </div>
             @endforeach
         </div>
-        @if($interventions->hasPages())
-            @include('components.intervention-pager', ['interventions' => $interventions, 'position' => 'bottom'])
-        @elseif($interventions->total() > 0)
+        @if($interventionTotal > 0)
             <div class="px-5 py-3 border-t border-[#f5c6cf]">
-                <p class="text-xs text-[#6b7280]">Showing all {{ $interventions->total() }} interventions</p>
+                <p class="text-xs text-[#6b7280]">Showing all {{ $interventionTotal }} interventions</p>
             </div>
         @endif
     @endif
