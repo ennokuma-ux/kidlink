@@ -66,7 +66,7 @@ class AccountRequestController extends Controller
 
             if ($accountRequest->role === 'student') {
                 $parentIds = User::whereIn('id', $accountRequest->parent_ids ?? [])
-                    ->where('role', 'parent')->where('is_active', true)->pluck('id')->all();
+                    ->where('role', 'parent')->whereRaw('is_active = true')->pluck('id')->all();
                 $student = Student::create([
                     'first_name' => $accountRequest->first_name,
                     'last_name' => $accountRequest->last_name,
