@@ -150,13 +150,18 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
             <tr class="hover:bg-[#fffbf0] transition" data-eccd-row>
                 <td class="px-4 py-2 text-[#5f6873]">{{ $i + 1 }}</td>
                 <td class="px-4 py-2 text-sm font-medium text-[#182438] min-w-[9rem]">
-                    @if($record->age_band)
-                    <span class="block text-[10px] uppercase tracking-wide text-[#1982c4] font-bold mb-1">{{ $record->age_band }}</span>
-                    @endif
+                    @php $rowTitle = $record->age_band ? ($labels['titles'][$record->indicator] ?? null) : null; @endphp
+                    @if($rowTitle)
+                    {{-- 0-3 checklist: short title with the age band beside it (normal case),
+                         and the full indicator as the description. --}}
+                    <span class="block text-sm font-semibold text-[#182438]">{{ $rowTitle }}<span class="font-normal text-[#5f6873]"> &middot; {{ $record->age_band }}</span></span>
+                    <span class="block text-xs font-normal text-[#5f6873] mt-0.5">{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}</span>
+                    @else
                     {{ $labels['indicators'][$record->indicator] ?? $record->indicator }}
+                    @endif
                 </td>
                 <td class="px-4 py-2">
-                    <div class="flex items-center justify-center gap-2" data-eccd-group data-record="{{ $record->id }}" data-original="{{ $record->status }}" data-current="{{ $record->status }}" role="group" aria-label="{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}">
+                    <div class="flex items-center justify-center gap-2" data-eccd-group data-record="{{ $record->id }}" data-original="{{ $record->status }}" data-current="{{ $record->status }}" role="group" aria-label="{{ $rowTitle ?: ($labels['indicators'][$record->indicator] ?? $record->indicator) }}">
                         <input type="hidden" name="statuses[{{ $record->id }}]" value="{{ $record->status }}" disabled data-eccd-input>
                         @foreach(['Not Yet','In Progress','Achieved'] as $status)
                         @php
