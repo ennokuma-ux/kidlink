@@ -18,7 +18,6 @@ use App\Http\Controllers\Teacher\SettingsController as TeacherSettingsController
 use App\Http\Controllers\Teacher\GameAssignmentController as TeacherGameAssignmentController;
 use App\Http\Middleware\EnsureGameAssigned;
 use App\Http\Middleware\PreventDuplicateSubmission;
-use App\Http\Middleware\PreventConcurrentActivityAccess;
 use App\Http\Controllers\Parent\DashboardController as ParentDashboardController;
 use App\Http\Controllers\Student\Games\ShapesGameController;
 use App\Http\Controllers\Student\Games\ColorsGameController;
@@ -126,15 +125,13 @@ Route::middleware(['auth', 'active', 'role:teacher', PreventDuplicateSubmission:
     Route::delete('/account-requests/{accountRequest}', [TeacherStudentController::class, 'cancelAccountRequest'])->name('account-requests.cancel');
     Route::get('/attendance', [TeacherAttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance', [TeacherAttendanceController::class, 'store'])->name('attendance.store');
-    Route::post('/activities/lock/heartbeat', fn () => response()->json(['ok' => true]))->name('activities.lock.heartbeat')->middleware(PreventConcurrentActivityAccess::class);
-    Route::post('/activities/lock/release', fn () => response()->json(['ok' => true]))->name('activities.lock.release')->middleware(PreventConcurrentActivityAccess::class);
-    Route::get('/activities', [TeacherActivityController::class, 'index'])->name('activities.index')->middleware(PreventConcurrentActivityAccess::class);
-    Route::post('/activities', [TeacherActivityController::class, 'store'])->name('activities.store')->middleware(PreventConcurrentActivityAccess::class);
-    Route::get('/activities/{activity}/participation', [TeacherActivityController::class, 'participation'])->name('activities.participation')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}/participation', [TeacherActivityController::class, 'saveParticipation'])->name('activities.participation.save')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}', [TeacherActivityController::class, 'update'])->name('activities.update')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}/toggle', [TeacherActivityController::class, 'toggleComplete'])->name('activities.toggle')->middleware(PreventConcurrentActivityAccess::class);
-    Route::delete('/activities/{activity}', [TeacherActivityController::class, 'destroy'])->name('activities.destroy')->middleware(PreventConcurrentActivityAccess::class);
+    Route::get('/activities', [TeacherActivityController::class, 'index'])->name('activities.index');
+    Route::post('/activities', [TeacherActivityController::class, 'store'])->name('activities.store');
+    Route::get('/activities/{activity}/participation', [TeacherActivityController::class, 'participation'])->name('activities.participation');
+    Route::put('/activities/{activity}/participation', [TeacherActivityController::class, 'saveParticipation'])->name('activities.participation.save');
+    Route::put('/activities/{activity}', [TeacherActivityController::class, 'update'])->name('activities.update');
+    Route::put('/activities/{activity}/toggle', [TeacherActivityController::class, 'toggleComplete'])->name('activities.toggle');
+    Route::delete('/activities/{activity}', [TeacherActivityController::class, 'destroy'])->name('activities.destroy');
     Route::get('/eccd', [TeacherEccdController::class, 'index'])->name('eccd.index');
     Route::post('/eccd/update', [TeacherEccdController::class, 'update'])->name('eccd.update');
     // Saves every changed indicator for one child in a single request.
