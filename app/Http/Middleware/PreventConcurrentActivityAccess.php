@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -109,8 +110,47 @@ class PreventConcurrentActivityAccess
         }, 3);
 
         if (! $acquired) {
+            $reference = strtoupper(Str::random(8));
+
+            $holder = DB::table('user_page_locks')
+                ->where('user_id', $userId)
+                ->where('page_key', $pageKey)
+                ->first(['lock_token', 'last_seen_at', 'expires_at']);
+
+            // Device tokens are hashed so the log never contains a usable credential.
+            Log::warning('Page lock denied: page is active on another device.', [
+                'reference' => $reference,
+                'user_id' => $userId,
+                'role' => $user->role ?? null,
+                'page_key' => $pageKey,
+                'route' => $routeName,
+                'url' => $request->fullUrl(),
+                'this_device' => $this->fingerprint($deviceToken),
+                'holder_device' => $holder ? $this->fingerprint($holder->lock_token) : null,
+                'holder_last_seen_at' => $holder->last_seen_at ?? null,
+                'holder_expires_at' => $holder->expires_at ?? null,
+                'ip' => $request->ip(),
+                'user_agent' => Str::limit((string) $request->userAgent(), 160, ''),
+            ]);
+
+            $isParent = ($user->role ?? null) === 'parent';
+            if ($isParent) {
+                // Offer a parent page that is not the one that is locked.
+                $alternate = $pageKey === 'parent-dashboard' ? 'parent.results.index' : 'parent.dashboard';
+                $homeUrl = route($alternate);
+                $homeLabel = $pageKey === 'parent-dashboard' ? 'Open Results instead' : 'Open Dashboard instead';
+            } else {
+                $homeUrl = route('teacher.dashboard');
+                $homeLabel = 'Back to dashboard';
+            }
+
             $response = response()->view('errors.concurrent-access', [
                 'retryUrl' => $request->fullUrl(),
+                'pageLabel' => $this->pageLabel($pageKey),
+                'homeUrl' => $homeUrl,
+                'homeLabel' => $homeLabel,
+                'reference' => $reference,
+                'leaseSeconds' => self::LEASE_SECONDS,
             ], 409);
             $response = $this->withDeviceCookie($response, $deviceToken, $request);
             return $response->withCookie(cookie()->forget(self::ACTIVE_PAGE_COOKIE));
@@ -145,6 +185,14 @@ class PreventConcurrentActivityAccess
             ]);
 
         if (! $updated) {
+            Log::notice('Page lock heartbeat rejected: lock is held by another device or has expired.', [
+                'user_id' => $userId,
+                'page_key' => $pageKey,
+                'this_device' => $this->fingerprint($deviceToken),
+                'ip' => $request->ip(),
+                'user_agent' => Str::limit((string) $request->userAgent(), 160, ''),
+            ]);
+
             return $this->withDeviceCookie(response()->json([
                 'ok' => false,
                 'message' => 'This page is active on another device or its lock has expired.',
@@ -207,5 +255,22 @@ class PreventConcurrentActivityAccess
             false,
             'lax'
         ));
+    }
+
+    private function fingerprint(?string $deviceToken): ?string
+    {
+        return $deviceToken ? substr(hash('sha256', $deviceToken), 0, 10) : null;
+    }
+
+    private function pageLabel(string $pageKey): string
+    {
+        return match ($pageKey) {
+            'teacher-activities' => 'Activity Planner',
+            'parent-dashboard' => 'Dashboard',
+            'parent-results' => 'Results',
+            'parent-milestones' => 'Milestones',
+            'parent-attendance' => 'Attendance',
+            default => 'This page',
+        };
     }
 }

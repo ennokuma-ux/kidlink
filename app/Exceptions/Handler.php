@@ -3,7 +3,10 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -17,6 +20,33 @@ class Handler extends ExceptionHandler
 
     public function register(): void
     {
+        // A 405 means a URL that only accepts another method (for example a
+        // POST-only background endpoint) was opened as a normal page. Log where
+        // it came from so it can be traced, then show a clear page.
+        $this->renderable(function (MethodNotAllowedHttpException $exception, $request) {
+            $reference = strtoupper(Str::random(8));
+
+            Log::warning('Method not allowed.', [
+                'reference' => $reference,
+                'method' => $request->method(),
+                'allowed' => $exception->getHeaders()['Allow'] ?? null,
+                'url' => $request->fullUrl(),
+                'referer' => $request->headers->get('referer'),
+                'user_id' => optional($request->user())->getAuthIdentifier(),
+                'ip' => $request->ip(),
+                'user_agent' => Str::limit((string) $request->userAgent(), 160, ''),
+            ]);
+
+            if ($request->expectsJson()) {
+                return null; // falls through to the JSON message below
+            }
+
+            return response()->view('errors.405', [
+                'reference' => $reference,
+                'allowed' => $exception->getHeaders()['Allow'] ?? null,
+            ], 405, $exception->getHeaders());
+        });
+
         $this->renderable(function (Throwable $exception, $request) {
             // Let Laravel return its normal field-by-field validation payload.
             if (! $request->expectsJson() || $exception instanceof ValidationException) {

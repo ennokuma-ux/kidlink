@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 
 class TrustProxies extends Middleware
 {
-    protected $proxies;
+    // Render terminates TLS in front of the app, so trust its forwarded headers.
+    // Without this, route() builds http:// URLs and POSTs get redirected into GETs (405).
+    protected $proxies = '*';
     protected $headers =
         Request::HEADER_X_FORWARDED_FOR |
         Request::HEADER_X_FORWARDED_HOST |
