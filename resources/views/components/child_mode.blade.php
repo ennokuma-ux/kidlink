@@ -30,13 +30,28 @@
         accounts: [],
         labels: {},
         init() {
-            this.accounts = JSON.parse(document.getElementById('childModeAccounts').textContent);
-            this.labels = JSON.parse(document.getElementById('childModeLabels').textContent);
+            try {
+                const accountsNode = document.getElementById('childModeAccounts');
+                const labelsNode = document.getElementById('childModeLabels');
+                this.accounts = accountsNode ? JSON.parse(accountsNode.textContent || '[]') : [];
+                this.labels = labelsNode ? JSON.parse(labelsNode.textContent || '{}') : {};
+            } catch (error) {
+                console.error('KidLink child mode could not load its account list.', error);
+                this.accounts = [];
+                this.labels = {};
+            }
         },
         async refresh() {
             try {
-                const res = await fetch('{{ route('child-mode.accounts') }}', { headers: { 'Accept': 'application/json' } });
-                if (res.ok) this.accounts = (await res.json()).accounts;
+                const res = await fetch('{{ route('child-mode.accounts') }}', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) throw new Error('Account list request failed (' + res.status + ').');
+                const payload = await res.json();
+                if (!payload || !Array.isArray(payload.accounts)) throw new Error('Account list response was invalid.');
+                this.accounts = payload.accounts;
             } catch (e) {
                 // keep the last known list if the refresh fails
             }
@@ -44,7 +59,9 @@
         openPicker() {
             this.open = true;
             this.search = '';
-            this.$nextTick(() => this.$refs.pickerSearch.focus());
+            this.$nextTick(() => {
+                if (this.$refs.pickerSearch) this.$refs.pickerSearch.focus();
+            });
             this.refresh();
         },
         close() {

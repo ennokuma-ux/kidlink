@@ -114,6 +114,7 @@
     </div>
 </div>
 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div data-pager="students" class="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1e7cc] bg-white px-4 py-3 text-sm text-[#5f6873]" style="display:none"></div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-[#fffbf0]">
@@ -191,7 +192,8 @@
 
 <div id="parentsView" class="hidden">
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div data-pager="parents" class="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1e7cc] bg-white px-4 py-3 text-sm text-[#5f6873]" style="display:none"></div>
+    <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-[#fffbf0]">
                     <tr>
@@ -260,7 +262,8 @@
             <h3 class="text-sm font-bold text-[#182438]">{{ __('teacher.archived_students') }}</h3>
             <p class="text-xs text-[#5f6873] mt-0.5">{{ __('teacher.archived_students_desc') }}</p>
         </div>
-        <div class="overflow-auto max-h-[26rem]">
+        <div data-pager="archivedStudents" class="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1e7cc] bg-white px-4 py-3 text-sm text-[#5f6873]" style="display:none"></div>
+    <div class="overflow-auto max-h-[26rem]">
             <table class="w-full">
                 <thead class="bg-[#fffbf0] sticky top-0 z-10 shadow-[0_1px_0_#f1e7cc]">
                     <tr>
@@ -319,6 +322,7 @@
             <h3 class="text-sm font-bold text-[#182438]">{{ __('teacher.archived_parent_accounts') }}</h3>
             <p class="text-xs text-[#5f6873] mt-0.5">{{ __('teacher.archived_parent_accounts_desc') }}</p>
         </div>
+        <div data-pager="archivedParents" class="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1e7cc] bg-white px-4 py-3 text-sm text-[#5f6873]" style="display:none"></div>
         <div class="overflow-auto max-h-[26rem]">
             <table class="w-full">
                 <thead class="bg-[#fffbf0] sticky top-0 z-10 shadow-[0_1px_0_#f1e7cc]">
@@ -392,7 +396,7 @@ function currentView() {
 const PAGE_SIZES = [10];
 
 function createPager(name, rowEls) {
-    const el = document.querySelector('[data-pager="' + name + '"]');
+    const els = Array.from(document.querySelectorAll('[data-pager="' + name + '"]'));
     let matches = rowEls, page = 1, perPage = PAGE_SIZES[0];
     const shown = new Map(rowEls.map(r => [r, true]));
 
@@ -420,11 +424,10 @@ function createPager(name, rowEls) {
             if (shown.get(r) !== want) { r.hidden = !want; shown.set(r, want); }
         }
 
-        if (!el) return;
-        // Nothing to page through: keep the bar out of the way.
-        // (style, not the hidden attribute: the flex class would override that.)
+        if (!els.length) return;
+        // Keep the controls in sync above and below the table.
         const needed = matches.length > PAGE_SIZES[0];
-        el.style.display = needed ? '' : 'none';
+        els.forEach(el => { el.style.display = needed ? '' : 'none'; el.replaceChildren(); });
         if (!needed) return;
 
         const btn = 'min-w-[2.25rem] rounded-lg border px-2.5 py-1.5 text-sm font-medium transition ';
@@ -432,7 +435,6 @@ function createPager(name, rowEls) {
         const active = btn + 'border-[#ff8555] bg-[#ff8555] text-white';
         const off = btn + 'border-[#f1e7cc] bg-[#fffbf0] text-[#c9c4b8] cursor-not-allowed';
 
-        el.innerHTML = '';
         const info = document.createElement('div');
         info.className = 'flex items-center gap-3';
         const summary = document.createElement('span');
@@ -441,25 +443,24 @@ function createPager(name, rowEls) {
         size.setAttribute('aria-label', 'Rows per page');
         size.className = 'rounded-lg border border-[#f1e7cc] bg-white px-2 py-1 text-sm text-[#182438]';
         PAGE_SIZES.forEach(n => {
-            const o = document.createElement('option');
-            o.value = n; o.textContent = n + ' / page'; o.selected = n === perPage;
-            size.appendChild(o);
+            const option = document.createElement('option');
+            option.value = n; option.textContent = n + ' / page'; option.selected = n === perPage;
+            size.appendChild(option);
         });
-        size.addEventListener('change', () => { perPage = +size.value; page = 1; render(); });
         info.append(summary, size);
 
         const nav = document.createElement('nav');
         nav.setAttribute('aria-label', 'Pagination');
         nav.className = 'flex flex-wrap items-center gap-1';
         const add = (label, target, cls, current) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.textContent = label;
-            b.className = cls;
-            if (current) b.setAttribute('aria-current', 'page');
-            if (target === null) b.disabled = true;
-            else b.addEventListener('click', () => { page = target; render(); el.scrollIntoView({ block: 'nearest' }); });
-            nav.appendChild(b);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = label;
+            button.className = cls;
+            if (current) button.setAttribute('aria-current', 'page');
+            if (target === null) button.disabled = true;
+            else button.addEventListener('click', () => { page = target; render(); });
+            nav.appendChild(button);
         };
         add('‹', page > 1 ? page - 1 : null, page > 1 ? idle : off);
         pageButtons(total).forEach(n => {
@@ -473,7 +474,19 @@ function createPager(name, rowEls) {
         });
         add('›', page < total ? page + 1 : null, page < total ? idle : off);
 
-        el.append(info, nav);
+        els.forEach(el => {
+            const infoCopy = info.cloneNode(true);
+            const navCopy = nav.cloneNode(true);
+            const sizeCopy = infoCopy.querySelector('select');
+            sizeCopy.addEventListener('change', () => { perPage = +sizeCopy.value; page = 1; render(); });
+            Array.from(navCopy.querySelectorAll('button')).forEach(button => {
+                const label = button.textContent;
+                if (label === '‹' && page > 1) button.addEventListener('click', () => { page--; render(); });
+                else if (label === '›' && page < total) button.addEventListener('click', () => { page++; render(); });
+                else if (/^\\d+$/.test(label) && +label !== page) button.addEventListener('click', () => { page = +label; render(); });
+            });
+            el.replaceChildren(infoCopy, navCopy);
+        });
     }
 
     return {
