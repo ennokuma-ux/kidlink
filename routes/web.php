@@ -115,7 +115,7 @@ Route::middleware(['auth', 'active', 'role:super_admin', PreventDuplicateSubmiss
     Route::post('/account-requests/{accountRequest}/reject', [AdminAccountRequestController::class, 'reject'])->name('account-requests.reject');
 });
 
-Route::middleware(['auth', 'active', 'role:teacher', PreventDuplicateSubmission::class])->prefix('teacher')->name('teacher.')->group(function () {
+Route::middleware(['auth', 'active', 'role:teacher', PreventDuplicateSubmission::class, PreventConcurrentActivityAccess::class])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
     Route::get('/accounts', [TeacherStudentController::class, 'index'])->name('accounts.index');
     Route::post('/accounts', [TeacherStudentController::class, 'store'])->name('accounts.store');
@@ -126,15 +126,15 @@ Route::middleware(['auth', 'active', 'role:teacher', PreventDuplicateSubmission:
     Route::delete('/account-requests/{accountRequest}', [TeacherStudentController::class, 'cancelAccountRequest'])->name('account-requests.cancel');
     Route::get('/attendance', [TeacherAttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance', [TeacherAttendanceController::class, 'store'])->name('attendance.store');
-    Route::post('/activities/lock/heartbeat', fn () => response()->json(['ok' => true]))->name('activities.lock.heartbeat')->middleware(PreventConcurrentActivityAccess::class);
-    Route::post('/activities/lock/release', fn () => response()->json(['ok' => true]))->name('activities.lock.release')->middleware(PreventConcurrentActivityAccess::class);
-    Route::get('/activities', [TeacherActivityController::class, 'index'])->name('activities.index')->middleware(PreventConcurrentActivityAccess::class);
-    Route::post('/activities', [TeacherActivityController::class, 'store'])->name('activities.store')->middleware(PreventConcurrentActivityAccess::class);
-    Route::get('/activities/{activity}/participation', [TeacherActivityController::class, 'participation'])->name('activities.participation')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}/participation', [TeacherActivityController::class, 'saveParticipation'])->name('activities.participation.save')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}', [TeacherActivityController::class, 'update'])->name('activities.update')->middleware(PreventConcurrentActivityAccess::class);
-    Route::put('/activities/{activity}/toggle', [TeacherActivityController::class, 'toggleComplete'])->name('activities.toggle')->middleware(PreventConcurrentActivityAccess::class);
-    Route::delete('/activities/{activity}', [TeacherActivityController::class, 'destroy'])->name('activities.destroy')->middleware(PreventConcurrentActivityAccess::class);
+    Route::post('/activities/lock/heartbeat', fn () => response()->json(['ok' => true]))->name('activities.lock.heartbeat');
+    Route::post('/activities/lock/release', fn () => response()->json(['ok' => true]))->name('activities.lock.release');
+    Route::get('/activities', [TeacherActivityController::class, 'index'])->name('activities.index');
+    Route::post('/activities', [TeacherActivityController::class, 'store'])->name('activities.store');
+    Route::get('/activities/{activity}/participation', [TeacherActivityController::class, 'participation'])->name('activities.participation');
+    Route::put('/activities/{activity}/participation', [TeacherActivityController::class, 'saveParticipation'])->name('activities.participation.save');
+    Route::put('/activities/{activity}', [TeacherActivityController::class, 'update'])->name('activities.update');
+    Route::put('/activities/{activity}/toggle', [TeacherActivityController::class, 'toggleComplete'])->name('activities.toggle');
+    Route::delete('/activities/{activity}', [TeacherActivityController::class, 'destroy'])->name('activities.destroy');
     Route::get('/eccd', [TeacherEccdController::class, 'index'])->name('eccd.index');
     Route::post('/eccd/update', [TeacherEccdController::class, 'update'])->name('eccd.update');
     // Saves every changed indicator for one child in a single request.
@@ -176,7 +176,9 @@ Route::middleware(['auth', 'role:teacher'])
     Route::put('/{announcement}/pin', [AnnouncementController::class, 'pin'])->name('pin');
   });
 
-Route::middleware(['auth', 'active', 'role:parent'])->prefix('parent')->name('parent.')->group(function () {
+Route::middleware(['auth', 'active', 'role:parent', PreventConcurrentActivityAccess::class])->prefix('parent')->name('parent.')->group(function () {
+    Route::post('/page-lock/heartbeat', fn () => response()->json(['ok' => true]))->name('page-lock.heartbeat');
+    Route::post('/page-lock/release', fn () => response()->json(['ok' => true]))->name('page-lock.release');
     Route::get('/dashboard', [ParentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [ParentDashboardController::class, 'index'])->name('analytics.index');
     Route::get('/results', [ParentResultsController::class, 'index'])->name('results.index');

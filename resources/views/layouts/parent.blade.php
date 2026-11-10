@@ -65,6 +65,39 @@
     <x-connection-status />
     <x-session-keep-alive />
 
+    <script>
+    // One active device per parent account on each parent page.
+    // The server issues a unique HttpOnly device cookie and validates every page request.
+    (() => {
+        const pageKey = @json(request()->route()->getName());
+        const heartbeatUrl = @json(route('parent.page-lock.heartbeat'));
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const heartbeat = async () => {
+            try {
+                const body = new URLSearchParams({ page_key: pageKey });
+                const response = await fetch(heartbeatUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body
+                });
+                if (response.status === 409) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                // The 90-second server lease handles brief network interruptions.
+            }
+        };
+        const timer = window.setInterval(heartbeat, 30000);
+        window.addEventListener('pagehide', () => window.clearInterval(timer));
+    })();
+    </script>
+
     <script src="{{ \App\Support\Asset::v('js/ajax-filters.js') }}"></script>
     @stack('scripts')
     @if(session('success'))

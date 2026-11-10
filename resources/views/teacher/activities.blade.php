@@ -540,11 +540,8 @@ function openEditModal(button) {
     @endif
 @endif
 </script>
-// Keep the Activity Planner lease alive while this page is open.
-// Do not release from pagehide: browsers also fire pagehide during refresh,
-// and an asynchronous release can race with the next GET and delete its lock.
+// Keep this account's Activity Planner lease alive while this page is open.
 const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
-const activityLockReleaseUrl = @json(route('teacher.activities.lock.release'));
 const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
     method: 'POST',
@@ -556,36 +553,22 @@ const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
         'Accept': 'application/json'
     }
 });
-
-let activityLockLeaving = false;
 const activityLockTimer = window.setInterval(async () => {
-    if (activityLockLeaving) return;
     try {
         const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
         if (response.status === 409) {
             window.clearInterval(activityLockTimer);
-            window.location.replace(@json(route('teacher.activities.index')));
+            window.location.href = @json(route('teacher.activities.index'));
         }
     } catch (error) {
-        // The server-side lease expires automatically if this device disconnects.
+        // A brief network interruption is handled by the server-side lease expiry.
     }
 }, 30000);
-
-// Release before ordinary same-site link navigation, but never on refresh.
-document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a[href]');
-    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (link.target === '_blank' || link.hasAttribute('download')) return;
-
-    let destination;
-    try { destination = new URL(link.href, window.location.href); } catch (error) { return; }
-    if (destination.origin !== window.location.origin || destination.href === window.location.href || destination.hash && destination.pathname === window.location.pathname) return;
-
-    event.preventDefault();
-    if (activityLockLeaving) return;
-    activityLockLeaving = true;
+window.addEventListener('pagehide', () => {
+    // Do not release on pagehide: browsers fire it during refresh too.
+    // The next authenticated page request releases the previous page lock;
+    // abandoned tabs are recovered automatically when the lease expires.
     window.clearInterval(activityLockTimer);
-    try { await sendActivityLockRequest(activityLockReleaseUrl, true); } catch (error) {}
-    window.location.assign(destination.href);
-}, true);
+});
+
 @endpush
