@@ -185,10 +185,13 @@ class DashboardController extends Controller
         // Only the single-child narrative reads these flags.
         $studentInterventions = $selectedStudent ? $this->analytics->interventionFlags($studentIds) : [];
 
-        // The intervention panel is a class-wide view: it follows the section
-        // filter but keeps naming every child who needs action even when one
-        // student has been selected for inspection.
-        $interventions = $this->analytics->interventionFlags($sectionStudentIds);
+        // The intervention panel follows the active analytics scope. In an
+        // individual view it must name only the selected child; group views
+        // continue to show the selected section or the teacher's full roster.
+        $interventionStudentIds = $selectedStudent
+            ? [$selectedStudent->id]
+            : $sectionStudentIds;
+        $interventions = $this->analytics->interventionFlags($interventionStudentIds);
         $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
 
         // Both charts are group-only (hidden for one child).

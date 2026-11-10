@@ -112,10 +112,13 @@ class AnalyticsController extends Controller
         $classDistribution = $this->analytics->classDistribution(null);
         $recommendations = $this->analytics->studentRecommendations($recommendationIds, 6);
 
-        // Interventions and the per-class rollup are centre-wide views: they
-        // follow the section filter but stay on the whole class even when one
-        // child has been selected for inspection.
-        $interventions = $this->analytics->interventionFlags($sectionScopedIds);
+        // The intervention panel follows the active analytics scope. When an
+        // individual child is selected, show only that child's intervention
+        // flags; otherwise show the selected section or all active students.
+        $interventionStudentIds = $selectedStudent
+            ? [$selectedStudent->id]
+            : $sectionScopedIds;
+        $interventions = $this->analytics->interventionFlags($interventionStudentIds);
         $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
 
         // Per-category scores for the leaderboard tables. The scoped list is
