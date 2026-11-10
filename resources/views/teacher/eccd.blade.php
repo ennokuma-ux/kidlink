@@ -13,6 +13,23 @@
         <x-student-chooser :students="$students" :selected="$selectedStudent"
                            :action="route('teacher.eccd.index')" param="student_id"
                            :extra="['evaluation' => $evaluationNumber]" />
+
+        <div class="w-full md:w-auto md:min-w-[290px]" aria-label="ECCD checklist age group">
+            <p class="text-xs font-semibold uppercase tracking-wide text-[#5f6873] mb-2">ECCD checklist age group</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" disabled aria-disabled="true"
+                    title="The 0 to 3 years checklist will be added when its indicators are provided"
+                    class="px-3 py-2 rounded-lg border border-dashed border-[#c9c3b8] bg-[#f8f7f4] text-[#8b949d] text-sm font-semibold cursor-not-allowed">
+                    0–3 years
+                    <span class="block text-[11px] font-normal">Coming soon</span>
+                </button>
+                <button type="button" aria-current="true"
+                    class="px-3 py-2 rounded-lg border-2 border-[#1982c4] bg-[#eaf5fc] text-[#145f8e] text-sm font-semibold">
+                    3–5 years
+                    <span class="block text-[11px] font-normal">Current checklist</span>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
