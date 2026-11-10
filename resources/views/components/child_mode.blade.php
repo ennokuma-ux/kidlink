@@ -3,7 +3,7 @@
     $accounts = (in_array($user->role, ['super_admin', 'admin'], true)
         ? App\Models\Student::query()
         : ($user->role === 'teacher' ? $user->teacherStudents() : $user->children()))
-        ->where('students.is_active', true)
+        ->whereRaw('students.is_active = true')
         ->orderBy('first_name')
         ->get()
         ->map(fn ($c) => [
