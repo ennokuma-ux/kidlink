@@ -554,18 +554,40 @@ const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
         'Accept': 'application/json'
     }
 });
-const activityLockTimer = window.setInterval(async () => {
+let activityLockPageActive = true;
+let activityLockRedirecting = false;
+
+async function verifyActivityPageLock() {
+    if (!activityLockPageActive || activityLockRedirecting) return;
+
     try {
         const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
         if (response.status === 409) {
+            activityLockRedirecting = true;
             window.clearInterval(activityLockTimer);
-            window.location.href = @json(route('teacher.activities.index'));
+            // Re-enter through the protected page route. The server will either
+            // grant a fresh lock or show the concurrent-access error page.
+            window.location.replace(@json(route('teacher.activities.index')));
         }
     } catch (error) {
         // A brief network interruption is handled by the server-side lease expiry.
     }
-}, 30000);
+}
+
+// Keep the lease alive while the planner is open.
+const activityLockTimer = window.setInterval(verifyActivityPageLock, 30000);
+
+// Re-check when the page is restored from browser back/forward cache or the
+// user returns to this tab. This prevents a stale page from continuing after
+// another session has acquired the planner lock.
+window.addEventListener('pageshow', verifyActivityPageLock);
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') verifyActivityPageLock();
+});
+
+// Release the lock when navigating away, refreshing, or closing this page.
 window.addEventListener('pagehide', () => {
+    activityLockPageActive = false;
     window.clearInterval(activityLockTimer);
     sendActivityLockRequest(activityLockReleaseUrl, true).catch(() => {});
 });
