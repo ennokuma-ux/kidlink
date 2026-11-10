@@ -64,9 +64,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
     @foreach($days as $offset => $day)
-        @php
-            $date = $weekStart->copy()->addDays($offset);
-        @endphp
+        @php($date = $weekStart->copy()->addDays($offset))
         <div class="bg-white rounded-xl shadow-sm overflow-hidden {{ $date->isToday() ? 'ring-2 ring-[#ff8555]' : '' }}">
             <div class="text-center py-3 font-semibold {{ $date->isToday() ? 'bg-[#ff8555] text-white' : 'bg-[#f1e7cc] text-[#182438]' }}">
                 {{ $date->format('D') }}
@@ -83,7 +81,7 @@
                      data-end="{{ substr($activity->end_time, 0, 5) }}"
                      data-group="{{ $activity->group_name }}"
                      data-mode="{{ $activity->target_mode ?? 'section' }}"
-                     data-students='@json($activity->target_student_ids ?? [])'
+                     data-students='@json(array_map("intval", $activity->target_student_ids ?? []))'
                      data-update-url="{{ route('teacher.activities.update', $activity) }}">
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-semibold text-[#182438]">{{ $activity->title }}</span>
@@ -98,9 +96,7 @@
                     </div>
                     <p class="text-[#5f6873] text-xs">{{ substr($activity->start_time, 0, 5) }} - {{ substr($activity->end_time, 0, 5) }}</p>
                     @if(($activity->target_mode ?? 'section') === 'individual')
-                        @php
-                            $count = count($activity->target_student_ids ?? []);
-                        @endphp
+                        @php($count = count($activity->target_student_ids ?? []))
                         <p class="text-[#6b7280] text-xs mt-1">{{ __('Students') }}: {{ $count }}</p>
                     @elseif($activity->group_name)
                         <p class="text-[#6b7280] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>
@@ -536,12 +532,42 @@ function openEditModal(button) {
         document.getElementById('editStart').value = @json(old('start_time'));
         document.getElementById('editEnd').value = @json(old('end_time'));
         document.getElementById('editWeek').value = @json(old('week'));
-        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(old('target_student_ids', [])));
+        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
         document.getElementById('editActivityModal').classList.remove('hidden');
     @else
-        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(old('target_student_ids', [])));
+        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
         document.getElementById('addActivityModal').classList.remove('hidden');
     @endif
 @endif
 </script>
+// Keep this account's Activity Planner lease alive while this page is open.
+const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
+const activityLockReleaseUrl = @json(route('teacher.activities.lock.release'));
+const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin',
+    keepalive,
+    headers: {
+        'X-CSRF-TOKEN': activityLockCsrf,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+    }
+});
+const activityLockTimer = window.setInterval(async () => {
+    try {
+        const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
+        if (response.status === 409) {
+            window.clearInterval(activityLockTimer);
+            window.location.href = @json(route('teacher.activities.index'));
+        }
+    } catch (error) {
+        // A brief network interruption is handled by the server-side lease expiry.
+    }
+}, 30000);
+window.addEventListener('pagehide', () => {
+    window.clearInterval(activityLockTimer);
+    sendActivityLockRequest(activityLockReleaseUrl, true).catch(() => {});
+});
+
 @endpush
