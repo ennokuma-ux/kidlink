@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AccountRequest extends Model
 {
     protected $fillable = [
-        'requested_by', 'teacher_id', 'parent_ids', 'role', 'first_name', 'last_name', 'email', 'contact',
+        'requested_by', 'teacher_id', 'parent_ids', 'role', 'first_name', 'last_name', 'email', 'password', 'contact',
         'student_id', 'sex', 'date_of_birth', 'address', 'class_name', 'academic_year', 'dominant_hand', 'father_name', 'father_contact', 'mother_name', 'mother_contact', 'siblings_count', 'status', 'reviewed_by', 'reviewed_at', 'review_notes',
     ];
 

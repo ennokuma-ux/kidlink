@@ -59,6 +59,13 @@
                     <input type="text" name="contact" x-ref="contact" value="{{ old('contact') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
 
+                {{-- Parent login password is optional; the system uses password123 when blank. --}}
+                <div x-show="role === 'parent'">
+                    <label class="block text-sm font-medium text-[#182438] mb-2">Parent account password <span class="text-[#6b7280] font-normal">(optional)</span></label>
+                    <input type="password" name="password" x-ref="password" value="{{ old('password') }}" minlength="8" :disabled="role !== 'parent'" autocomplete="new-password" placeholder="Leave blank to use password123" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <p class="text-xs text-[#6b7280] mt-1">Parents will be asked to change this password the first time they sign in.</p>
+                </div>
+
                 {{-- Student only --}}
                 <div x-show="role === 'student'" x-cloak style="display:none;" class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
@@ -169,7 +176,7 @@ window.accountRequestForm = function (role, reopen) {
             this.parentIds = (d.parent_ids || []).map(Number);
             this.$nextTick(() => {
                 const blank = { sex: 'Female', dominant_hand: 'Not yet established', academic_year: @js(\App\Models\Student::currentAcademicYear()) };
-                ['first_name', 'last_name', 'email', 'contact', 'sex', 'date_of_birth', 'class_name', 'academic_year', 'dominant_hand',
+                ['first_name', 'last_name', 'email', 'contact', 'password', 'sex', 'date_of_birth', 'class_name', 'academic_year', 'dominant_hand',
                  'address', 'father_name', 'mother_name'].forEach(key => {
                     const el = this.$refs[key];
                     if (!el) return;

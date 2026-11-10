@@ -14,6 +14,23 @@ class ProfileController extends Controller
         return view('parent.profile-edit', ['user' => auth()->user()]);
     }
 
+
+    public function updateInitialPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = $request->user();
+        abort_unless($user->role === 'parent', 403);
+
+        $user->password = Hash::make($validated['password']);
+        $user->must_change_password = false;
+        $user->save();
+
+        return response()->json(['ok' => true, 'message' => 'Your password has been updated.']);
+    }
+
     public function update(Request $request)
     {
         $user = $request->user();

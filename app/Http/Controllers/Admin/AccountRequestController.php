@@ -47,13 +47,18 @@ class AccountRequestController extends Controller
         }
 
         $hasLogin = (bool) $accountRequest->email;
-        $generatedPassword = $hasLogin ? Str::password(12, symbols: false, spaces: false) : null;
-        $user = DB::transaction(function () use ($accountRequest, $generatedPassword, $hasLogin) {
+        $usesDefaultParentPassword = $accountRequest->role === 'parent' && ! $accountRequest->password;
+        $generatedPassword = $usesDefaultParentPassword ? 'password123' : ($hasLogin && $accountRequest->role !== 'parent' ? Str::password(12, symbols: false, spaces: false) : null);
+        $passwordHash = $accountRequest->role === 'parent'
+            ? ($accountRequest->password ?: Hash::make('password123'))
+            : ($generatedPassword ? Hash::make($generatedPassword) : null);
+        $user = DB::transaction(function () use ($accountRequest, $passwordHash, $hasLogin) {
             $user = ! $hasLogin ? null : User::create([
                 'first_name' => $accountRequest->first_name,
                 'last_name' => $accountRequest->last_name,
                 'email' => $accountRequest->email,
-                'password' => Hash::make($generatedPassword),
+                'password' => $passwordHash,
+                'must_change_password' => $accountRequest->role === 'parent',
                 'role' => $accountRequest->role,
                 'contact' => $accountRequest->contact,
                 'is_active' => true,
@@ -101,9 +106,11 @@ class AccountRequestController extends Controller
             return $redirect->with('success', 'Student account approved (no login was requested).');
         }
 
-        return $redirect
-            ->with('success', 'Account request approved. Copy the temporary credentials below and share them securely.')
-            ->with('generated_credentials', ['name' => $user->full_name, 'email' => $user->email, 'password' => $generatedPassword]);
+        $redirect->with('success', 'Account request approved.');
+        if ($generatedPassword !== null) {
+            $redirect->with('generated_credentials', ['name' => $user->full_name, 'email' => $user->email, 'password' => $generatedPassword]);
+        }
+        return $redirect;
     }
 
     public function reject(Request $request, AccountRequest $accountRequest)

@@ -117,6 +117,11 @@ Route::middleware(['auth', 'active', 'role:super_admin', PreventDuplicateSubmiss
 
 Route::middleware(['auth', 'active', 'role:teacher', PreventDuplicateSubmission::class, PreventConcurrentActivityAccess::class])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+    // Small fragments of the dashboard (score table pages, level progression) so a
+    // filter reloads only its own card instead of the whole page.
+    Route::get('/dashboard/partials/{name}', [TeacherDashboardController::class, 'partial'])
+        ->whereIn('name', TeacherDashboardController::PARTIALS)
+        ->name('dashboard.partial');
     Route::get('/accounts', [TeacherStudentController::class, 'index'])->name('accounts.index');
     Route::post('/accounts', [TeacherStudentController::class, 'store'])->name('accounts.store');
     Route::put('/accounts/{student}', [TeacherStudentController::class, 'toggleActive'])->name('accounts.toggle');
@@ -179,6 +184,7 @@ Route::middleware(['auth', 'role:teacher'])
 Route::middleware(['auth', 'active', 'role:parent', PreventConcurrentActivityAccess::class])->prefix('parent')->name('parent.')->group(function () {
     Route::post('/page-lock/heartbeat', fn () => response()->json(['ok' => true]))->name('page-lock.heartbeat');
     Route::post('/page-lock/release', fn () => response()->json(['ok' => true]))->name('page-lock.release');
+    Route::post('/password/initial', [App\Http\Controllers\Parent\ProfileController::class, 'updateInitialPassword'])->name('password.initial');
     Route::get('/dashboard', [ParentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [ParentDashboardController::class, 'index'])->name('analytics.index');
     Route::get('/results', [ParentResultsController::class, 'index'])->name('results.index');

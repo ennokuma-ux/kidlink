@@ -119,24 +119,31 @@ class AnalyticsService
      */
     public function attendanceRateTrend(?array $studentIds, int $months = 6): array
     {
-        $series = [];
+        $first = Carbon::today()->startOfMonth()->subMonths($months - 1);
+        $last = Carbon::today()->startOfMonth()->endOfMonth();
 
+        // One grouped query for the whole window; months are bucketed in PHP so
+        // it works on every driver (no DATE_TRUNC / strftime differences).
+        $query = Attendance::whereBetween('date', [$first, $last])
+            ->selectRaw('date, status, COUNT(*) as total')
+            ->groupBy('date', 'status');
+        if (!empty($studentIds)) {
+            $query->whereIn('student_id', $studentIds);
+        }
+
+        $buckets = [];
+        foreach ($query->toBase()->get() as $row) {
+            $key = Carbon::parse($row->date)->format('Y-m');
+            $buckets[$key][$row->status] = ($buckets[$key][$row->status] ?? 0) + (int) $row->total;
+        }
+
+        $series = [];
         for ($i = $months - 1; $i >= 0; $i--) {
             $month = Carbon::today()->startOfMonth()->subMonths($i);
-            $end = $month->copy()->endOfMonth();
-
-            $query = Attendance::whereBetween('date', [$month, $end]);
-            if (!empty($studentIds)) {
-                $query->whereIn('student_id', $studentIds);
-            }
-
-            $rows = $query
-                ->selectRaw('status, COUNT(*) as total')
-                ->groupBy('status')
-                ->pluck('total', 'status');
+            $rows = $buckets[$month->format('Y-m')] ?? [];
 
             $present = (int) ($rows['Present'] ?? 0);
-            $total = (int) $rows->sum();
+            $total = (int) array_sum($rows);
 
             $series[] = [
                 'month' => $month->format('M Y'),
@@ -318,13 +325,13 @@ public const ECCD_DOMAIN_SHORT = [
      * Per-student percentage of ECCD indicators marked Achieved, for every
      * domain. Mirrors gameMasteryByStudent so the two can be shown side by side.
      */
-    public function domainMasteryByStudent(array $studentIds): array
+    public function domainMasteryByStudent(array $studentIds, ?Collection $students = null): array
     {
         if (empty($studentIds)) {
             return [];
         }
 
-        $students = Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
+        $students ??= Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
 
         $rows = EccdRecord::whereIn('student_id', $studentIds)
             ->selectRaw('student_id, domain, COUNT(*) as total, SUM(CASE WHEN status = \'Achieved\' THEN 1 ELSE 0 END) as achieved')
@@ -371,7 +378,7 @@ public const ECCD_DOMAIN_SHORT = [
      * balance per game type written by Point::awardPoints, so adding it up would
      * count every earlier award again.
      */
-    public function pointsByStudent(array $studentIds): array
+    public function pointsByStudent(array $studentIds, ?Collection $students = null): array
     {
         if (empty($studentIds)) {
             return [];
@@ -384,7 +391,8 @@ public const ECCD_DOMAIN_SHORT = [
             ->groupBy('student_id');
 
         $points = [];
-        foreach ($students = Student::whereIn('id', $studentIds)->orderBy('first_name')->get() as $student) {
+        $students ??= Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
+        foreach ($students as $student) {
             $byGame = $rows->get($student->id, collect())->keyBy('game_type');
             $scores = [];
 
@@ -410,20 +418,23 @@ public const ECCD_DOMAIN_SHORT = [
      * ECCD domain, plus the section they belong to, so a table can show the
      * categories as their own columns instead of one blended average.
      */
-    public function studentCategoryBreakdown(array $studentIds): array
+    public function studentCategoryBreakdown(array $studentIds, ?Collection $students = null): array
     {
         if (empty($studentIds)) {
             return [];
         }
 
-        $classes = Student::whereIn('id', $studentIds)
-            ->pluck('class_name', 'id');
+        // Callers that already hold the students (the dashboard pages through
+        // them) pass them in, in the order they want the rows. Otherwise load
+        // them once here instead of once per sub-query.
+        $students ??= Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
+        $classes = $students->pluck('class_name', 'id');
 
-        $domains = collect($this->domainMasteryByStudent($studentIds))->keyBy('student_id');
-        $points = collect($this->pointsByStudent($studentIds))->keyBy('student_id');
+        $domains = collect($this->domainMasteryByStudent($studentIds, $students))->keyBy('student_id');
+        $points = collect($this->pointsByStudent($studentIds, $students))->keyBy('student_id');
 
         $rows = [];
-        foreach ($this->gameMasteryByStudent($studentIds) as $gameRow) {
+        foreach ($this->gameMasteryByStudent($studentIds, $students) as $gameRow) {
             $domainRow = $domains->get($gameRow['student_id'], ['scores' => [], 'overall' => null, 'assessed' => 0]);
             $pointRow = $points->get($gameRow['student_id'], ['scores' => [], 'total' => 0, 'awards' => 0]);
 
@@ -505,13 +516,13 @@ public const ECCD_DOMAIN_SHORT = [
     /**
      * Per-student mean percentage for each game type.
      */
-    public function gameMasteryByStudent(array $studentIds): array
+    public function gameMasteryByStudent(array $studentIds, ?Collection $students = null): array
     {
         if (empty($studentIds)) {
             return [];
         }
 
-        $students = Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
+        $students ??= Student::whereIn('id', $studentIds)->orderBy('first_name')->get();
 
         $rows = GameScore::whereIn('student_id', $studentIds)
             ->selectRaw('student_id, game_type, ' . self::ACCURACY_SQL . ' as avg_pct, COUNT(*) as attempts')
@@ -549,7 +560,7 @@ public const ECCD_DOMAIN_SHORT = [
      * Per-topic standings: which students are exceeding and which are
      * struggling, across games, ECCD domains and activity areas.
      */
-    public function topicStandings(array $studentIds, int $maxNames = 4): array
+    public function topicStandings(array $studentIds, int $maxNames = 4, ?array $bases = null): array
     {
         if (empty($studentIds)) {
             return [];
@@ -561,7 +572,7 @@ public const ECCD_DOMAIN_SHORT = [
         $gameOrder = array_flip(self::GAME_TYPES);
         $domainOrder = array_flip(self::ECCD_DOMAINS);
 
-        $byBasis = $this->topicRows($studentIds);
+        $byBasis = $this->topicRows($studentIds, $bases);
 
         $standings = [];
 
@@ -619,38 +630,56 @@ public const ECCD_DOMAIN_SHORT = [
      *
      * @return array<string, array{order: ?array, rows: \Illuminate\Support\Collection}>
      */
-    private function topicRows(array $studentIds): array
+    private function topicRows(array $studentIds, ?array $bases = null): array
     {
-        $gameOrder = array_flip(self::GAME_TYPES);
-        $domainOrder = array_flip(self::ECCD_DOMAINS);
+        $bases ??= ['Game', 'Domain', 'Activity'];
+        $idsKey = md5(implode(',', $studentIds));
 
-        $byBasis = [
-            'Game' => [
-                'order' => $gameOrder,
+        $loaders = [
+            'Game' => fn () => [
+                'order' => array_flip(self::GAME_TYPES),
                 'rows' => GameScore::whereIn('student_id', $studentIds)
                     ->selectRaw('student_id, game_type as topic, ' . self::ACCURACY_SQL . ' as pct')
                     ->groupBy('student_id', 'game_type')
+                    ->toBase()
                     ->get(),
             ],
-            'Domain' => [
-                'order' => $domainOrder,
+            'Domain' => fn () => [
+                'order' => array_flip(self::ECCD_DOMAINS),
                 'rows' => EccdRecord::whereIn('student_id', $studentIds)
                     ->selectRaw("student_id, domain as topic, SUM(CASE WHEN status = 'Achieved' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0) as pct")
                     ->groupBy('student_id', 'domain')
+                    ->toBase()
                     ->get(),
             ],
-            'Activity' => [
+            'Activity' => fn () => [
                 'order' => null,
                 'rows' => ActivityAttendance::whereIn('student_id', $studentIds)
                     ->join('activities', 'activity_attendance.activity_id', '=', 'activities.id')
                     ->selectRaw('activity_attendance.student_id, activities.type as topic, AVG(activity_attendance.score) as pct')
                     ->groupBy('activity_attendance.student_id', 'activities.type')
+                    ->toBase()
                     ->get(),
             ],
         ];
 
+        // The standings table and the leaderboards read the same rows. Each
+        // basis is queried once per request and reused, and a basis nobody
+        // asked for is never queried at all.
+        $byBasis = [];
+        foreach ($loaders as $basis => $load) {
+            if (! in_array($basis, $bases, true)) {
+                continue;
+            }
+
+            $byBasis[$basis] = $this->topicRowsCache[$idsKey][$basis] ??= $load();
+        }
+
         return $byBasis;
     }
+
+    /** @var array<string, array<string, array>> per-request memo for topicRows() */
+    private array $topicRowsCache = [];
 
     /**
      * A full ranking for every topic (each game, each ECCD domain, each
@@ -1531,6 +1560,74 @@ public const ECCD_DOMAIN_SHORT = [
             $index === false ? count(Student::SECTIONS) : $index,
             Student::sectionLabel($section),
         ];
+    }
+
+    /**
+     * Orders students the same way the dashboard orders its rows: by section
+     * (canonical order, unassigned last) or by name. "performance" keeps the
+     * name order the queries use. Done on students, before any scores are
+     * loaded, so a page of rows only ever needs that page's data.
+     */
+    public function orderStudents(Collection $students, string $sort): Collection
+    {
+        $byName = $students->sortBy(fn (Student $s) => mb_strtolower($s->first_name.' '.$s->last_name))->values();
+
+        if ($sort === 'section') {
+            // sortBy is stable, so each section keeps its name order.
+            return $byName->sortBy(fn (Student $s) => $this->sectionSortKey($s->class_name))->values();
+        }
+
+        return $byName;
+    }
+
+    /**
+     * Per-student attendance over the same window as the monthly trend chart:
+     * counts, rate and the last absence, from one grouped query. Rate follows
+     * Attendance::rate() (a late child still came; excused days are ignored).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function attendanceByStudent(Collection $students, int $months = 6): array
+    {
+        if ($students->isEmpty()) {
+            return [];
+        }
+
+        $from = Carbon::today()->startOfMonth()->subMonths($months - 1);
+
+        $byStudent = Attendance::whereIn('student_id', $students->pluck('id'))
+            ->where('date', '>=', $from)
+            ->selectRaw('student_id, status, COUNT(*) as total, MAX(date) as last_date')
+            ->groupBy('student_id', 'status')
+            ->toBase()
+            ->get()
+            ->groupBy('student_id');
+
+        $rows = [];
+        foreach ($students as $student) {
+            $counts = $byStudent->get($student->id, collect())->keyBy('status');
+            $present = (int) ($counts->get('Present')->total ?? 0);
+            $late = (int) ($counts->get('Late')->total ?? 0);
+            $absent = (int) ($counts->get('Absent')->total ?? 0);
+            $excused = (int) ($counts->get('Excused')->total ?? 0);
+            $recorded = $present + $late + $absent + $excused;
+            $lastAbsent = $counts->get('Absent')->last_date ?? null;
+
+            $rows[] = [
+                'student_id' => $student->id,
+                'name' => $student->name,
+                'class_name' => $student->class_name,
+                'present' => $present,
+                'late' => $late,
+                'absent' => $absent,
+                'excused' => $excused,
+                'recorded' => $recorded,
+                'rate' => $recorded > 0 ? Attendance::rate($present, $late, $absent) : null,
+                'last_absent' => $lastAbsent ? Carbon::parse($lastAbsent)->format('M j') : null,
+            ];
+        }
+
+        return $rows;
     }
 
     /**

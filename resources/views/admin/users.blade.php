@@ -135,7 +135,7 @@
                             <button type="button" title="{{ __('admin_ui.edit') }}"
                                 data-edit='@json($editData[$user->id])'
                                 class="edit-user-btn w-9 h-9 rounded-lg border border-[#f1e7cc] hover:bg-[#fffbf0] transition text-[#1982c4]">
-                                ✎
+                                <svg class="w-4 h-4 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
                             </button>
                             <form method="POST" action="{{ route('admin.users.archive', $user) }}" class="archive-form" data-name="{{ $user->full_name }}" data-archived="0">
                                 @csrf @method('PUT')

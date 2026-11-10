@@ -121,5 +121,44 @@
     @if(session('info'))
     <script>Swal.fire({ icon: 'info', title: @json(__('misc.notice_title')), text: @json(session('info')), timer: 3500, showConfirmButton: false });</script>
     @endif
+
+    @if(auth()->check() && auth()->user()->role === 'parent' && auth()->user()->must_change_password)
+    <script>
+    (() => {
+        const endpoint = @json(route('parent.password.initial'));
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        Swal.fire({
+            title: 'Set your new password',
+            text: 'For your account security, please create a password you want to use before continuing.',
+            html: '<input id="firstParentPassword" type="password" class="swal2-input" placeholder="New password" autocomplete="new-password"><input id="confirmParentPassword" type="password" class="swal2-input" placeholder="Confirm new password" autocomplete="new-password">',
+            confirmButtonText: 'Save password',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: false,
+            focusConfirm: false,
+            preConfirm: async () => {
+                const password = document.getElementById('firstParentPassword').value;
+                const confirmation = document.getElementById('confirmParentPassword').value;
+                if (password.length < 8) { Swal.showValidationMessage('Use at least 8 characters.'); return false; }
+                if (password !== confirmation) { Swal.showValidationMessage('The passwords do not match.'); return false; }
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password, password_confirmation: confirmation })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || Object.values(data.errors || {}).flat()[0] || 'Unable to update password. Please try again.');
+                    return data;
+                } catch (error) {
+                    Swal.showValidationMessage(error.message);
+                    return false;
+                }
+            }
+        }).then(result => { if (result.isConfirmed && result.value?.ok) window.location.reload(); });
+    })();
+    </script>
+    @endif
 </body>
 </html>

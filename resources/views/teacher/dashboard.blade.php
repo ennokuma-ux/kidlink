@@ -11,6 +11,8 @@
     .chart-box { position: relative; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; overflow: hidden; padding: 0.5rem 0.5rem 0.75rem; height: clamp(210px, 32vh, 340px); }
     .chart-box > canvas { max-width: 100%; }
     .chart-box--tall { height: clamp(250px, 40vh, 420px); }
+    /* A card that is reloading on its own (dash-partials.js) dims instead of blanking the page. */
+    [data-partial].is-loading, [data-partial-body].is-loading { opacity: .55; pointer-events: none; transition: opacity .15s; }
 </style>
 
 @unless($scope === 'individual')
@@ -146,6 +148,58 @@
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.attendance_trend_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.attendance_trend_subtitle') }}</p>
         <div class="chart-box"><canvas id="attendanceTrendChart"></canvas></div>
+
+        {{-- Per-student attendance, same window as the chart. Every row is in the page and
+             paged in the browser (public/js/dash-partials.js), so turning a page costs nothing. --}}
+        @php
+            $attPerPage = 5;
+            $attCount = count($attendanceStudents);
+            $attMin = \App\Services\AnalyticsService::ATTENDANCE_MIN_RATE;
+        @endphp
+        <div class="mt-5 pt-4 border-t border-[#f1e7cc]" data-client-pager data-per-page="{{ $attPerPage }}" data-label="students">
+            <div class="flex flex-wrap items-baseline justify-between gap-x-3 mb-2">
+                <h4 class="text-sm font-semibold text-[#182438]">Attendance by student</h4>
+                <span class="text-xs text-[#6b7280]">Last 6 months &middot; below {{ $attMin }}% needs a look</span>
+            </div>
+            @if($attCount)
+            <ul class="divide-y divide-[#f1e7cc]">
+                @foreach($attendanceStudents as $i => $att)
+                    @php
+                        $rate = $att['rate'];
+                        $rateColor = $rate === null ? '#9aa1ab' : ($rate >= 90 ? '#8ac926' : ($rate >= $attMin ? '#ffca3a' : '#ff595e'));
+                    @endphp
+                    <li data-pager-row @if($i >= $attPerPage) hidden @endif>
+                        <div class="flex items-center gap-3 py-2.5">
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ \App\Models\Student::colorForSection($att['class_name']) }}" title="{{ \App\Models\Student::sectionLabel($att['class_name']) }}"></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-[#182438] truncate">{{ $att['name'] }}</p>
+                                <p class="text-xs text-[#6b7280]">
+                                    @if($att['recorded'] > 0)
+                                        {{ $att['present'] }} present &middot; {{ $att['late'] }} late &middot; {{ $att['absent'] }} absent@if($att['last_absent']) &middot; last absent {{ $att['last_absent'] }}@endif
+                                    @else
+                                        No attendance recorded yet
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="w-20 shrink-0 text-right">
+                                @if($rate !== null)
+                                    <span class="text-sm font-bold" style="color: {{ $rateColor }}">{{ $rate }}%</span>
+                                    <div class="h-1.5 rounded-full bg-[#f4f2ec] mt-1" role="img" aria-label="{{ $rate }}% attendance"><div class="h-1.5 rounded-full" style="width: {{ $rate }}%; background-color: {{ $rateColor }}"></div></div>
+                                @else
+                                    <span class="text-xs text-[#6b7280]">&mdash;</span>
+                                @endif
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+            @if($attCount > $attPerPage)
+                <nav data-pager-nav class="mt-3 flex flex-wrap items-center justify-between gap-2" aria-label="Attendance by student pages"></nav>
+            @endif
+            @else
+                <p class="text-sm text-[#6b7280] py-4 text-center">No students to show.</p>
+            @endif
+        </div>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4">
         <x-attendance-period-header :period="$attendancePeriod" :keep="$attendanceKeep" />
@@ -277,113 +331,11 @@
     </div>
 </div>
 
-{{-- Per-student score for every category: games and ECCD domains --}}
-@if(count($categoryScores))
-<div class="bg-white rounded-xl shadow-sm p-4 mb-8">
-    <h3 class="text-lg font-semibold text-[#182438] mb-1">
-        {{ $scoreStudent ? __('analytics.score_by_category') : __('analytics.score_by_category_per_student') }}
-    </h3>
-    <p class="text-xs text-[#6b7280] mb-4">
-        @if($scoreStudent)
-            {{ __('analytics.category_blurb_selected') }}
-        @else
-            {{ __('analytics.category_blurb_cohort') }}
-        @endif
-    </p>
-
-    <form method="GET" action="{{ route('teacher.dashboard') }}" class="flex flex-wrap items-end gap-3 mb-4">
-        @foreach(request()->except(['score_section','score_student','intervention_page']) as $key => $value)
-            @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
-        @endforeach
-        <label class="text-xs font-semibold text-[#5f6873]">Section
-            <select name="score_section" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.score_student.value='';this.form.submit()">
-                <option value="">All sections</option>
-                @foreach($availableSections as $option)<option value="{{ $option }}" @selected($scoreSection === $option)>{{ \App\Models\Student::sectionLabel($option) }}</option>@endforeach
-            </select>
-        </label>
-        <label class="text-xs font-semibold text-[#5f6873]">Individual student
-            <select name="score_student" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
-                <option value="">Show selected section</option>
-                @foreach($scoreStudents as $option)<option value="{{ $option->id }}" @selected($scoreStudent && $scoreStudent->id === $option->id)>{{ $option->name }}</option>@endforeach
-            </select>
-        </label>
-    </form>
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-[980px]">
-            <thead class="bg-[#fffbf0]">
-                <tr>
-                    <th rowspan="2" class="px-3 py-2 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_student') }}</th>
-                    <th rowspan="2" class="px-3 py-2 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_section') }}</th>
-                    <th colspan="{{ count(\App\Services\AnalyticsService::GAME_TYPES) }}"
-                        class="px-3 py-2 text-center text-xs font-semibold text-[#1982c4] uppercase">
-                        {{ __('analytics.th_game_accuracy') }}
-                    </th>
-                    <th colspan="{{ count(\App\Services\AnalyticsService::ECCD_DOMAINS) }}"
-                        class="px-3 py-2 text-center text-xs font-semibold text-[#7c5cbf] uppercase">
-                        {{ __('analytics.th_eccd_mastery') }}
-                    </th>
-                    <th rowspan="2" class="px-3 py-2 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_game_avg') }}</th>
-                    <th rowspan="2" class="px-3 py-2 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_eccd_avg') }}</th>
-                    <th colspan="{{ count(\App\Services\AnalyticsService::GAME_TYPES) }}"
-                        class="px-3 py-2 text-center text-xs font-semibold text-[#b8860b] uppercase">
-                        {{ __('analytics.th_points_earned') }}
-                    </th>
-                    <th rowspan="2" class="px-3 py-2 text-center text-xs font-semibold text-[#b8860b] uppercase">{{ __('analytics.th_total_pts') }}</th>
-                </tr>
-                <tr>
-                    @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
-                    @endforeach
-                    @foreach(\App\Services\AnalyticsService::ECCD_DOMAINS as $domain)
-                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase"
-                            title="{{ $domain }}">{{ \App\Services\AnalyticsService::ECCD_DOMAIN_SHORT[$domain] ?? $domain }}</th>
-                    @endforeach
-                    @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                        <th class="px-2 py-2 text-center text-xs font-semibold text-[#5f6873] uppercase">{{ ucfirst($game) }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#f1e7cc]">
-                @foreach($categoryScores as $row)
-                    <tr class="hover:bg-[#fffbf0] transition">
-                        <td class="px-3 py-2.5 whitespace-nowrap font-medium text-[#182438]">{{ $row['name'] }}</td>
-                        <td class="px-3 py-2.5">
-                            <span class="inline-flex items-center gap-1.5 text-xs text-[#5f6873] whitespace-nowrap">
-                                <span class="w-2 h-2 rounded-full" style="background-color: {{ \App\Models\Student::colorForSection($row['class_name']) }}"></span>
-                                {{ \App\Models\Student::sectionLabel($row['class_name']) }}
-                            </span>
-                        </td>
-                        @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                            <td class="px-2 py-2.5 text-center text-sm"><x-score-cell :value="$row['games'][$game] ?? null" /></td>
-                        @endforeach
-                        @foreach(\App\Services\AnalyticsService::ECCD_DOMAINS as $domain)
-                            <td class="px-2 py-2.5 text-center text-sm"><x-score-cell :value="$row['domains'][$domain] ?? null" /></td>
-                        @endforeach
-                        <td class="px-3 py-2.5 text-center text-sm"><x-score-cell :value="$row['game_overall']" /></td>
-                        <td class="px-3 py-2.5 text-center text-sm"><x-score-cell :value="$row['domain_overall']" /></td>
-                        @foreach(\App\Services\AnalyticsService::GAME_TYPES as $game)
-                            <td class="px-2 py-2.5 text-center text-sm text-[#5f6873]">
-                                @if(isset($row['points'][$game]))
-                                    <span>{{ number_format($row['points'][$game]) }}</span>
-                                @else
-                                    <span class="text-[#6b7280]" title="{{ __('analytics.no_points_yet') }}">&mdash;</span>
-                                @endif
-                            </td>
-                        @endforeach
-                        <td class="px-3 py-2.5 text-center">
-                            <span class="font-bold text-[#b8860b]">{{ number_format($row['total_points']) }}</span>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <p class="text-xs text-[#6b7280] mt-3">
-        <span class="text-[#8ac926] font-bold">&#8805;75%</span> {{ __('analytics.legend_on_track') }} &middot;
-        <span class="text-[#ffca3a] font-bold">50&ndash;74%</span> {{ __('analytics.legend_needs_practice') }} &middot;
-        <span class="text-[#ff595e] font-bold">&lt;50%</span> {{ __('analytics.legend_priority') }}
-    </p>
+{{-- Per-student score for every category: games and ECCD domains. 8 students a page;
+     the filters and pager reload only this card (DashboardController::partial). --}}
+@if($scorePager->total() > 0 || $scoreSection !== '')
+<div class="bg-white rounded-xl shadow-sm p-4 mb-8" data-partial="scores">
+    @include('teacher.dashboard.partials.scores')
 </div>
 @endif
 
@@ -398,20 +350,24 @@
         ]) }}
     </p>
 
-    <form method="GET" action="{{ route('teacher.dashboard') }}" class="mb-4 flex items-center gap-3">
-        @foreach(request()->except('topic_type') as $key => $value)
-            @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
-        @endforeach
+    @php
+        $standingVisible = fn (string $basis) => $topicType === 'all' || ($topicType === 'game' && $basis === 'Game') || ($topicType === 'eccd' && $basis === 'Domain');
+        $standingShown = count(array_filter($topicStandings, fn ($row) => $standingVisible($row['basis'])));
+    @endphp
+    {{-- Every row is already on the page; this filter just shows and hides them in the browser,
+         so changing it makes no request and recomputes nothing. --}}
+    <div data-standings>
+    <div class="mb-4 flex items-center gap-3">
         <label class="text-xs font-semibold text-[#5f6873]">Show
-            <select name="topic_type" class="ml-2 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
+            <select data-standings-filter class="ml-2 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm">
                 <option value="all" @selected($topicType === 'all')>Games and ECCD</option>
                 <option value="game" @selected($topicType === 'game')>Games only</option>
                 <option value="eccd" @selected($topicType === 'eccd')>ECCD only</option>
             </select>
         </label>
-    </form>
+    </div>
     @if(count($topicStandings))
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto" data-standings-table @if($standingShown === 0) hidden @endif>
         <table class="w-full min-w-[780px]">
             <thead class="bg-[#fffbf0]">
                 <tr>
@@ -425,7 +381,7 @@
             </thead>
             <tbody class="divide-y divide-[#f1e7cc]">
                 @foreach($topicStandings as $row)
-                <tr class="hover:bg-[#fffbf0] transition align-top">
+                <tr class="hover:bg-[#fffbf0] transition align-top" data-basis="{{ $row['basis'] }}" @if(! $standingVisible($row['basis'])) hidden @endif>
                     <td class="px-4 py-3 font-medium text-[#182438] capitalize">{{ $row['topic'] }}</td>
                     <td class="px-3 py-3 text-sm text-[#5f6873]">{{ $row['basis'] }}</td>
                     <td class="px-3 py-3 text-sm text-center text-[#5f6873]">{{ $row['participants'] }}</td>
@@ -467,9 +423,9 @@
             </tbody>
         </table>
     </div>
-    @else
-    <p class="text-sm text-[#6b7280] py-8 text-center">{{ __('analytics.no_scores_recorded') }}</p>
     @endif
+    <p data-standings-empty class="text-sm text-[#6b7280] py-8 text-center" @if($standingShown > 0) hidden @endif>{{ __('analytics.no_scores_recorded') }}</p>
+    </div>
 </div>
 @endunless
 
@@ -478,64 +434,31 @@
     @include('teacher.analytics.partials.leaderboards')
 @endunless
 
-{{-- Level progression table --}}
+{{-- Level progression. Picking a student reloads only the table below (DashboardController::partial). --}}
 <div class="bg-white rounded-xl shadow-sm p-4">
-    <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.level_progress_map') }}</h3>
-    <p class="text-xs text-[#6b7280] mb-4">
-        @if($levelStudent)
-            {{ __('analytics.lpm_subtitle_selected', ['name' => $levelStudent->first_name]) }}
-        @else
-            {{ __('analytics.lpm_subtitle_cohort') }}
-        @endif
-    </p>
-    <form method="GET" action="{{ route('teacher.dashboard') }}" class="mb-4 flex flex-wrap items-end gap-3">
+    <h3 class="text-lg font-semibold text-[#182438] mb-3">{{ __('analytics.level_progress_map') }}</h3>
+    <form method="GET" action="{{ route('teacher.dashboard') }}" class="mb-4 flex flex-wrap items-end gap-3"
+          data-partial-form data-no-loader data-partial-url="{{ route('teacher.dashboard.partial', 'levels') }}" data-partial-target="#levelProgressBody">
+        {{-- Only used without JavaScript; with it the live URL is the source of truth. --}}
         @foreach(request()->except(['level_student','intervention_page']) as $key => $value)
             @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
         @endforeach
         <label class="text-xs font-semibold text-[#5f6873]">Individual student
-            <select name="level_student" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
+            <select name="level_student" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.requestSubmit()">
                 <option value="">Choose a student</option>
                 @foreach($levelStudentOptions as $option)<option value="{{ $option->id }}" @selected($levelStudent && $levelStudent->id === $option->id)>{{ $option->name }}</option>@endforeach
             </select>
         </label>
     </form>
-    @if($levelStudent)
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-[720px]">
-            <thead class="bg-[#fffbf0]">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_game') }}</th>
-                    @for($l = 1; $l <= 8; $l++)
-                        <th class="px-3 py-3 text-center text-xs font-semibold text-[#182438] uppercase">L{{ $l }}</th>
-                    @endfor
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#f1e7cc]">
-                @foreach($levelProgress as $game => $levels)
-                <tr class="hover:bg-[#fffbf0] transition">
-                    <td class="px-4 py-3 font-medium text-[#182438] capitalize">{{ $game }}</td>
-                    @for($l = 1; $l <= 8; $l++)
-                        <td class="px-3 py-3 text-center">
-                            @php $count = $levels[$l] ?? 0; @endphp
-                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold
-                                {{ $count === 0 ? 'bg-[#f4f2ec] text-[#c9c4b8]' : ($count >= 5 ? 'bg-[#8ac926] text-[#182438]' : 'bg-[#ecf7d6] text-[#3d7a1c]') }}">
-                                {{ $count }}
-                            </span>
-                        </td>
-                    @endfor
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div id="levelProgressBody" data-partial-body>
+        @include('teacher.dashboard.partials.levels-body')
     </div>
-    @else
-        <p class="py-8 text-center text-sm text-[#6b7280]">Select a student to view individual level progression.</p>
-    @endif
 </div>
 @endsection
 
 @push('scripts')
 <script src="{{ \App\Support\Asset::v('js/chart.umd.min.js') }}"></script>
+<script src="{{ \App\Support\Asset::v('js/dash-partials.js') }}"></script>
 <script data-page-script>
 Chart.defaults.maintainAspectRatio = false;
 const chartIfPresent = (id, config) => { const el = document.getElementById(id); if (el) new Chart(el, config); };

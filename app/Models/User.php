@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role',
         'contact',
         'is_active',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'announcements_seen_at' => 'datetime',
         'is_active' => 'boolean',
+        'must_change_password' => 'boolean',
     ];
 
     public function students(): \Illuminate\Database\Eloquent\Relations\HasMany

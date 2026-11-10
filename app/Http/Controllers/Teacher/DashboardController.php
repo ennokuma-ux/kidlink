@@ -12,6 +12,7 @@ use App\Services\AnalyticsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
@@ -20,6 +21,12 @@ class DashboardController extends Controller
      * ranking the service already produced untouched.
      */
     public const SORT_OPTIONS = ['section', 'name', 'performance'];
+
+    /** Students per page in the "score by category per student" table. */
+    public const SCORES_PER_PAGE = 8;
+
+    /** Fragments the dashboard can reload on their own, without recomputing the page. */
+    public const PARTIALS = ['scores', 'levels'];
 
     public function __construct(private AnalyticsService $analytics) {}
 
@@ -119,45 +126,55 @@ class DashboardController extends Controller
             ->all();
 
         $summary = $this->analytics->summary($studentIds);
-        $performanceRadar = $this->analytics->radar($studentIds);
-        $domainStatus = $this->analytics->domainStatusBreakdown($studentIds);
+        // The two ECCD charts only exist for a single child, so a group view
+        // never pays for their queries.
+        $performanceRadar = $selectedStudent ? $this->analytics->radar($studentIds) : [];
+        $domainStatus = $selectedStudent ? $this->analytics->domainStatusBreakdown($studentIds) : [];
         $attendanceRate = $this->analytics->attendanceRateTrend($studentIds, 6);
+
+        // Per-student attendance listed under the trend chart (paged in the browser).
+        $attendanceStudents = $this->analytics->attendanceByStudent(
+            $this->analytics->orderStudents($students, $sort)
+        );
+        if ($sort === 'performance') {
+            // Lowest rate first so the children who need a look come up first;
+            // children with no records have no rate to rank and go last.
+            usort($attendanceStudents, fn ($a, $b) => [$a['rate'] === null, $a['rate'] ?? 0] <=> [$b['rate'] === null, $b['rate'] ?? 0]);
+        }
         $attendancePeriod = $this->analytics->attendancePeriod($studentIds, (string) $request->query('att_mode', 'week'), $request->query('att_date'));
         $weeklyBreakdown = $attendancePeriod['rows'];
         $attendanceKeep = collect($request->query())->except(['att_mode', 'att_date'])->filter(fn ($value) => is_scalar($value))->all();
         $gamePerformance = $this->analytics->gamePerformance($studentIds);
         $gamePlayTrend = $this->analytics->gamePlayTrend($studentIds, 8);
         // Independent selectors for category scores and individual level progression.
-        $scoreSection = trim((string) $request->query('score_section', $section));
-        if ($scoreSection !== '' && ! in_array($scoreSection, $availableSections, true)) $scoreSection = '';
-        $scoreStudentId = $request->query('score_student', $selectedStudent?->id);
-        $scoreStudents = $allStudents;
-        if ($scoreSection !== '') $scoreStudents = $scoreStudents->where('class_name', $scoreSection);
-        $scoreStudent = $scoreStudents->firstWhere('id', (int) $scoreStudentId);
-        $scoreIds = $scoreStudent ? [$scoreStudent->id] : $scoreStudents->pluck('id')->all();
-        $categoryScores = $this->analytics->studentCategoryBreakdown($scoreIds);
-        $sectionScores = [];
+        // Only the first page of students is scored; the other pages are fetched
+        // on demand through partial() so they cost nothing until they are opened.
+        $scores = $this->scoreData($request, $allStudents, $availableSections, $section, $selectedStudent, $sort);
 
         $levelStudentOptions = $allStudents->sortBy('name')->values();
         $levelStudentId = $request->query('level_student', $selectedStudent?->id);
         $levelStudent = $allStudents->firstWhere('id', (int) $levelStudentId);
-        $levelIds = $levelStudent ? [$levelStudent->id] : [];
+        $levelProgress = $this->levelProgress($levelStudent ? [$levelStudent->id] : []);
         $recommendations = $this->analytics->studentRecommendations($studentIds, 6);
-        $topicStandings = array_values(array_filter(
-            $this->analytics->topicStandings($studentIds),
-            fn ($row) => in_array($row['basis'], ['Game', 'Domain'], true)
-        ));
+        // Standings and leaderboards are group views: the page hides them for a
+        // single child, so they are not computed for one. The standings table
+        // holds every game/ECCD row and is filtered in the browser, so changing
+        // its filter never reaches the server.
+        $topicStandings = [];
+        $topicLeaderboards = [];
+        if (! $selectedStudent) {
+            $topicStandings = $this->analytics->topicStandings($studentIds, 4, ['Game', 'Domain']);
+            // Leaderboards rank the whole chosen class (the section filter applies, a single
+            // selected child does not), so one child can still be seen against classmates.
+            $topicLeaderboards = $this->analytics->topicLeaderboards($sectionStudentIds, $sectionByStudent);
+        }
         $topicType = strtolower((string) $request->query('topic_type', 'all'));
         if (! in_array($topicType, ['all', 'game', 'eccd'], true)) $topicType = 'all';
-        if ($topicType === 'game') $topicStandings = array_values(array_filter($topicStandings, fn ($row) => $row['basis'] === 'Game'));
-        elseif ($topicType === 'eccd') $topicStandings = array_values(array_filter($topicStandings, fn ($row) => $row['basis'] === 'Domain'));
-        // Leaderboards rank the whole chosen class (the section filter applies, a single
-        // selected child does not), so one child can still be seen against classmates.
-        $topicLeaderboards = $this->analytics->topicLeaderboards($sectionStudentIds, $sectionByStudent);
 
         // The narrative blurb talks about the child on screen, so it keeps the
         // student-scoped flags.
-        $studentInterventions = $this->analytics->interventionFlags($studentIds);
+        // Only the single-child narrative reads these flags.
+        $studentInterventions = $selectedStudent ? $this->analytics->interventionFlags($studentIds) : [];
 
         // The intervention panel is a class-wide view: it follows the section
         // filter but keeps naming every child who needs action even when one
@@ -165,9 +182,9 @@ class DashboardController extends Controller
         $interventions = $this->analytics->interventionFlags($sectionStudentIds);
         $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
 
-        $enrollmentTrend = $this->enrollmentTrend($teacherId, $section, $selectedStudent?->id);
-        $ageDistribution = $this->ageDistribution($students);
-        $levelProgress = $this->levelProgress($levelIds);
+        // Both charts are group-only (hidden for one child).
+        $enrollmentTrend = $selectedStudent ? [] : $this->enrollmentTrend($teacherId, $section);
+        $ageDistribution = $selectedStudent ? [] : $this->ageDistribution($students);
 
         $recommendations = $this->analytics->sortStudentRows($recommendations, $sort, $sectionByStudent);
         $interventions = $this->analytics->sortStudentRows($interventions, $sort, $sectionByStudent);
@@ -191,10 +208,9 @@ class DashboardController extends Controller
                 'pageName' => 'intervention_page',
             ]
         );
-        $categoryScores = $this->analytics->sortStudentRows($categoryScores, $sort);
         $sectionLegend = $this->analytics->sectionLegend($allStudents);
 
-        return view('teacher.dashboard', compact(
+        return view('teacher.dashboard', $scores + compact(
             'totalStudents',
             'presentToday',
             'absentToday',
@@ -213,12 +229,8 @@ class DashboardController extends Controller
             'ageDistribution',
             'gamePerformance',
             'gamePlayTrend',
-            'categoryScores',
-            'sectionScores',
+            'attendanceStudents',
             'levelProgress',
-            'scoreSection',
-            'scoreStudent',
-            'scoreStudents',
             'levelStudent',
             'levelStudentOptions',
             'topicType',
@@ -237,28 +249,30 @@ class DashboardController extends Controller
         ));
     }
 
-    private function enrollmentTrend(int $teacherId, string $section = '', ?int $studentId = null): array
+    private function enrollmentTrend(int $teacherId, string $section = ''): array
     {
-        $series = [];
+        $first = Carbon::today()->startOfMonth()->subMonths(5);
 
+        $query = Student::where('teacher_id', $teacherId)
+            ->whereBetween('enrolled_date', [$first, Carbon::today()->endOfMonth()]);
+
+        if ($section !== '') {
+            $query->where('class_name', $section);
+        }
+
+        // One query for the six months, counted per month here.
+        $perMonth = [];
+        foreach ($query->toBase()->get(['enrolled_date']) as $row) {
+            $key = Carbon::parse($row->enrolled_date)->format('Y-m');
+            $perMonth[$key] = ($perMonth[$key] ?? 0) + 1;
+        }
+
+        $series = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::today()->startOfMonth()->subMonths($i);
-            $query = Student::where('teacher_id', $teacherId)
-                ->whereBetween('enrolled_date', [$month, $month->copy()->endOfMonth()]);
-
-            if ($section !== '') {
-                $query->where('class_name', $section);
-            }
-
-            // A single child enrolled once, so the trend collapses to the one
-            // month they joined rather than repeating the whole class.
-            if ($studentId !== null) {
-                $query->whereKey($studentId);
-            }
-
             $series[] = [
                 'month' => $month->format('M Y'),
-                'total' => (clone $query)->count(),
+                'total' => $perMonth[$month->format('Y-m')] ?? 0,
             ];
         }
 
@@ -320,6 +334,7 @@ class DashboardController extends Controller
         $rows = GameScore::whereIn('student_id', $studentIds)
             ->selectRaw('game_type, level, COUNT(DISTINCT student_id) as students')
             ->groupBy('game_type', 'level')
+            ->toBase()
             ->get()
             ->groupBy('game_type');
 
@@ -334,5 +349,106 @@ class DashboardController extends Controller
         }
 
         return $progress;
+    }
+
+    /**
+     * Reloads one piece of the dashboard on its own. The page's filters send
+     * only the fragment they change, so picking a student or turning a page
+     * runs a couple of small queries instead of rebuilding every chart, table
+     * and ranking on the page.
+     */
+    public function partial(Request $request, string $name)
+    {
+        abort_unless(in_array($name, self::PARTIALS, true), 404);
+
+        $teacherId = auth()->id();
+
+        if ($name === 'levels') {
+            // One child at a time: look that child up directly rather than
+            // loading the whole class just to find them.
+            $levelId = $request->query('level_student', $request->query('student'));
+            $levelStudent = ($levelId !== null && $levelId !== '')
+                ? Student::where('teacher_id', $teacherId)->where('is_active', true)
+                    ->find((int) $levelId, ['id', 'first_name', 'last_name', 'full_name'])
+                : null;
+
+            return view('teacher.dashboard.partials.levels-body', [
+                'levelStudent' => $levelStudent,
+                'levelProgress' => $this->levelProgress($levelStudent ? [$levelStudent->id] : []),
+            ]);
+        }
+
+        // Only the columns the score table reads.
+        $allStudents = Student::where('teacher_id', $teacherId)->where('is_active', true)
+            ->get(['id', 'first_name', 'last_name', 'full_name', 'class_name']);
+        $availableSections = $this->analytics->availableSections($allStudents);
+
+        $section = trim((string) $request->query('section', ''));
+        if ($section !== '' && ! in_array($section, $availableSections, true)) {
+            $section = '';
+        }
+
+        $sort = (string) $request->query('sort', 'section');
+        if (! in_array($sort, self::SORT_OPTIONS, true)) {
+            $sort = 'section';
+        }
+
+        $studentParam = $request->query('student');
+        $selectedStudent = ($studentParam !== null && $studentParam !== '')
+            ? ($section === '' ? $allStudents : $allStudents->where('class_name', $section))->firstWhere('id', (int) $studentParam)
+            : null;
+
+        return view('teacher.dashboard.partials.scores',
+            $this->scoreData($request, $allStudents, $availableSections, $section, $selectedStudent, $sort)
+            + ['availableSections' => $availableSections]
+        );
+    }
+
+    /**
+     * Everything the category score table needs. Students are ordered and cut
+     * to the requested page first, so only that page's scores are ever loaded.
+     */
+    private function scoreData(
+        Request $request,
+        Collection $allStudents,
+        array $availableSections,
+        string $section,
+        ?Student $selectedStudent,
+        string $sort
+    ): array {
+        $scoreSection = trim((string) $request->query('score_section', $section));
+        if ($scoreSection !== '' && ! in_array($scoreSection, $availableSections, true)) {
+            $scoreSection = '';
+        }
+
+        $scoreStudentId = $request->query('score_student', $selectedStudent?->id);
+        $scoreStudents = $scoreSection !== '' ? $allStudents->where('class_name', $scoreSection) : $allStudents;
+        $scoreStudent = $scoreStudents->firstWhere('id', (int) $scoreStudentId);
+
+        $ordered = $this->analytics->orderStudents(
+            $scoreStudent ? collect([$scoreStudent]) : $scoreStudents->values(),
+            $sort
+        );
+
+        $perPage = self::SCORES_PER_PAGE;
+        $total = $ordered->count();
+        $page = min(max(1, (int) $request->query('score_page', 1)), max(1, (int) ceil($total / $perPage)));
+        $pageStudents = $ordered->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $rows = $this->analytics->studentCategoryBreakdown($pageStudents->pluck('id')->all(), $pageStudents);
+
+        $pager = new LengthAwarePaginator($rows, $total, $perPage, $page, [
+            'path' => route('teacher.dashboard'),
+            'pageName' => 'score_page',
+            'query' => $request->except('score_page'),
+        ]);
+
+        return [
+            'scoreRows' => $rows,
+            'scorePager' => $pager,
+            'scoreSection' => $scoreSection,
+            'scoreStudent' => $scoreStudent,
+            'scoreStudents' => $scoreStudents,
+        ];
     }
 }

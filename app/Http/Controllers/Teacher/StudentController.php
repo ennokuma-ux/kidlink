@@ -162,7 +162,7 @@ class StudentController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
+            'password' => 'nullable|string|min:8',
             'contact' => 'nullable|string|max:255',
         ]);
 
@@ -170,7 +170,8 @@ class StudentController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->filled('password') ? $request->password : 'password123'),
+            'must_change_password' => true,
             'role' => 'parent',
             'contact' => $request->contact,
         ]);
@@ -192,6 +193,7 @@ class StudentController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => [$role === 'parent' ? 'required' : 'prohibited', 'email', 'max:255', 'unique:users,email'],
+            'password' => [$role === 'parent' ? 'nullable' : 'prohibited', 'string', 'min:8'],
             'contact' => 'nullable|string|max:255',
         ];
 
@@ -234,6 +236,7 @@ class StudentController extends Controller
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $email,
+            'password' => $role === 'parent' && ! empty($validated['password']) ? Hash::make($validated['password']) : null,
             'contact' => $validated['contact'] ?? null,
             'parent_ids' => $parentIds ?: null,
             'sex' => $validated['sex'] ?? null,
