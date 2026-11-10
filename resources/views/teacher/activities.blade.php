@@ -1,4 +1,4 @@
-﻿@extends('layouts.teacher')
+@extends('layouts.teacher')
 
 @section('title', __('teacher.activities_title'))
 @section('page-title', __('teacher.activities_title'))
@@ -81,7 +81,7 @@
                      data-end="{{ substr($activity->end_time, 0, 5) }}"
                      data-group="{{ $activity->group_name }}"
                      data-mode="{{ $activity->target_mode ?? 'section' }}"
-                     data-students='@json(array_map("intval", $activity->target_student_ids ?? []))'
+                     data-students='@json($activity->target_student_ids ?? [])'
                      data-update-url="{{ route('teacher.activities.update', $activity) }}">
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-semibold text-[#182438]">{{ $activity->title }}</span>
