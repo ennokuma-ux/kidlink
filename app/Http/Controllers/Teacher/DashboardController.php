@@ -35,7 +35,7 @@ class DashboardController extends Controller
         $teacherId = auth()->id();
         $today = Carbon::today();
 
-        $allStudents = Student::where('teacher_id', $teacherId)->where('is_active', true)->get();
+        $allStudents = Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')->get();
 
         // Headline cards: today's register and this week's activities.
         $totalStudents = $allStudents->count();
@@ -94,15 +94,6 @@ class DashboardController extends Controller
         $students = $section === ''
             ? $allStudents->values()
             : $allStudents->where('class_name', $section)->values();
-
-        // The headline cards on group analytics pages must use the same cohort
-        // as the selected scope. Keep the selection-screen counts centre/teacher-wide.
-        $totalStudents = $students->count();
-        $todayAttendance = Attendance::whereDate('date', $today)
-            ->whereIn('student_id', $students->pluck('id'))
-            ->get();
-        $presentToday = $todayAttendance->where('status', 'Present')->count();
-        $absentToday = $todayAttendance->where('status', 'Absent')->count();
 
         // The per-section rollup compares classes, so it must never be narrowed
         // by the section or single-student filter: it always counts every class
@@ -185,13 +176,10 @@ class DashboardController extends Controller
         // Only the single-child narrative reads these flags.
         $studentInterventions = $selectedStudent ? $this->analytics->interventionFlags($studentIds) : [];
 
-        // The intervention panel follows the active analytics scope. In an
-        // individual view it must name only the selected child; group views
-        // continue to show the selected section or the teacher's full roster.
-        $interventionStudentIds = $selectedStudent
-            ? [$selectedStudent->id]
-            : $sectionStudentIds;
-        $interventions = $this->analytics->interventionFlags($interventionStudentIds);
+        // The intervention panel is a class-wide view: it follows the section
+        // filter but keeps naming every child who needs action even when one
+        // student has been selected for inspection.
+        $interventions = $this->analytics->interventionFlags($sectionStudentIds);
         $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
 
         // Both charts are group-only (hidden for one child).
@@ -380,7 +368,7 @@ class DashboardController extends Controller
             // loading the whole class just to find them.
             $levelId = $request->query('level_student', $request->query('student'));
             $levelStudent = ($levelId !== null && $levelId !== '')
-                ? Student::where('teacher_id', $teacherId)->where('is_active', true)
+                ? Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')
                     ->find((int) $levelId, ['id', 'first_name', 'last_name', 'full_name'])
                 : null;
 
@@ -391,7 +379,7 @@ class DashboardController extends Controller
         }
 
         // Only the columns the score table reads.
-        $allStudents = Student::where('teacher_id', $teacherId)->where('is_active', true)
+        $allStudents = Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')
             ->get(['id', 'first_name', 'last_name', 'full_name', 'class_name']);
         $availableSections = $this->analytics->availableSections($allStudents);
 
