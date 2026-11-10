@@ -4,6 +4,28 @@
 @section('page-title', __('teacher.activities_title'))
 
 @section('content')
+@php
+    // Prepare picker and validation values before the JavaScript block so Blade
+    // does not have to parse nested function arguments inside @json directives.
+    $pickerStudents = $students->map(fn ($st) => [
+        'id' => $st->id,
+        'name' => $st->name,
+        'section' => $st->class_name ?: '',
+        'year' => $st->academic_year ?: '',
+        'age' => (int) $st->age,
+    ])->values();
+
+    $oldActivityId = old('_activity_id');
+    $oldActivityTitle = old('title', '');
+    $oldActivityType = old('type', '');
+    $oldActivityDay = old('day_of_week', '');
+    $oldActivityStart = old('start_time', '');
+    $oldActivityEnd = old('end_time', '');
+    $oldActivityWeek = old('week', '');
+    $oldTargetMode = old('target_mode', 'section');
+    $oldGroupName = old('group_name', '');
+    $oldTargetStudentIds = array_map('intval', old('target_student_ids', []));
+@endphp
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div class="flex items-center gap-2">
         <a href="{{ route('teacher.activities.index', ['week' => $prevWeek]) }}"
@@ -326,17 +348,6 @@ window.activityCalendar = function (days, weekStart, baseUrl, labels) {
 
 // ---- Who the activity is for: a group, or individual students ---------------
 window.activityTarget = (function () {
-    @php
-        // Built here instead of inline: the JSON directive splits its argument on every comma and
-        // drops everything after the third piece, which turned this list into a ParseError.
-        $pickerStudents = $students->map(fn ($st) => [
-            'id' => $st->id,
-            'name' => $st->name,
-            'section' => $st->class_name ?: '',
-            'year' => $st->academic_year ?: '',
-            'age' => (int) $st->age,
-        ])->values();
-    @endphp
     const STUDENTS = @json($pickerStudents);
     const AGE_LABEL = age => age < 1 ? @json(__('Below 1')) : age + ' ' + @json(__('teacher.yrs'));
     const byId = new Map(STUDENTS.map(st => [st.id, st]));
@@ -525,21 +536,22 @@ function openEditModal(button) {
     @if (old('_activity_id'))
         // The edit form bounced: restore it instead of the create form.
         document.getElementById('editActivityForm').action = @json(route('teacher.activities.update', old('_activity_id')));
-        document.getElementById('editActivityId').value = @json(old('_activity_id'));
-        document.getElementById('editTitle').value = @json(old('title'));
-        document.getElementById('editType').value = @json(old('type'));
-        document.getElementById('editDay').value = @json(old('day_of_week'));
-        document.getElementById('editStart').value = @json(old('start_time'));
-        document.getElementById('editEnd').value = @json(old('end_time'));
-        document.getElementById('editWeek').value = @json(old('week'));
-        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
+        document.getElementById('editActivityId').value = @json($oldActivityId);
+        document.getElementById('editTitle').value = @json($oldActivityTitle);
+        document.getElementById('editType').value = @json($oldActivityType);
+        document.getElementById('editDay').value = @json($oldActivityDay);
+        document.getElementById('editStart').value = @json($oldActivityStart);
+        document.getElementById('editEnd').value = @json($oldActivityEnd);
+        document.getElementById('editWeek').value = @json($oldActivityWeek);
+        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json($oldTargetMode), @json($oldGroupName), @json($oldTargetStudentIds));
         document.getElementById('editActivityModal').classList.remove('hidden');
     @else
-        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
+        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json($oldTargetMode), @json($oldGroupName), @json($oldTargetStudentIds));
         document.getElementById('addActivityModal').classList.remove('hidden');
     @endif
 @endif
 </script>
+<script>
 // Keep this account's Activity Planner lease alive while this page is open.
 const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
 const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -570,5 +582,6 @@ window.addEventListener('pagehide', () => {
     // abandoned tabs are recovered automatically when the lease expires.
     window.clearInterval(activityLockTimer);
 });
+</script>
 
 @endpush
