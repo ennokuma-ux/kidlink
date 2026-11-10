@@ -16,11 +16,11 @@
 --}}
 
 <div class="rounded-xl border-2 mb-8
-    {{ $interventions === [] ? 'bg-white border-[#b8e0c2]' : 'bg-[#fff5f7] border-[#ff595e]' }}">
+    {{ $interventions->isEmpty() ? 'bg-white border-[#b8e0c2]' : 'bg-[#fff5f7] border-[#ff595e]' }}">
     <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b
-        {{ $interventions === [] ? 'border-[#f1e7cc]' : 'border-[#f5c6cf]' }}">
+        {{ $interventions->isEmpty() ? 'border-[#f1e7cc]' : 'border-[#f5c6cf]' }}">
         <div class="flex items-center gap-3">
-            @if($interventions === [])
+            @if($interventions->isEmpty())
                 <span class="w-9 h-9 rounded-full bg-[#ecf7d6] text-[#8ac926] flex items-center justify-center text-lg font-bold" aria-hidden="true">&check;</span>
             @else
                 <span class="w-9 h-9 rounded-full bg-[#ff595e] text-white flex items-center justify-center font-bold" aria-hidden="true">!</span>
@@ -35,13 +35,13 @@
         </div>
         @if($interventions !== [])
             <span class="px-3 py-1.5 rounded-full bg-[#ff595e] text-white text-xs font-bold uppercase tracking-wide">
-                {{ trans_choice('intervention.count', count($interventions), ['count' => count($interventions)]) }}
+                {{ trans_choice('intervention.count', $interventions->total(), ['count' => $interventions->total()]) }}
                 
             </span>
         @endif
     </div>
 
-    @if($interventions === [])
+    @if($interventions->isEmpty())
         <div class="px-6 py-8 text-center">
             <p class="text-[#182438] font-semibold">{{ __('intervention.nothing_missing') }}</p>
             <p class="text-sm text-[#5f6873] mt-1">
@@ -90,5 +90,11 @@
                 </div>
             @endforeach
         </div>
+        @if(method_exists($interventions, 'links'))
+            <div class="px-5 py-3 border-t border-[#f5c6cf] flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs text-[#6b7280]">Showing {{ $interventions->firstItem() }}–{{ $interventions->lastItem() }} of {{ $interventions->total() }}</span>
+                <div class="text-sm">{{ $interventions->onEachSide(1)->links() }}</div>
+            </div>
+        @endif
     @endif
 </div>

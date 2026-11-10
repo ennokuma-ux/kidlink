@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,6 +26,25 @@ class PreventConcurrentActivityAccess
     {
         $user = $request->user();
         if (! $user) {
+            return $next($request);
+        }
+
+        // The page-lock table is introduced by a migration. During deployment,
+        // a release can receive traffic before that migration has completed.
+        // Dashboard and other pages must remain available in that window; the
+        // lock feature is temporarily skipped until its backing table exists.
+        try {
+            if (! Schema::hasTable('user_page_locks')) {
+                return $next($request);
+            }
+        } catch (\Throwable $exception) {
+            // A schema inspection/database outage must not turn every teacher
+            // or parent page into an HTTP 500. Fail open and leave a log trail.
+            Log::warning('Page-lock middleware skipped because its table could not be checked.', [
+                'exception' => $exception->getMessage(),
+                'route' => optional($request->route())->getName(),
+            ]);
+
             return $next($request);
         }
 

@@ -117,23 +117,23 @@
 <x-intervention-panel :interventions="$interventions" />
 
 {{-- Headline stats --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#1982c4]">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-[#1982c4]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_active_students') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['active_students'] }}</p>
         <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_of_enrolled', ['count' => $summary['students']]) }}</p>
     </div>
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#8ac926]">
+    <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-[#8ac926]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_avg_game_accuracy') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['avg_game_pct'] }}%</p>
         <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_levels_played', ['count' => $summary['games_played']]) }}</p>
     </div>
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#ff8555]">
+    <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-[#ff8555]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_attendance_rate') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ $summary['attendance_rate'] }}%</p>
         <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_late_arrivals', ['count' => $summary['late_count']]) }}</p>
     </div>
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#ffca3a]">
+    <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-[#ffca3a]">
         <p class="text-[#5f6873] text-sm">{{ __('analytics.stat_points_awarded') }}</p>
         <p class="text-3xl font-bold text-[#182438]">{{ number_format($summary['points_awarded']) }}</p>
         <p class="text-xs text-[#6b7280] mt-1">{{ __('analytics.stat_all_time') }}</p>
@@ -141,13 +141,13 @@
 </div>
 
 {{-- Attendance --}}
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.attendance_trend_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.attendance_trend_subtitle') }}</p>
         <div class="chart-box"><canvas id="attendanceTrendChart"></canvas></div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <x-attendance-period-header :period="$attendancePeriod" :keep="$attendanceKeep" />
         <div class="chart-box"><canvas id="weeklyBreakdownChart"></canvas></div>
         <div class="mt-5 pt-4 border-t border-[#f1e7cc]">
@@ -158,15 +158,15 @@
 
 {{-- Developmental domains: ECCD charts only make sense for one student --}}
 @if($selectedStudent)
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.domain_mastery_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">
             {{ __('analytics.domain_mastery_subtitle_teacher', ['who' => __('analytics.domain_who_name', ['name' => $selectedStudent->first_name])]) }}
         </p>
         <div class="chart-box"><canvas id="performanceRadarChart"></canvas></div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.indicator_status_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.indicator_status_subtitle') }}</p>
         <div class="chart-box"><canvas id="domainStatusChart"></canvas></div>
@@ -174,8 +174,8 @@
 </div>
 @else
 {{-- Group view: group charts only (the ECCD charts above belong to one child). --}}
-<div class="grid grid-cols-1 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6">
+<div class="grid grid-cols-1 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.age_dist_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.age_dist_subtitle_cohort') }}</p>
         <div class="chart-box"><canvas id="ageDistChart"></canvas></div>
@@ -184,7 +184,7 @@
 @endif
 
 {{-- Game performance --}}
-<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+<div class="bg-white rounded-xl shadow-sm p-4 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.game_perf_breakdown') }}</h3>
     <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.gp_subtitle') }}</p>
     <div class="overflow-x-auto">
@@ -227,14 +227,14 @@
 </div>
 
 {{-- Engagement + enrolment --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6 {{ $selectedStudent ? 'lg:col-span-3' : 'lg:col-span-2' }}">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4 {{ $selectedStudent ? 'lg:col-span-3' : 'lg:col-span-2' }}">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.weekly_trend_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.weekly_subtitle_long') }}</p>
-        <div class="chart-box"><canvas id="gamePlayTrendChart"></canvas></div>
+        <div class="chart-box chart-box--tall"><canvas id="gamePlayTrendChart"></canvas></div>
     </div>
     @unless($selectedStudent)
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.enrolment_trend_title') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.enrolment_trend_subtitle_teacher') }}</p>
         <div class="chart-box"><canvas id="enrollTrendChart"></canvas></div>
@@ -244,8 +244,8 @@
 
 {{-- Recommendations. (A per-student comparison chart used to sit beside them; individual
      data does not belong in a group view, so it is gone.) --}}
-<div class="grid grid-cols-1 gap-8 mb-10">
-    <div class="bg-white rounded-xl shadow-sm p-6">
+<div class="grid grid-cols-1 gap-5 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4">
         <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.recommended_interventions') }}</h3>
         <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.ri_subtitle') }}</p>
         <div class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
@@ -279,18 +279,35 @@
 
 {{-- Per-student score for every category: games and ECCD domains --}}
 @if(count($categoryScores))
-<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+<div class="bg-white rounded-xl shadow-sm p-4 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">
-        {{ $selectedStudent ? __('analytics.score_by_category') : __('analytics.score_by_category_per_student') }}
+        {{ $scoreStudent ? __('analytics.score_by_category') : __('analytics.score_by_category_per_student') }}
     </h3>
     <p class="text-xs text-[#6b7280] mb-4">
-        @if($selectedStudent)
+        @if($scoreStudent)
             {{ __('analytics.category_blurb_selected') }}
         @else
             {{ __('analytics.category_blurb_cohort') }}
         @endif
     </p>
 
+    <form method="GET" action="{{ route('teacher.dashboard') }}" class="flex flex-wrap items-end gap-3 mb-4">
+        @foreach(request()->except(['score_section','score_student','intervention_page']) as $key => $value)
+            @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
+        @endforeach
+        <label class="text-xs font-semibold text-[#5f6873]">Section
+            <select name="score_section" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.score_student.value='';this.form.submit()">
+                <option value="">All sections</option>
+                @foreach($availableSections as $option)<option value="{{ $option }}" @selected($scoreSection === $option)>{{ \App\Models\Student::sectionLabel($option) }}</option>@endforeach
+            </select>
+        </label>
+        <label class="text-xs font-semibold text-[#5f6873]">Individual student
+            <select name="score_student" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
+                <option value="">Show selected section</option>
+                @foreach($scoreStudents as $option)<option value="{{ $option->id }}" @selected($scoreStudent && $scoreStudent->id === $option->id)>{{ $option->name }}</option>@endforeach
+            </select>
+        </label>
+    </form>
     <div class="overflow-x-auto">
         <table class="w-full min-w-[980px]">
             <thead class="bg-[#fffbf0]">
@@ -370,51 +387,9 @@
 </div>
 @endif
 
-{{-- Rollup of the same scores per section. Always every class, never filtered. --}}
-@if(!$selectedStudent && count($sectionScores))
-<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-    <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.avg_score_by_section') }}</h3>
-    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.asbs_subtitle') }}</p>
-
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-[520px]">
-            <thead class="bg-[#fffbf0]">
-                <tr>
-                    <th class="px-3 py-2 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_section') }}</th>
-                    <th class="px-3 py-2 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_students') }}</th>
-                    <th class="px-3 py-2 text-center text-xs font-semibold text-[#1982c4] uppercase">{{ __('analytics.th_avg_game_accuracy') }}</th>
-                    <th class="px-3 py-2 text-center text-xs font-semibold text-[#7c5cbf] uppercase">{{ __('analytics.th_avg_eccd_mastery') }}</th>
-                    <th class="px-3 py-2 text-center text-xs font-semibold text-[#b8860b] uppercase">{{ __('analytics.th_avg_points') }}</th>
-                    <th class="px-3 py-2 text-center text-xs font-semibold text-[#b8860b] uppercase">{{ __('analytics.th_total_points') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#f1e7cc]">
-                @foreach($sectionScores as $row)
-                    <tr class="hover:bg-[#fffbf0] transition">
-                        <td class="px-3 py-2.5">
-                            <span class="inline-flex items-center gap-2 text-sm font-medium text-[#182438]">
-                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $row['color'] }}"></span>
-                                {{ $row['label'] }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-2.5 text-center text-sm text-[#5f6873]">{{ $row['students'] }}</td>
-                        <td class="px-3 py-2.5 text-center text-sm"><x-score-cell :value="$row['game_pct']" /></td>
-                        <td class="px-3 py-2.5 text-center text-sm"><x-score-cell :value="$row['domain_pct']" /></td>
-                        <td class="px-3 py-2.5 text-center text-sm text-[#5f6873]">
-                            {{ $row['avg_points'] === null ? '—' : number_format($row['avg_points']) }}
-                        </td>
-                        <td class="px-3 py-2.5 text-center font-bold text-[#b8860b]">{{ number_format($row['total_points']) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endif
-
 @unless($selectedStudent)
 {{-- Who is exceeding / struggling, per topic --}}
-<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+<div class="bg-white rounded-xl shadow-sm p-4 mb-8">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.exceeding_struggling') }}</h3>
     <p class="text-xs text-[#6b7280] mb-4">
         {{ __('analytics.es_subtitle', [
@@ -423,6 +398,18 @@
         ]) }}
     </p>
 
+    <form method="GET" action="{{ route('teacher.dashboard') }}" class="mb-4 flex items-center gap-3">
+        @foreach(request()->except('topic_type') as $key => $value)
+            @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
+        @endforeach
+        <label class="text-xs font-semibold text-[#5f6873]">Show
+            <select name="topic_type" class="ml-2 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
+                <option value="all" @selected($topicType === 'all')>Games and ECCD</option>
+                <option value="game" @selected($topicType === 'game')>Games only</option>
+                <option value="eccd" @selected($topicType === 'eccd')>ECCD only</option>
+            </select>
+        </label>
+    </form>
     @if(count($topicStandings))
     <div class="overflow-x-auto">
         <table class="w-full min-w-[780px]">
@@ -491,25 +478,28 @@
     @include('teacher.analytics.partials.leaderboards')
 @endunless
 
-{{-- Activity performance --}}
-@if(count($activityPerformance))
-<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-    <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.activity_performance') }}</h3>
-    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.ap_subtitle') }}</p>
-    <div class="chart-box"><canvas id="activityChart"></canvas></div>
-</div>
-@endif
-
 {{-- Level progression table --}}
-<div class="bg-white rounded-xl shadow-sm p-6">
+<div class="bg-white rounded-xl shadow-sm p-4">
     <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.level_progress_map') }}</h3>
     <p class="text-xs text-[#6b7280] mb-4">
-        @if($selectedStudent)
-            {{ __('analytics.lpm_subtitle_selected', ['name' => $selectedStudent->first_name]) }}
+        @if($levelStudent)
+            {{ __('analytics.lpm_subtitle_selected', ['name' => $levelStudent->first_name]) }}
         @else
             {{ __('analytics.lpm_subtitle_cohort') }}
         @endif
     </p>
+    <form method="GET" action="{{ route('teacher.dashboard') }}" class="mb-4 flex flex-wrap items-end gap-3">
+        @foreach(request()->except(['level_student','intervention_page']) as $key => $value)
+            @if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
+        @endforeach
+        <label class="text-xs font-semibold text-[#5f6873]">Individual student
+            <select name="level_student" class="block mt-1 rounded-lg border border-[#d8d2c5] px-3 py-2 text-sm" onchange="this.form.submit()">
+                <option value="">Choose a student</option>
+                @foreach($levelStudentOptions as $option)<option value="{{ $option->id }}" @selected($levelStudent && $levelStudent->id === $option->id)>{{ $option->name }}</option>@endforeach
+            </select>
+        </label>
+    </form>
+    @if($levelStudent)
     <div class="overflow-x-auto">
         <table class="w-full min-w-[720px]">
             <thead class="bg-[#fffbf0]">
@@ -538,6 +528,9 @@
             </tbody>
         </table>
     </div>
+    @else
+        <p class="py-8 text-center text-sm text-[#6b7280]">Select a student to view individual level progression.</p>
+    @endif
 </div>
 @endsection
 
@@ -554,7 +547,6 @@ const ageDistribution = @json($ageDistribution);
 const enrollmentTrend = @json($enrollmentTrend);
 const gamePlayTrend = @json($gamePlayTrend);
 const gamePerformance = @json($gamePerformance);
-const activityPerformance = @json($activityPerformance);
 
 const PALETTE = ['#ff8555', '#1982c4', '#8ac926', '#ff595e', '#ffca3a', '#e78cae', '#7c5cbf', '#16a085'];
 const gridColor = 'rgba(24, 36, 56, 0.08)';
@@ -607,7 +599,7 @@ new Chart(document.getElementById('attendanceTrendChart'), {
         plugins: { legend: { position: 'bottom' } },
         scales: {
             y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: gridColor } },
-            x: { grid: { display: false } }
+            x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 } }
         }
     }
 });
@@ -627,11 +619,13 @@ new Chart(document.getElementById('weeklyBreakdownChart'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { left: 12, right: 18, top: 10, bottom: 10 } },
         plugins: {
             legend: { position: 'bottom' },
             tooltip: withCounts([weeklyBreakdown.map(r => r.present), weeklyBreakdown.map(r => r.absent), weeklyBreakdown.map(r => r.late)])
         },
-        scales: { y: { min: 0, max: 100, ticks: pctTicks, grid: { color: gridColor } }, x: { grid: { display: false } } }
+        scales: { y: { min: 0, max: 100, ticks: pctTicks, grid: { color: gridColor } }, x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 } } }
     }
 });
 
@@ -716,11 +710,11 @@ new Chart(document.getElementById('gamePlayTrendChart'), {
         labels: gamePlayTrend.map(r => r.week),
         datasets: [
             { type: 'bar', label: L.levels_played, data: shareOf(gamePlayTrend.map(r => r.plays)), backgroundColor: 'rgba(37, 140, 197, 0.55)', borderRadius: 4, maxBarThickness: 36, yAxisID: 'y' },
-            { type: 'line', label: L.avg_accuracy, data: gamePlayTrend.map(r => r.avg_pct), borderColor: '#8ac926', backgroundColor: '#8ac926', tension: 0.35, yAxisID: 'y1', pointRadius: 3 }
+            { type: 'line', label: L.avg_accuracy, data: gamePlayTrend.map(r => r.avg_pct), borderColor: '#8ac926', backgroundColor: '#8ac926', tension: 0.35, yAxisID: 'y1', pointRadius: 3, clip: false }
         ]
     },
     options: {
-        responsive: true,
+        responsive: true,\n        maintainAspectRatio: false,\n        layout: { padding: { left: 12, right: 18, top: 10, bottom: 10 } },
         plugins: {
             legend: { position: 'bottom' },
             tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0
@@ -730,7 +724,7 @@ new Chart(document.getElementById('gamePlayTrendChart'), {
         scales: {
             y: { min: 0, max: 100, position: 'left', ticks: pctTicks, grid: { color: gridColor }, title: { display: true, text: L.levels + ' (%)' } },
             y1: { min: 0, max: 100, position: 'right', ticks: { callback: v => v + '%' }, grid: { display: false } },
-            x: { grid: { display: false } }
+            x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 } }
         }
     }
 });
@@ -757,32 +751,5 @@ chartIfPresent('enrollTrendChart', {
     }
 });
 
-// Activity performance
-if (activityPerformance.length) {
-    new Chart(document.getElementById('activityChart'), {
-        type: 'bar',
-        data: {
-            labels: activityPerformance.map(a => a.type),
-            datasets: [
-                { label: L.avg_score, data: activityPerformance.map(a => Math.min(100, +a.avg_score || 0)), backgroundColor: '#1982c4', borderRadius: 4, maxBarThickness: 36 },
-                { label: L.attempts, data: shareOf(activityPerformance.map(a => a.attempts)), backgroundColor: '#ff8555', borderRadius: 4, maxBarThickness: 36, yAxisID: 'y1' }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 1
-                    ? ctx.dataset.label + ': ' + ctx.raw + '% (' + activityPerformance[ctx.dataIndex].attempts + ')'
-                    : ctx.dataset.label + ': ' + ctx.raw + '%' } }
-            },
-            scales: {
-                y: { min: 0, max: 100, ticks: pctTicks, grid: { color: gridColor } },
-                y1: { min: 0, max: 100, position: 'right', grid: { display: false }, ticks: pctTicks },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-}
 </script>
 @endpush

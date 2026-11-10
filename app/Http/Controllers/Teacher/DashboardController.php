@@ -11,6 +11,7 @@ use App\Models\Student;
 use App\Services\AnalyticsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardController extends Controller
 {
@@ -126,10 +127,30 @@ class DashboardController extends Controller
         $attendanceKeep = collect($request->query())->except(['att_mode', 'att_date'])->filter(fn ($value) => is_scalar($value))->all();
         $gamePerformance = $this->analytics->gamePerformance($studentIds);
         $gamePlayTrend = $this->analytics->gamePlayTrend($studentIds, 8);
-        $categoryScores = $this->analytics->studentCategoryBreakdown($studentIds);
-        $sectionScores = $this->analytics->sectionScoreBreakdown($allStudentIds);
+        // Independent selectors for category scores and individual level progression.
+        $scoreSection = trim((string) $request->query('score_section', $section));
+        if ($scoreSection !== '' && ! in_array($scoreSection, $availableSections, true)) $scoreSection = '';
+        $scoreStudentId = $request->query('score_student', $selectedStudent?->id);
+        $scoreStudents = $allStudents;
+        if ($scoreSection !== '') $scoreStudents = $scoreStudents->where('class_name', $scoreSection);
+        $scoreStudent = $scoreStudents->firstWhere('id', (int) $scoreStudentId);
+        $scoreIds = $scoreStudent ? [$scoreStudent->id] : $scoreStudents->pluck('id')->all();
+        $categoryScores = $this->analytics->studentCategoryBreakdown($scoreIds);
+        $sectionScores = [];
+
+        $levelStudentOptions = $allStudents->sortBy('name')->values();
+        $levelStudentId = $request->query('level_student', $selectedStudent?->id);
+        $levelStudent = $allStudents->firstWhere('id', (int) $levelStudentId);
+        $levelIds = $levelStudent ? [$levelStudent->id] : [];
         $recommendations = $this->analytics->studentRecommendations($studentIds, 6);
-        $topicStandings = $this->analytics->topicStandings($studentIds);
+        $topicStandings = array_values(array_filter(
+            $this->analytics->topicStandings($studentIds),
+            fn ($row) => in_array($row['basis'], ['Game', 'Domain'], true)
+        ));
+        $topicType = strtolower((string) $request->query('topic_type', 'all'));
+        if (! in_array($topicType, ['all', 'game', 'eccd'], true)) $topicType = 'all';
+        if ($topicType === 'game') $topicStandings = array_values(array_filter($topicStandings, fn ($row) => $row['basis'] === 'Game'));
+        elseif ($topicType === 'eccd') $topicStandings = array_values(array_filter($topicStandings, fn ($row) => $row['basis'] === 'Domain'));
         // Leaderboards rank the whole chosen class (the section filter applies, a single
         // selected child does not), so one child can still be seen against classmates.
         $topicLeaderboards = $this->analytics->topicLeaderboards($sectionStudentIds, $sectionByStudent);
@@ -146,11 +167,19 @@ class DashboardController extends Controller
 
         $enrollmentTrend = $this->enrollmentTrend($teacherId, $section, $selectedStudent?->id);
         $ageDistribution = $this->ageDistribution($students);
-        $activityPerformance = $this->activityPerformance($studentIds);
-        $levelProgress = $this->levelProgress($studentIds);
+        $levelProgress = $this->levelProgress($levelIds);
 
         $recommendations = $this->analytics->sortStudentRows($recommendations, $sort, $sectionByStudent);
         $interventions = $this->analytics->sortStudentRows($interventions, $sort, $sectionByStudent);
+        $interventionPage = max(1, (int) $request->query('intervention_page', 1));
+        $interventionTotal = count($interventions);
+        $interventions = new LengthAwarePaginator(
+            array_slice($interventions, ($interventionPage - 1) * 7, 7),
+            $interventionTotal,
+            7,
+            $interventionPage,
+            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'intervention_page']
+        );
         $categoryScores = $this->analytics->sortStudentRows($categoryScores, $sort);
         $sectionLegend = $this->analytics->sectionLegend($allStudents);
 
@@ -171,12 +200,17 @@ class DashboardController extends Controller
             'domainStatus',
             'enrollmentTrend',
             'ageDistribution',
-            'activityPerformance',
             'gamePerformance',
             'gamePlayTrend',
             'categoryScores',
             'sectionScores',
             'levelProgress',
+            'scoreSection',
+            'scoreStudent',
+            'scoreStudents',
+            'levelStudent',
+            'levelStudentOptions',
+            'topicType',
             'recommendations',
             'interventions',
             'studentInterventions',
