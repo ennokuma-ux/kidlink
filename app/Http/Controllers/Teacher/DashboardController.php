@@ -171,14 +171,25 @@ class DashboardController extends Controller
 
         $recommendations = $this->analytics->sortStudentRows($recommendations, $sort, $sectionByStudent);
         $interventions = $this->analytics->sortStudentRows($interventions, $sort, $sectionByStudent);
-        $interventionPage = max(1, (int) $request->query('intervention_page', 1));
+        $interventionPerPage = 7;
         $interventionTotal = count($interventions);
+        $interventionLastPage = max(1, (int) ceil($interventionTotal / $interventionPerPage));
+        // Keep page navigation inside the valid range so a stale page URL never
+        // produces an empty panel while intervention records still exist.
+        $interventionPage = min(
+            max(1, (int) $request->query('intervention_page', 1)),
+            $interventionLastPage
+        );
         $interventions = new LengthAwarePaginator(
-            array_slice($interventions, ($interventionPage - 1) * 7, 7),
+            array_slice($interventions, ($interventionPage - 1) * $interventionPerPage, $interventionPerPage),
             $interventionTotal,
-            7,
+            $interventionPerPage,
             $interventionPage,
-            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'intervention_page']
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+                'pageName' => 'intervention_page',
+            ]
         );
         $categoryScores = $this->analytics->sortStudentRows($categoryScores, $sort);
         $sectionLegend = $this->analytics->sectionLegend($allStudents);

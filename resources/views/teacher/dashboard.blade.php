@@ -714,7 +714,9 @@ new Chart(document.getElementById('gamePlayTrendChart'), {
         ]
     },
     options: {
-        responsive: true,\n        maintainAspectRatio: false,\n        layout: { padding: { left: 12, right: 18, top: 10, bottom: 10 } },
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { left: 12, right: 18, top: 10, bottom: 10 } },
         plugins: {
             legend: { position: 'bottom' },
             tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0
