@@ -30,6 +30,15 @@
     </style>
     @stack('styles')
     <link href="{{ \App\Support\Asset::v('css/tailwind.css') }}" rel="stylesheet">
+<style>
+    input.password-entry::-ms-reveal,
+    input.password-entry::-ms-clear,
+    input.password-entry::-webkit-credentials-auto-fill-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+</style>
 </head>
 <body class="bg-[#fff8e7] font-sans antialiased">
     <div class="flex h-screen h-[100dvh] bg-[#fff8e7]" x-data="{ navOpen: false }" @keydown.escape.window="navOpen = false">
@@ -130,12 +139,22 @@
         Swal.fire({
             title: 'Set your new password',
             text: 'For your account security, please create a password you want to use before continuing.',
-            html: '<input id="firstParentPassword" type="password" class="swal2-input" placeholder="New password" autocomplete="new-password"><input id="confirmParentPassword" type="password" class="swal2-input" placeholder="Confirm new password" autocomplete="new-password">',
+            html: '<div class="parent-password-fields"><input id="firstParentPassword" type="password" class="swal2-input password-entry" placeholder="New password" autocomplete="off" autocapitalize="off" spellcheck="false"><input id="confirmParentPassword" type="password" class="swal2-input password-entry" placeholder="Confirm new password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>', 
+            customClass: { popup: 'parent-password-popup' },
             confirmButtonText: 'Save password',
             allowOutsideClick: false,
             allowEscapeKey: false,
             showCancelButton: false,
             focusConfirm: false,
+            didOpen: () => {
+                document.querySelectorAll('.parent-password-fields .swal2-input').forEach(input => {
+                    input.style.cssText = 'display:block;width:100%;box-sizing:border-box;margin:0 0 12px;padding:13px 16px;border:2px solid #e7dcc5;border-radius:14px;background:#fff;box-shadow:none;outline:none;font-size:15px;';
+                    input.addEventListener('focus', () => input.style.borderColor = '#ff8555');
+                    input.addEventListener('blur', () => input.style.borderColor = '#e7dcc5');
+                });
+                const fields = document.querySelector('.parent-password-fields');
+                if (fields) fields.style.cssText = 'display:flex;flex-direction:column;gap:4px;width:100%;';
+            },
             preConfirm: async () => {
                 const password = document.getElementById('firstParentPassword').value;
                 const confirmation = document.getElementById('confirmParentPassword').value;

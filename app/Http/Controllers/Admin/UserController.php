@@ -16,22 +16,42 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $filtered = function ($query) use ($request) {
+        $search = trim((string) $request->query('search', ''));
+        $role = in_array($request->query('role'), ['teacher', 'parent', 'student', 'super_admin'], true)
+            ? $request->query('role')
+            : '';
+
+        // Apply filters in SQL before pagination. Separate page names let the
+        // active and archived tabs keep their own position and query string.
+        $filtered = function ($query) use ($search, $role) {
             return $query
-                ->when($request->search, function ($q, $search) {
+                ->when($search !== '', function ($q) use ($search) {
                     $q->where(function ($q2) use ($search) {
-                        $q2->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                        $term = '%' . mb_strtolower($search) . '%';
+                        $q2->whereRaw('LOWER(first_name) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(last_name) LIKE ?', [$term])
+                            ->orWhereRaw("LOWER(CONCAT(first_name, ' ', last_name)) LIKE ?", [$term])
+                            ->orWhereRaw('LOWER(email) LIKE ?', [$term]);
                     });
                 })
-                ->when($request->role, fn ($q, $role) => $q->where('role', $role));
+                ->when($role !== '', fn ($q) => $q->where('role', $role));
         };
 
-        $users = $filtered(User::query()->with('children')->where('is_active', true))->get();
-        $archivedUsers = $filtered(User::query()->with('children')->where('is_active', false))->get();
+        $users = $filtered(User::query()->where('is_active', true))
+            ->with('children:id,first_name,last_name')
+            ->orderBy('first_name')->orderBy('last_name')
+            ->paginate(10, ['*'], 'active_page')->withQueryString();
 
-        $studentsByUser = Student::with('parents')->get()->keyBy('user_id');
+        $archivedUsers = $filtered(User::query()->where('is_active', false))
+            ->orderBy('first_name')->orderBy('last_name')
+            ->paginate(10, ['*'], 'archived_page')->withQueryString();
+
+        // Only fetch linked student/parent data for the student accounts on
+        // the visible page instead of hydrating every student in the centre.
+        $studentUserIds = $users->getCollection()->where('role', 'student')->pluck('id');
+        $studentsByUser = $studentUserIds->isEmpty()
+            ? collect()
+            : Student::with('parents:id')->whereIn('user_id', $studentUserIds)->get()->keyBy('user_id');
 
         $editData = [];
         foreach ($users as $user) {
@@ -52,13 +72,13 @@ class UserController extends Controller
             ];
         }
 
-        // Archived accounts stay out of the account maker entirely: you cannot
-        // hand a new account to a teacher or parent who has been archived.
+        // The account-maker selectors are kept separate from the paginated
+        // tables because they need the full list of assignable records.
         $allStudents = Student::where('is_active', true)->orderBy('first_name')->get();
         $allParents = User::where('role', 'parent')->where('is_active', true)->orderBy('first_name')->get();
         $allTeachers = User::where('role', 'teacher')->where('is_active', true)->orderBy('first_name')->get();
 
-        $academicYears = Student::academicYearOptions($studentsByUser->pluck('academic_year'));
+        $academicYears = Student::academicYearOptions($allStudents->pluck('academic_year'));
 
         $stats = [
             'teachers' => User::where('role', 'teacher')->where('is_active', true)->count(),
@@ -73,14 +93,15 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $isStudent = $request->input('role') === 'student';
+        $isParent = $request->input('role') === 'parent';
 
-        // Students are placed in a section/class rather than being given a
-        // password by hand, so their login is generated for them instead.
+        // Parent accounts may use a chosen password or the shared temporary
+        // default. Other non-student accounts must provide a password.
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => ($isStudent ? 'nullable' : 'required') . '|string|min:8',
+            'password' => (($isStudent || $isParent) ? 'nullable' : 'required') . '|string|min:8',
             'role' => 'required|in:super_admin,teacher,parent,student',
             'contact' => 'nullable|string|max:255',
             'class_name' => $isStudent
@@ -113,13 +134,14 @@ class UserController extends Controller
         // type it in, and it keeps the value safe to render and copy.
         $generatedPassword = $isStudent
             ? Str::password(10, symbols: false, spaces: false)
-            : null;
+            : ($isParent && ! $request->filled('password') ? 'password123' : null);
 
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($generatedPassword ?? $request->password),
+            'must_change_password' => $isParent,
             'role' => $request->role,
             'contact' => $request->contact,
         ]);
@@ -159,6 +181,7 @@ class UserController extends Controller
             ->with('generated_credentials', $generatedPassword ? [
                 'email' => $user->email,
                 'password' => $generatedPassword,
+                'role' => $user->role,
             ] : null);
     }
 
@@ -177,7 +200,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'contact' => 'nullable|string|max:255',
-            'password' => 'nullable|min:8',
+            'password' => 'nullable|string|min:8',
             'is_active' => 'nullable|boolean',
             'parent_ids' => 'nullable|array',
             'parent_ids.*' => 'integer|exists:users,id',
@@ -196,6 +219,12 @@ class UserController extends Controller
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
+
+            // An administrator reset a parent's password. Require the parent
+            // to replace that temporary password at their next sign-in.
+            if ($user->role === 'parent') {
+                $user->must_change_password = true;
+            }
         }
 
         $user->save();

@@ -197,11 +197,43 @@
     </div>
     @else
     <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.game_popularity_title') }}</h3>
-        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.game_popularity_subtitle') }}</p>
+        <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.game_perf_breakdown') }}</h3>
+        <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.gp_subtitle') }}</p>
         <div class="chart-box"><canvas id="gamePopularityChart"></canvas></div>
     </div>
     @endif
+</div>
+
+{{-- Same per-game attempt, accuracy and best-level figures shown to teachers. --}}
+<div class="bg-white rounded-xl shadow-sm p-4 mb-8">
+    <h3 class="text-lg font-semibold text-[#182438] mb-1">{{ __('analytics.game_perf_breakdown') }}</h3>
+    <p class="text-xs text-[#6b7280] mb-4">{{ __('analytics.gp_subtitle') }}</p>
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px]">
+            <thead class="bg-[#fffbf0]"><tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_game') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_levels_played') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_avg_accuracy') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_highest_level') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-[#182438] uppercase">{{ __('analytics.th_interpretation') }}</th>
+            </tr></thead>
+            <tbody class="divide-y divide-[#f1e7cc]">
+                @foreach($gamePerformance as $game => $gameStats)
+                <tr class="hover:bg-[#fffbf0]">
+                    <td class="px-4 py-3 font-medium text-[#182438] capitalize">{{ $game }}</td>
+                    @if($gameStats)
+                        <td class="px-4 py-3 text-center text-[#5f6873]">{{ $gameStats['attempts'] }}</td>
+                        <td class="px-4 py-3 text-center font-bold text-[#182438]">{{ $gameStats['avg_pct'] }}%</td>
+                        <td class="px-4 py-3 text-center text-[#5f6873]">{{ $gameStats['best_level'] }}</td>
+                        <td class="px-4 py-3 text-[#5f6873]">{{ $gameStats['avg_pct'] >= 75 ? __('analytics.interp_confident') : ($gameStats['avg_pct'] >= 50 ? __('analytics.interp_progress') : __('analytics.interp_reteach')) }}</td>
+                    @else
+                        <td class="px-4 py-3 text-center text-[#6b7280]">0</td><td class="px-4 py-3 text-center text-[#6b7280]">—</td><td class="px-4 py-3 text-center text-[#6b7280]">—</td><td class="px-4 py-3 text-[#5f6873]">{{ __('analytics.not_started') }}</td>
+                    @endif
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @unless($selectedStudent)
@@ -387,7 +419,7 @@ const roleGrowth = @json($roleGrowth);
 const enrollmentTrend = @json($enrollmentTrend);
 const attendanceRate = @json($attendanceRate);
 const weeklyBreakdown = @json($weeklyBreakdown);
-const gamePopularity = @json($gamePopularity);
+const gamePerformance = @json($gamePerformance);
 const domainMastery = @json($domainMastery);
 const gamePlayTrend = @json($gamePlayTrend);
 const classDistribution = @json($classDistribution);
@@ -568,22 +600,20 @@ new Chart(document.getElementById('domainMasteryChart'), {
 
 chartIfPresent('gamePopularityChart', {
     data: {
-        labels: Object.keys(gamePopularity),
+        labels: Object.keys(gamePerformance),
         datasets: [
-            { type: 'bar', label: L.unique_students, data: shareOf(Object.values(gamePopularity).map(g => g.students)), backgroundColor: '#ff8555', borderRadius: 4, maxBarThickness: 36, yAxisID: 'y' },
-            { type: 'line', label: L.avg_accuracy, data: Object.values(gamePopularity).map(g => g.avg_pct), borderColor: '#1982c4', backgroundColor: '#1982c4', tension: 0.35, yAxisID: 'y1', pointRadius: 4 }
+            { type: 'bar', label: L.levels_played, data: Object.values(gamePerformance).map(g => g ? g.attempts : 0), backgroundColor: '#ff8555', borderRadius: 4, maxBarThickness: 36, yAxisID: 'y' },
+            { type: 'line', label: L.avg_accuracy, data: Object.values(gamePerformance).map(g => g ? g.avg_pct : 0), borderColor: '#1982c4', backgroundColor: '#1982c4', tension: 0.35, yAxisID: 'y1', pointRadius: 4 }
         ]
     },
     options: {
         responsive: true,
         plugins: {
             legend: { position: 'bottom' },
-            tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0
-                ? ctx.dataset.label + ': ' + ctx.raw + '% (' + Object.values(gamePopularity)[ctx.dataIndex].students + ')'
-                : ctx.dataset.label + ': ' + ctx.raw + '%' } }
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + (ctx.datasetIndex === 0 ? '' : '%') } }
         },
         scales: {
-            y: { min: 0, max: 100, position: 'left', ticks: pctTicks, grid: { color: gridColor }, title: { display: true, text: L.students + ' (%)' } },
+            y: { beginAtZero: true, position: 'left', ticks: { precision: 0 }, grid: { color: gridColor }, title: { display: true, text: L.levels_played } },
             y1: { min: 0, max: 100, position: 'right', ticks: { callback: v => v + '%' }, grid: { display: false } },
             x: { grid: { display: false }, ticks: { capitalize: true } }
         }

@@ -98,7 +98,9 @@ class AnalyticsController extends Controller
         $attendancePeriod = $this->analytics->attendancePeriod($scopedIds, (string) $request->query('att_mode', 'week'), $request->query('att_date'));
         $weeklyBreakdown = $attendancePeriod['rows'];
         $attendanceKeep = collect($request->query())->except(['att_mode', 'att_date'])->filter(fn ($value) => is_scalar($value))->all();
-        $gamePopularity = $this->analytics->globalGamePopularity($scopedIds);
+        // Use the same per-game attempt and accuracy calculation as the teacher dashboard.
+        $analyticsStudentIds = $scopedIds ?? $allStudents->pluck('id')->all();
+        $gamePerformance = $this->analytics->gamePerformance($analyticsStudentIds);
         $domainMastery = $this->analytics->globalDomainMastery($scopedIds);
         $domainStatus = $this->analytics->domainStatusBreakdown($scopedIds);
         $gamePlayTrend = $this->analytics->gamePlayTrend($scopedIds, 8);
@@ -165,7 +167,7 @@ class AnalyticsController extends Controller
             'weeklyBreakdown',
             'attendancePeriod',
             'attendanceKeep',
-            'gamePopularity',
+            'gamePerformance',
             'domainMastery',
             'domainStatus',
             'gamePlayTrend',

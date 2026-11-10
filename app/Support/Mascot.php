@@ -37,7 +37,7 @@ class Mascot
 
     public static function forSex(?string $sex): string
     {
-        return strtolower((string) $sex) === 'female' ? self::LINKA : self::KIDO;
+        return strtolower(trim((string) $sex)) === 'female' ? self::LINKA : self::KIDO;
     }
 
     /**
@@ -53,6 +53,17 @@ class Mascot
     {
         if (! Auth::check()) {
             return null;
+        }
+
+        // Parent/teacher child mode explicitly records which child is active.
+        // Prefer that ID over a user_id lookup so a shared or legacy-linked
+        // account can never make a girl inherit the wrong sibling's mascot.
+        if (session()->boolean('student_mode') && session()->filled('student_child_id')) {
+            $activeStudent = Student::find(session('student_child_id'));
+
+            if ($activeStudent && (int) $activeStudent->user_id === (int) Auth::id()) {
+                return $activeStudent;
+            }
         }
 
         return Student::where('user_id', Auth::id())->first();

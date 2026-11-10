@@ -4,14 +4,27 @@
 @section('page-title', __('admin_ui.manage_accounts'))
 
 @section('content')
+@php($accountView = request('view') === 'archived' ? 'archived' : 'active')
+<style>
+    input.password-entry::-ms-reveal,
+    input.password-entry::-ms-clear,
+    input.password-entry::-webkit-credentials-auto-fill-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+</style>
 @if(session('generated_credentials'))
 <div id="generatedCredentials" class="bg-white rounded-xl shadow-sm p-6 mb-6 border-l-4 border-[#ff8555]">
     <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
-            <h2 class="text-lg font-bold text-[#182438]">{{ __('admin_ui.student_login_created') }}</h2>
-            <p class="text-sm text-[#5f6873] mt-1">
-                {{ __('admin_ui.student_login_created_description') }}
-            </p>
+            @if((session('generated_credentials')['role'] ?? null) === 'parent')
+                <h2 class="text-lg font-bold text-[#182438]">Parent login created</h2>
+                <p class="text-sm text-[#5f6873] mt-1">Share these credentials with the parent. They will be asked to change the temporary password on first login.</p>
+            @else
+                <h2 class="text-lg font-bold text-[#182438]">{{ __('admin_ui.student_login_created') }}</h2>
+                <p class="text-sm text-[#5f6873] mt-1">{{ __('admin_ui.student_login_created_description') }}</p>
+            @endif
             <div class="flex flex-wrap items-center gap-3 mt-4">
                 <code class="px-3 py-2 bg-[#fdf3d6] rounded-lg text-sm text-[#182438]">{{ session('generated_credentials')['email'] }}</code>
                 <code class="px-3 py-2 bg-[#fdf3d6] rounded-lg text-sm font-semibold text-[#182438]">{{ session('generated_credentials')['password'] }}</code>
@@ -33,14 +46,14 @@
         <div class="flex flex-wrap items-center gap-3 self-start md:self-auto">
             <div class="flex flex-wrap items-center gap-1 bg-[#fdf3d6] rounded-lg p-1 w-full sm:w-auto">
                 <button type="button" id="viewActiveBtn" onclick="switchView('active')"
-                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition {{ $accountView === 'active' ? 'bg-[#ff8555] text-white' : 'text-[#5f6873] hover:text-[#182438]' }}">
                     {{ __('admin_ui.active') }}
                 </button>
                 <button type="button" id="viewArchivedBtn" onclick="switchView('archived')"
-                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition {{ $accountView === 'archived' ? 'bg-[#ff8555] text-white' : 'text-[#5f6873] hover:text-[#182438]' }}">
                     {{ __('admin_ui.archived') }}
-                    @if($archivedUsers->count() > 0)
-                        <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-[#f1e7cc] text-[#5f6873] text-xs">{{ $archivedUsers->count() }}</span>
+                    @if($archivedUsers->total() > 0)
+                        <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-[#f1e7cc] text-[#5f6873] text-xs">{{ $archivedUsers->total() }}</span>
                     @endif
                 </button>
             </div>
@@ -56,7 +69,8 @@
             </button>
         </div>
     </div>
-    <form method="GET" action="{{ route('admin.users.index') }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
+    <form id="accountFilterForm" method="GET" action="{{ route('admin.users.index') }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
+        <input type="hidden" name="view" value="{{ $accountView }}">
         <div class="relative flex-1 md:max-w-xs">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]">⌕</span>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin_ui.search_by_name_or_email') }}" autocomplete="off"
@@ -92,7 +106,7 @@
     </div>
 </div>
 
-<div id="activeView" class="bg-white rounded-xl shadow-sm overflow-hidden">
+<div id="activeView" class="{{ $accountView === 'active' ? '' : 'hidden' }} bg-white rounded-xl shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-[#fffbf0]">
@@ -156,9 +170,10 @@
             </tbody>
         </table>
     </div>
+    <div class="mt-3">{{ $users->links() }}</div>
 </div>
 
-<div id="archivedView" class="hidden">
+<div id="archivedView" class="{{ $accountView === 'archived' ? '' : 'hidden' }}">
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 bg-[#fffbf0] border-b border-[#f1e7cc]">
             <h3 class="text-sm font-bold text-[#182438]">{{ __('admin_ui.archived_accounts') }}</h3>
@@ -217,6 +232,7 @@
             </table>
         </div>
     </div>
+    <div class="mt-3">{{ $archivedUsers->links() }}</div>
 </div>
 
 <div id="addUserModal" class="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 hidden p-4 overflow-y-auto">
@@ -244,12 +260,8 @@
             <div class="grid grid-cols-2 gap-4">
                 <div id="addPasswordField">
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.password') }}</label>
-                    <div class="relative">
-                        <input type="password" name="password" id="addPassword" required minlength="8" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none pr-12">
-                        <button type="button" onclick="togglePassword('addPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        </button>
-                    </div>
+                    <input type="password" name="password" id="addPassword" required minlength="8" autocomplete="off" class="password-entry w-full px-4 py-3 border-2 border-[#e7dcc5] rounded-xl focus:border-[#ff8555] focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <p id="addPasswordHelp" class="text-xs text-[#6b7280] mt-1 hidden">Optional for parents. Leave blank to use password123; they will be asked to change it on first login.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.role') }}</label>
@@ -355,12 +367,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('admin_ui.new_password_optional') }}</label>
-                    <div class="relative">
-                        <input type="password" name="password" id="editPassword" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none pr-12" placeholder="{{ __('admin_ui.leave_blank_to_keep') }}">
-                        <button type="button" onclick="togglePassword('editPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#5f6873]" aria-label="{{ __('admin_ui.show_password') }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        </button>
-                    </div>
+                    <input type="password" name="password" id="editPassword" autocomplete="off" class="password-entry w-full px-4 py-3 border-2 border-[#e7dcc5] rounded-xl focus:border-[#ff8555] focus:ring-2 focus:ring-[#ff8555] outline-none" placeholder="{{ __('admin_ui.leave_blank_to_keep') }}">
                 </div>
             </div>
             <label class="flex items-center gap-3 cursor-pointer">
@@ -449,35 +456,27 @@ function currentView() {
     return VIEWS.find(v => !document.getElementById(v + 'View').classList.contains('hidden')) || 'active';
 }
 
-function filterVisibleTable() {
-    const input = document.querySelector('input[name="search"]');
-    const search = (input ? input.value : '').toLowerCase().trim();
-    document.querySelectorAll('#' + currentView() + 'View tbody tr').forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(search) ? '' : 'none';
-    });
-}
-
 function switchView(view) {
-    VIEWS.forEach(v => document.getElementById(v + 'View').classList.toggle('hidden', v !== view));
-
-    const btnActive = 'px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white';
-    const btnIdle = 'px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]';
-    VIEWS.forEach(v => {
-        document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1) + 'Btn').className = v === view ? btnActive : btnIdle;
-    });
-
-    const input = document.querySelector('input[name="search"]');
-    if (input) input.value = '';
-    VIEWS.forEach(v => {
-        document.querySelectorAll('#' + v + 'View tbody tr').forEach(row => row.style.display = '');
-    });
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', view);
+    url.searchParams.delete('active_page');
+    url.searchParams.delete('archived_page');
+    window.location.assign(url.toString());
 }
 
+// Search against the database, not just the ten rows currently on screen.
+// Debouncing avoids a request for every keystroke.
 const searchInput = document.querySelector('input[name="search"]');
-
-if (searchInput) {
-    searchInput.addEventListener('input', filterVisibleTable);
+const filterForm = document.getElementById('accountFilterForm');
+let searchDebounce;
+if (searchInput && filterForm) {
+    searchInput.addEventListener('input', () => {
+        window.clearTimeout(searchDebounce);
+        searchDebounce = window.setTimeout(() => {
+            filterForm.querySelector('input[name="view"]').value = currentView();
+            filterForm.requestSubmit();
+        }, 400);
+    });
 }
 
 document.querySelectorAll('.archive-form').forEach(form => {
@@ -587,16 +586,6 @@ if (parentConnSearch) {
     });
 }
 
-function togglePassword(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>';
-    } else {
-        input.type = 'password';
-        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7z"/></svg>';
-    }
-}
 
 const addUserRole = document.querySelector('#addUserModal select[name="role"]');
 const addStudentParentsSection = document.getElementById('addStudentParentsSection');
@@ -606,6 +595,7 @@ const addStudentHandSection = document.getElementById('addStudentHandSection');
 const addStudentYearSection = document.getElementById('addStudentYearSection');
 const addPasswordField = document.getElementById('addPasswordField');
 const addPasswordInput = document.getElementById('addPassword');
+const addPasswordHelp = document.getElementById('addPasswordHelp');
 const addStudentClassInput = document.getElementById('addStudentClassName');
 
 if (addUserRole) {
@@ -613,6 +603,7 @@ if (addUserRole) {
     // password field is swapped out and the generated password is not requested.
     const applyRoleFields = function () {
         const isStudent = this.value === 'student';
+        const isParent = this.value === 'parent';
 
         if (addStudentParentsSection) {
             addStudentParentsSection.classList.toggle('hidden', !isStudent);
@@ -634,7 +625,10 @@ if (addUserRole) {
         }
         if (addPasswordInput) {
             addPasswordInput.disabled = isStudent;
-            addPasswordInput.required = !isStudent;
+            addPasswordInput.required = !isStudent && !isParent;
+        }
+        if (addPasswordHelp) {
+            addPasswordHelp.classList.toggle('hidden', !isParent);
         }
         if (addStudentClassInput) {
             addStudentClassInput.required = isStudent;

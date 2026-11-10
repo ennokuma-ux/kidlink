@@ -49,11 +49,11 @@
             <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
                     <label for="password" class="mb-1.5 block text-sm font-semibold text-gray-700">New password</label>
-                    <input id="password" type="password" name="password" minlength="8" autocomplete="new-password" class="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
+                    <input id="password" type="password" name="password" minlength="8" autocomplete="off" class="password-entry w-full rounded-xl border-2 border-gray-300 px-3 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
                 </div>
                 <div>
                     <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-gray-700">Confirm new password</label>
-                    <input id="password_confirmation" type="password" name="password_confirmation" minlength="8" autocomplete="new-password" class="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
+                    <input id="password_confirmation" type="password" name="password_confirmation" minlength="8" autocomplete="off" class="password-entry w-full rounded-xl border-2 border-gray-300 px-3 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
                 </div>
             </div>
         </div>
