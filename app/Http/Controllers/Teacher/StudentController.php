@@ -35,11 +35,11 @@ class StudentController extends Controller
             ->orderBy('id', 'desc');
 
         $students = $order($scope(Student::with('parents')))
-            ->whereRaw('is_active = true')
+            ->where('is_active', true)
             ->get();
 
         $archivedStudents = $order($scope(Student::with('parents')))
-            ->whereRaw('is_active = false')
+            ->where('is_active', false)
             ->get();
 
         // Also backs the "connect parent account" pickers in the add/edit modals.
@@ -111,7 +111,6 @@ class StudentController extends Controller
             'teacher_id' => auth()->id(),
             'user_id' => null,
             'enrolled_date' => Carbon::today(),
-            'is_active' => true,
             'father_name' => $request->father_name,
             'father_contact' => $request->father_contact,
             'mother_name' => $request->mother_name,
@@ -228,7 +227,7 @@ class StudentController extends Controller
         }
 
         $parentIds = $role === 'student'
-            ? User::whereIn('id', $validated['parent_ids'] ?? [])->where('role', 'parent')->whereRaw('is_active = true')->pluck('id')->all()
+            ? User::whereIn('id', $validated['parent_ids'] ?? [])->where('role', 'parent')->where('is_active', true)->pluck('id')->all()
             : [];
 
         $teacherId = auth()->id();
