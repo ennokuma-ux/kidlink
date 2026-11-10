@@ -542,6 +542,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ \App\Support\Asset::v('js/chart.umd.min.js') }}"></script>
 <script data-page-script>
 Chart.defaults.maintainAspectRatio = false;
 const chartIfPresent = (id, config) => { const el = document.getElementById(id); if (el) new Chart(el, config); };

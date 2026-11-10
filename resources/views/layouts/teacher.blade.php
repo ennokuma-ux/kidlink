@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#ff8555">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <meta name="description" content="{{ __('KidLink: early childhood learning, attendance and progress for teachers, parents and children.') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>KidLink - @yield('title', __('page.teacher_dashboard'))</title>
     
     
-    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/kidlink-theme.css') }}?v={{ filemtime(public_path('css/kidlink-theme.css')) }}" rel="stylesheet">
-    <link href="{{ asset('css/icons.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/tailwind.min.js') }}"></script>
-    <x-stronger-shadows />
-    <script src="{{ asset('js/chart.umd.min.js') }}"></script>
-    <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
-    <script defer src="{{ asset('js/alpine.min.js') }}"></script>
+    <link rel="preload" href="{{ asset('fonts/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link href="{{ \App\Support\Asset::v('css/fonts.css') }}" rel="stylesheet">
+    <link href="{{ \App\Support\Asset::v('css/kidlink-theme.css') }}" rel="stylesheet">
+    <link href="{{ \App\Support\Asset::v('css/icons.css') }}" rel="stylesheet">
+    <x-swal-lazy :prefetch="true" />
+    <script defer src="{{ \App\Support\Asset::v('js/alpine.min.js') }}"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -30,6 +29,7 @@
         button, a, select, input[type="checkbox"], input[type="radio"] { touch-action: manipulation; }
     </style>
     @stack('styles')
+    <link href="{{ \App\Support\Asset::v('css/tailwind.css') }}" rel="stylesheet">
 </head>
 <body class="bg-[#fff8e7] font-sans antialiased">
     <div class="flex h-screen h-[100dvh] bg-[#fff8e7]" x-data="{ navOpen: false }" @keydown.escape.window="navOpen = false">
@@ -65,8 +65,8 @@
     <x-connection-status />
     <x-session-keep-alive />
 
-    <script src="{{ asset('js/ajax-filters.js') }}"></script>
-    <script src="{{ asset('js/confirm-swal.js') }}"></script>
+    <script src="{{ \App\Support\Asset::v('js/ajax-filters.js') }}"></script>
+    <script src="{{ \App\Support\Asset::v('js/confirm-swal.js') }}"></script>
     @stack('scripts')
     @if(session('success'))
     <script>Swal.fire({ icon: 'success', title: @json(__('misc.success_title')), text: @json(session('success')), timer: 3000, showConfirmButton: false });</script>

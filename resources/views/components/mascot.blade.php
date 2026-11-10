@@ -8,6 +8,7 @@
     'side' => false,
     'bounce' => false,
     'circle' => false,
+    'eager' => false,
 ])
 
 @php
@@ -60,7 +61,8 @@
             width="{{ $size }}"
             height="{{ $size }}"
             class="kidlink-mascot__img"
-            loading="lazy"
+            loading="{{ $eager ? 'eager' : 'lazy' }}"
+            @if($eager) fetchpriority="high" @endif
             decoding="async"
         >
         @if($speech || $buddy)

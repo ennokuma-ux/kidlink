@@ -16,23 +16,23 @@
 <header class="navbar sticky top-0 z-20 h-[70px] bg-white border-b border-[#eeeeeb]">
     <div class="max-w-[1120px] h-full mx-auto flex items-center px-6">
         <a href="{{ url('/') }}" class="text-2xl font-extrabold tracking-tight whitespace-nowrap">
-            <span style="color: #1b2738;">Kid</span><strong style="color: #ff6b35;">Link</strong>
+            <span style="color: #1b2738;">Kid</span><strong style="color: #c2410c;">Link</strong>
         </a>
 
         <nav class="hidden md:flex items-center gap-[30px] mx-auto">
-            <a href="#features" class="text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_features') }}</a>
-            <a href="#students" class="text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_students') }}</a>
-            <a href="#teachers" class="text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_teachers') }}</a>
-            <a href="#parents" class="text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_parents') }}</a>
-            <a href="#about" class="text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_about') }}</a>
+            <a href="#features" class="py-2 text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_features') }}</a>
+            <a href="#students" class="py-2 text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_students') }}</a>
+            <a href="#teachers" class="py-2 text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_teachers') }}</a>
+            <a href="#parents" class="py-2 text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_parents') }}</a>
+            <a href="#about" class="py-2 text-[13.5px] font-medium hover:text-[#182438] transition" style="color: #5f6873;">{{ __('landing.nav_about') }}</a>
         </nav>
 
         <div class="flex items-center gap-3 ml-auto md:ml-0">
             <x-lang_switcher />
-            <a href="{{ route('login') }}" class="flex items-center justify-center h-[34px] px-4 rounded-full font-semibold text-white transition hover:bg-[#9a3412]" style="background: #ff6b35; font-size: 13px;">{{ __('landing.login') }}</a>
+            <a href="{{ route('login') }}" class="flex items-center justify-center h-[34px] px-4 rounded-full font-semibold transition hover:brightness-95" style="background: #ff6b35; color: #182438; font-size: 13px;">{{ __('landing.login') }}</a>
         </div>
 
-        <button class="menu-button md:hidden ml-auto flex flex-col gap-[3px] w-[27px] h-[27px] items-center justify-center bg-transparent border-0" id="menuButton" aria-label="{{ __('Menu') }}" aria-expanded="false">
+        <button class="menu-button md:hidden ml-auto flex flex-col gap-[3px] w-[27px] h-[27px] items-center justify-center bg-transparent border-0" id="menuButton" aria-label="{{ __('Menu') }}" aria-expanded="false" aria-controls="mobileNav">
             <span class="block w-4 h-[1.5px]" style="background: #182438;"></span>
             <span class="block w-4 h-[1.5px]" style="background: #182438;"></span>
             <span class="block w-4 h-[1.5px]" style="background: #182438;"></span>
@@ -45,7 +45,7 @@
         <a href="#teachers" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_teachers') }}</a>
         <a href="#parents" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_parents') }}</a>
         <a href="#about" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_about') }}</a>
-        <a href="{{ route('login') }}" class="text-[16px] font-medium text-white text-center rounded-full px-5 py-2.5" style="background: #ff6b35;">{{ __('landing.login') }}</a>
+        <a href="{{ route('login') }}" class="text-[16px] font-medium text-center rounded-full px-5 py-2.5" style="background: #ff6b35; color: #182438;">{{ __('landing.login') }}</a>
     </div>
 </header>
 
@@ -67,11 +67,11 @@
             {{ __('landing.hero_subtitle') }}
         </p>
 
-        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-8 rounded-full text-white text-[16px] font-semibold transition hover:bg-[#9a3412] hover:-translate-y-0.5" style="background: #ff6b35; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
+        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-8 rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #182438; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
 
         <div class="mt-10 flex items-end justify-center gap-6 sm:gap-10">
-            <x-mascot mascot="kido" state="happy" :size="116" bounce />
-            <x-mascot mascot="linka" state="wave" :size="116" bounce />
+            <x-mascot mascot="kido" state="happy" :size="116" bounce eager />
+            <x-mascot mascot="linka" state="wave" :size="116" bounce eager />
         </div>
         <p class="mt-4 text-[14px] font-medium" style="color: #5f6873;">{{ __('mascot.landing_hello') }}</p>
     </div>
@@ -79,7 +79,7 @@
 
 <section class="py-[90px] px-5" id="features" style="background: #fff8e7;">
     <div class="max-w-[640px] mx-auto text-center">
-        <span class="block text-[13px] font-bold mb-4" style="color: #ff6b35;">{{ __('landing.features_tag') }}</span>
+        <span class="block text-[13px] font-bold mb-4" style="color: #c2410c;">{{ __('landing.features_tag') }}</span>
         <h2 class="text-[34px] font-extrabold tracking-tight leading-[1.15]" style="color: #182438;">{{ __('landing.features_title') }}</h2>
         <p class="max-w-[480px] mx-auto mt-[18px] text-[15px] leading-[1.7]" style="color: #5f6873;">
             {{ __('landing.features_subtitle') }}
@@ -96,7 +96,7 @@
         </article>
 
         <article class="bg-white border border-[#f1e7cc] rounded-[14px] p-[30px] min-h-[190px] shadow-sm">
-            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] text-[18px] bg-[#e1f0f8]" style="color: #5da6d0;">▥</div>
+            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] bg-[#e1f0f8]" style="color: #3d86b0;"><i class="ico ico-grid text-[22px]" aria-hidden="true"></i></div>
             <h3 class="text-[17px] font-bold leading-[1.3]" style="color: #182438;">{{ __('landing.feature_analytics_title') }}</h3>
             <p class="mt-2.5 text-[13.5px] leading-[1.65]" style="color: #5f6873;">
                 {{ __('landing.feature_analytics_body') }}
@@ -104,7 +104,7 @@
         </article>
 
         <article class="bg-white border border-[#f1e7cc] rounded-[14px] p-[30px] min-h-[190px] shadow-sm">
-            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] text-[18px] bg-[#f0e7fa]" style="color: #a16ed1;">▣</div>
+            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] bg-[#f0e7fa]" style="color: #8a4fc0;"><i class="ico ico-lightbulb text-[22px]" aria-hidden="true"></i></div>
             <h3 class="text-[17px] font-bold leading-[1.3]" style="color: #182438;">{{ __('landing.feature_expert_title') }}</h3>
             <p class="mt-2.5 text-[13.5px] leading-[1.65]" style="color: #5f6873;">
                 {{ __('landing.feature_expert_body') }}
@@ -112,7 +112,7 @@
         </article>
 
         <article class="bg-white border border-[#f1e7cc] rounded-[14px] p-[30px] min-h-[190px] shadow-sm">
-            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] text-[18px] bg-[#ecf7d6]" style="color: #62b57e;">♧</div>
+            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] bg-[#ecf7d6]" style="color: #3f9560;"><i class="ico ico-graduation-cap text-[22px]" aria-hidden="true"></i></div>
             <h3 class="text-[17px] font-bold leading-[1.3]" style="color: #182438;">{{ __('landing.feature_roles_title') }}</h3>
             <p class="mt-2.5 text-[13.5px] leading-[1.65]" style="color: #5f6873;">
                 {{ __('landing.feature_roles_body') }}
@@ -120,7 +120,7 @@
         </article>
 
         <article class="bg-white border border-[#f1e7cc] rounded-[14px] p-[30px] min-h-[190px] shadow-sm">
-            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] text-[18px] bg-[#fde8ef]" style="color: #e78cae;">♡</div>
+            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] bg-[#fde8ef]" style="color: #d0618c;"><i class="ico ico-lock-closed text-[22px]" aria-hidden="true"></i></div>
             <h3 class="text-[17px] font-bold leading-[1.3]" style="color: #182438;">{{ __('landing.feature_secure_title') }}</h3>
             <p class="mt-2.5 text-[13.5px] leading-[1.65]" style="color: #5f6873;">
                 {{ __('landing.feature_secure_body') }}
@@ -128,7 +128,7 @@
         </article>
 
         <article class="bg-white border border-[#f1e7cc] rounded-[14px] p-[30px] min-h-[190px] shadow-sm">
-            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] text-[18px] bg-[#fff0e6]" style="color: #e69a69;">♧</div>
+            <div class="w-[44px] h-[44px] flex items-center justify-center rounded-[10px] mb-[18px] bg-[#fff0e6]" style="color: #d9772f;"><i class="ico ico-megaphone text-[22px]" aria-hidden="true"></i></div>
             <h3 class="text-[17px] font-bold leading-[1.3]" style="color: #182438;">{{ __('landing.feature_updates_title') }}</h3>
             <p class="mt-2.5 text-[13.5px] leading-[1.65]" style="color: #5f6873;">
                 {{ __('landing.feature_updates_body') }}
@@ -190,7 +190,7 @@
         <p class="max-w-[420px] mx-auto mt-[18px] text-[15px] leading-[1.75]" style="color: #5f6873;">
             {{ __('landing.cta_subtitle') }}
         </p>
-        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-[30px] rounded-full text-white text-[16px] font-semibold transition hover:bg-[#9a3412] hover:-translate-y-0.5" style="background: #ff6b35; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
+        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-[30px] rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #182438; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
     </div>
 </section>
 
@@ -199,9 +199,9 @@
 <footer class="bg-white border-t border-[#eeeeeb]">
     <div class="max-w-[1120px] mx-auto px-6 min-h-[72px] flex items-center justify-between">
         <a href="{{ url('/') }}" class="text-[17px] font-extrabold tracking-tight">
-            <span style="color: #1b2738;">Kid</span><strong style="color: #ff6b35;">Link</strong>
+            <span style="color: #1b2738;">Kid</span><strong style="color: #c2410c;">Link</strong>
         </a>
-        <p class="text-[13.5px]" style="color: #a0a5aa;">{{ __('landing.footer_tagline', ['year' => date('Y')]) }}</p>
+        <p class="text-[13.5px]" style="color: #5f6873;">{{ __('landing.footer_tagline', ['year' => date('Y')]) }}</p>
     </div>
 </footer>
 @endsection

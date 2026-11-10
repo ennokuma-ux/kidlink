@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    /* Inter is self-hosted in public/fonts and declared in css/fonts.css. */
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+
+    /* A visible, high-contrast focus ring for keyboard users on every control.
+       KidLink is used by children and teachers on tablets, so this is also the
+       "you are here" marker when a keyboard or switch device is attached. */
+    :focus-visible {
+        outline: 3px solid #1982c4;
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+}
+
+@layer components {
+    /* First tab stop on every page: lets keyboard and screen reader users jump
+       straight past the header and sidebar navigation. */
+    .skip-link {
+        position: absolute;
+        left: 0.75rem;
+        top: -4rem;
+        z-index: 100;
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
+        background: #182438;
+        color: #fff;
+        font-weight: 600;
+        transition: top 0.15s ease-in-out;
+    }
+
+    .skip-link:focus,
+    .skip-link:focus-visible {
+        top: 0.75rem;
+        color: #fff;
+        outline-color: #fff;
+    }
+}

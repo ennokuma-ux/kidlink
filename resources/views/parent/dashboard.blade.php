@@ -151,6 +151,7 @@
 
 @push('scripts')
 @if($child)
+<script src="{{ \App\Support\Asset::v('js/chart.umd.min.js') }}"></script>
 <script data-page-script>
 Chart.defaults.maintainAspectRatio = false;
 const scoreTrend = {!! json_encode($scoreTrend) !!};

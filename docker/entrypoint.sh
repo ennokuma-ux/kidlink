@@ -2,6 +2,9 @@
 set -e
 
 PORT="${PORT:-10000}"
+# Modules used by public/.htaccess (compression, cache headers). Harmless if already enabled.
+a2enmod rewrite headers expires deflate mime >/dev/null 2>&1 || true
+
 sed -ri "s/Listen [0-9]+/Listen ${PORT}/" /etc/apache2/ports.conf
 sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 

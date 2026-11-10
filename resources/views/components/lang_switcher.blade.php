@@ -23,12 +23,11 @@
                     name="locale"
                     value="{{ $code }}"
                     title="{{ $label }}"
-                    aria-label="{{ $label }}"
                     aria-current="{{ $active ? 'true' : 'false' }}"
                     class="px-2.5 py-1.5 text-xs font-semibold rounded-md transition {{ $active
                         ? 'bg-[#182438] text-white shadow-sm'
                         : 'text-[#5f6873] hover:bg-white hover:text-[#182438]' }}">
-                {{ strtoupper($code) }}
+                {{ strtoupper($code) }}<span class="sr-only"> {{ $label }}</span>
             </button>
         @endforeach
     </div>

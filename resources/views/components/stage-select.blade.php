@@ -16,8 +16,6 @@
 
 @push('styles')
 <style>
-    @import url('/css/fonts.css');
-
     * { font-family: 'Nunito', sans-serif; }
     h1, h2, h3, h4 { font-family: 'Fredoka One', cursive; }
 
@@ -156,7 +154,7 @@
         <x-games-switcher :topic="$topic" :current="$game" />
 
         <div class="ss-map">
-            <img src="{{ asset('assets/images/game/'.$bg.'/background.png') }}" alt="{{ __('game.'.$lang.'_map_alt') }}" class="ss-map-image">
+            <img src="{{ asset('assets/images/game/'.$bg.'/background.webp') }}" alt="{{ __('game.'.$lang.'_map_alt') }}" class="ss-map-image" decoding="async">
 
             {{-- The road: it starts at level 1 and ends at the last level. --}}
             <svg class="ss-road" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">

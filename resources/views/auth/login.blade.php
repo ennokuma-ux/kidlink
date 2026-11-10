@@ -3,14 +3,14 @@
 @section('title', __('page.login'))
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center px-4 py-8" style="background: linear-gradient(135deg, #f9f3d5 0%, #e3f1f2 40%, #e3f2f4 70%, #f9e9ed 100%);">
+<main id="main" class="min-h-screen flex items-center justify-center px-4 py-8" style="background: linear-gradient(135deg, #f9f3d5 0%, #e3f1f2 40%, #e3f2f4 70%, #f9e9ed 100%);">
     <div class="fixed top-5 right-5 z-10">
         <x-lang_switcher />
     </div>
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div class="mb-6">
             <a href="{{ route('home') }}"
-                class="inline-flex items-center gap-1.5 text-sm font-medium transition hover:gap-2.5"
+                class="inline-flex items-center gap-1.5 py-2 text-sm font-medium transition hover:gap-2.5"
                 style="color: #5f6873;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 {{ __('login.back_home') }}
@@ -19,16 +19,16 @@
 
         <div class="text-center mb-8">
             <a href="{{ route('home') }}" class="text-2xl font-extrabold tracking-tight inline-block mb-4" style="color: #182438;">
-                Kid<span style="color: #ff6b35;">Link</span>
+                Kid<span style="color: #c2410c;">Link</span>
             </a>
-            <h2 class="text-3xl font-extrabold tracking-tight" style="color: #182438;">{{ __('login.welcome_back') }}</h2>
+            <h1 class="text-3xl font-extrabold tracking-tight" style="color: #182438;">{{ __('login.welcome_back') }}</h1>
         </div>
 
         <form method="POST" action="{{ route('login') }}" class="space-y-5">
             @csrf
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: #182438;">{{ __('login.email') }}</label>
-                <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                <label for="email" class="block text-sm font-medium mb-2" style="color: #182438;">{{ __('login.email') }}</label>
+                <input type="email" name="email" id="email" autocomplete="username" value="{{ old('email') }}" required autofocus
                     class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2"
                     style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
                     onfocus="this.style.borderColor='#ff6b35'; this.style.boxShadow='0 0 0 3px rgba(255,107,53,0.18)'"
@@ -36,28 +36,28 @@
                     placeholder="{{ __('login.email_placeholder') }}">
             </div>
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: #182438;">{{ __('login.password') }}</label>
+                <label for="password" class="block text-sm font-medium mb-2" style="color: #182438;">{{ __('login.password') }}</label>
                 <div class="relative">
-                    <input type="password" name="password" id="password" required
+                    <input type="password" name="password" id="password" autocomplete="current-password" required
                         class="w-full px-4 py-3 border rounded-lg outline-none transition focus:ring-2 pr-12"
                         style="border-color: #f1e7cc; background: #fffbf0; color: #182438;"
                         onfocus="this.style.borderColor='#ff6b35'; this.style.boxShadow='0 0 0 3px rgba(255,107,53,0.18)'"
                         onblur="this.style.borderColor='#f1e7cc'; this.style.boxShadow='none'"
                         placeholder="{{ __('login.password_placeholder') }}">
-                    <button type="button" onclick="togglePassword('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#5f6873]" aria-label="{{ __('login.show_password') }}">
+                    <button type="button" onclick="togglePassword('password', this)" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-[#5f6873] hover:text-[#182438]" aria-label="{{ __('login.show_password') }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     </button>
                 </div>
             </div>
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-sm" style="color: #5f6873;">
-                    <input type="checkbox" name="remember" class="rounded" style="accent-color: #ff6b35;">
+                    <input type="checkbox" name="remember" class="rounded w-6 h-6" style="accent-color: #ff6b35;">
                     {{ __('login.remember') }}
                 </label>
             </div>
             <button type="submit"
-                class="w-full text-white py-3 rounded-lg font-semibold transition transform hover:scale-[1.02]"
-                style="background: #ff6b35; box-shadow: 0 4px 12px rgba(255,107,53,0.24);"
+                class="w-full py-3 rounded-lg font-semibold transition transform hover:scale-[1.02]"
+                style="background: #ff6b35; color: #182438; box-shadow: 0 4px 12px rgba(255,107,53,0.24);"
                 onmouseover="this.style.background='#ed5524'"
                 onmouseout="this.style.background='#ff6b35'">
                 {{ __('login.submit') }}
@@ -69,7 +69,7 @@
             <span class="font-semibold">{{ __('login.contact_admin') }}</span>
         </p>
     </div>
-</div>
+</main>
 @endsection
 
 @push('scripts')

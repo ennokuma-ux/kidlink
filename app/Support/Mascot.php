@@ -17,18 +17,18 @@ class Mascot
     /** Concrete expression artwork available per mascot (relative to /public). */
     public const EXPRESSIONS = [
         self::KIDO => [
-            'main' => 'assets/images/mascot/kido/kido-main.png',
-            'happy' => 'assets/images/mascot/kido/kido-expression-happy.png',
-            'cheer' => 'assets/images/mascot/kido/kido-expression-cheer.png',
-            'question' => 'assets/images/mascot/kido/kido-expression-question.png',
-            'shock' => 'assets/images/mascot/kido/kido-expression-shock.png',
+            'main' => 'assets/images/mascot/kido/kido-main.webp',
+            'happy' => 'assets/images/mascot/kido/kido-expression-happy.webp',
+            'cheer' => 'assets/images/mascot/kido/kido-expression-cheer.webp',
+            'question' => 'assets/images/mascot/kido/kido-expression-question.webp',
+            'shock' => 'assets/images/mascot/kido/kido-expression-shock.webp',
         ],
         self::LINKA => [
-            'main' => 'assets/images/mascot/linka/linka-main.png',
-            'happy' => 'assets/images/mascot/linka/linka-expression-happy.png',
-            'cheer' => 'assets/images/mascot/linka/linka-expression-cheer.png',
-            'question' => 'assets/images/mascot/linka/linka-expression-question.png',
-            'wave' => 'assets/images/mascot/linka/linka-expression-wave.png',
+            'main' => 'assets/images/mascot/linka/linka-main.webp',
+            'happy' => 'assets/images/mascot/linka/linka-expression-happy.webp',
+            'cheer' => 'assets/images/mascot/linka/linka-expression-cheer.webp',
+            'question' => 'assets/images/mascot/linka/linka-expression-question.webp',
+            'wave' => 'assets/images/mascot/linka/linka-expression-wave.webp',
         ],
     ];
 
