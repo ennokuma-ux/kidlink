@@ -540,14 +540,12 @@ function openEditModal(button) {
     @endif
 @endif
 </script>
-// Keep the Activity Planner lease alive for this browser/device only.
+// Keep the Activity Planner lease alive while this page is open.
+// Do not release from pagehide: browsers also fire pagehide during refresh,
+// and an asynchronous release can race with the next GET and delete its lock.
 const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
 const activityLockReleaseUrl = @json(route('teacher.activities.lock.release'));
-const activityLockPageUrl = @json(route('teacher.activities.index'));
 const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-let activityLockTimer = null;
-let activityLockLost = false;
-
 const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
     method: 'POST',
     credentials: 'same-origin',
@@ -559,46 +557,35 @@ const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
     }
 });
 
-const verifyActivityLock = async () => {
-    if (activityLockLost) return;
+let activityLockLeaving = false;
+const activityLockTimer = window.setInterval(async () => {
+    if (activityLockLeaving) return;
     try {
         const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
         if (response.status === 409) {
-            activityLockLost = true;
-            if (activityLockTimer) window.clearInterval(activityLockTimer);
-            window.location.replace(activityLockPageUrl);
+            window.clearInterval(activityLockTimer);
+            window.location.replace(@json(route('teacher.activities.index')));
         }
     } catch (error) {
         // The server-side lease expires automatically if this device disconnects.
     }
-};
+}, 30000);
 
-const startActivityLockHeartbeat = () => {
-    if (activityLockTimer) window.clearInterval(activityLockTimer);
-    verifyActivityLock();
-    activityLockTimer = window.setInterval(verifyActivityLock, 25000);
-};
-
-startActivityLockHeartbeat();
-
-// Revalidate after refresh restoration, browser Back/Forward, or returning to this tab.
-window.addEventListener('pageshow', verifyActivityLock);
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') verifyActivityLock();
-});
-
-// Release when the user navigates to a different page. Do not release on
-// pagehide: browsers also fire pagehide during refresh, which can race the
-// next GET and accidentally remove the freshly reacquired lock.
-document.addEventListener('click', (event) => {
+// Release before ordinary same-site link navigation, but never on refresh.
+document.addEventListener('click', async (event) => {
     const link = event.target.closest('a[href]');
-    if (!link || link.target === '_blank' || event.defaultPrevented || event.button !== 0) return;
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (link.target === '_blank' || link.hasAttribute('download')) return;
 
-    const destination = new URL(link.href, window.location.href);
-    if (destination.origin !== window.location.origin) return;
-    if (destination.pathname === new URL(activityLockPageUrl, window.location.origin).pathname) return;
+    let destination;
+    try { destination = new URL(link.href, window.location.href); } catch (error) { return; }
+    if (destination.origin !== window.location.origin || destination.href === window.location.href || destination.hash && destination.pathname === window.location.pathname) return;
 
-    if (activityLockTimer) window.clearInterval(activityLockTimer);
-    sendActivityLockRequest(activityLockReleaseUrl, true).catch(() => {});
-});
+    event.preventDefault();
+    if (activityLockLeaving) return;
+    activityLockLeaving = true;
+    window.clearInterval(activityLockTimer);
+    try { await sendActivityLockRequest(activityLockReleaseUrl, true); } catch (error) {}
+    window.location.assign(destination.href);
+}, true);
 @endpush
