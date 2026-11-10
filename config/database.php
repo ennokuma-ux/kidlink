@@ -46,6 +46,13 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'require'),
+            // Supabase transaction pooler (port 6543) does not support
+            // persistent server-side prepared statements across pooled
+            // connections. Emulate prepares on the client to avoid
+            // SQLSTATE[26000] "prepared statement does not exist".
+            'options' => extension_loaded('pdo_pgsql') ? [
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ] : [],
         ],
 
         'sqlsrv' => [
