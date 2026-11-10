@@ -809,7 +809,7 @@ public const ECCD_DOMAIN_SHORT = [
         }
 
         $summary['students'] = (clone $studentQuery)->count();
-        $summary['active_students'] = (clone $studentQuery)->where('is_active', true)->count();
+        $summary['active_students'] = (clone $studentQuery)->whereRaw('is_active = true')->count();
 
         $scoreQuery = GameScore::query();
         $pointQuery = Point::query();
@@ -1179,10 +1179,10 @@ public const ECCD_DOMAIN_SHORT = [
             'parents' => User::where('role', 'parent')->count(),
             'students' => User::where('role', 'student')->count(),
             'admins' => User::where('role', 'super_admin')->count(),
-            'inactive_users' => User::where('is_active', false)->count(),
+            'inactive_users' => User::whereRaw('is_active = false')->count(),
             'students_enrolled' => Student::count(),
-            'active_enrollments' => Student::where('is_active', true)->count(),
-            'inactive_enrollments' => Student::where('is_active', false)->count(),
+            'active_enrollments' => Student::whereRaw('is_active = true')->count(),
+            'inactive_enrollments' => Student::whereRaw('is_active = false')->count(),
             'teachers_with_students' => Student::whereNotNull('teacher_id')->distinct()->count('teacher_id'),
             'unassigned_students' => Student::whereNull('teacher_id')->count(),
             'unlinked_students' => Student::whereDoesntHave('parents')->count(),

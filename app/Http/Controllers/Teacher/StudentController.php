@@ -35,11 +35,11 @@ class StudentController extends Controller
             ->orderBy('id', 'desc');
 
         $students = $order($scope(Student::with('parents')))
-            ->where('is_active', true)
+            ->whereRaw('is_active = true')
             ->get();
 
         $archivedStudents = $order($scope(Student::with('parents')))
-            ->where('is_active', false)
+            ->whereRaw('is_active = false')
             ->get();
 
         // Also backs the "connect parent account" pickers in the add/edit modals.
@@ -228,7 +228,7 @@ class StudentController extends Controller
         }
 
         $parentIds = $role === 'student'
-            ? User::whereIn('id', $validated['parent_ids'] ?? [])->where('role', 'parent')->where('is_active', true)->pluck('id')->all()
+            ? User::whereIn('id', $validated['parent_ids'] ?? [])->where('role', 'parent')->whereRaw('is_active = true')->pluck('id')->all()
             : [];
 
         $teacherId = auth()->id();

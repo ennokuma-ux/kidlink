@@ -20,7 +20,7 @@ class AnalyticsController extends Controller
 
     public function index(Request $request)
     {
-        $allStudents = Student::where('is_active', true)->get();
+        $allStudents = Student::whereRaw('is_active = true')->get();
         $availableSections = $this->analytics->availableSections($allStudents);
 
         $section = trim((string) $request->query('section', ''));

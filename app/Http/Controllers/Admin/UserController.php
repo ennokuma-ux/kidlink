@@ -37,12 +37,12 @@ class UserController extends Controller
                 ->when($role !== '', fn ($q) => $q->where('role', $role));
         };
 
-        $users = $filtered(User::query()->where('is_active', true))
+        $users = $filtered(User::query()->whereRaw('is_active = true'))
             ->with('children:id,first_name,last_name')
             ->orderBy('first_name')->orderBy('last_name')
             ->paginate(10, ['*'], 'active_page')->withQueryString();
 
-        $archivedUsers = $filtered(User::query()->where('is_active', false))
+        $archivedUsers = $filtered(User::query()->whereRaw('is_active = false'))
             ->orderBy('first_name')->orderBy('last_name')
             ->paginate(10, ['*'], 'archived_page')->withQueryString();
 
@@ -74,16 +74,16 @@ class UserController extends Controller
 
         // The account-maker selectors are kept separate from the paginated
         // tables because they need the full list of assignable records.
-        $allStudents = Student::where('is_active', true)->orderBy('first_name')->get();
-        $allParents = User::where('role', 'parent')->where('is_active', true)->orderBy('first_name')->get();
-        $allTeachers = User::where('role', 'teacher')->where('is_active', true)->orderBy('first_name')->get();
+        $allStudents = Student::whereRaw('is_active = true')->orderBy('first_name')->get();
+        $allParents = User::where('role', 'parent')->whereRaw('is_active = true')->orderBy('first_name')->get();
+        $allTeachers = User::where('role', 'teacher')->whereRaw('is_active = true')->orderBy('first_name')->get();
 
         $academicYears = Student::academicYearOptions($allStudents->pluck('academic_year'));
 
         $stats = [
-            'teachers' => User::where('role', 'teacher')->where('is_active', true)->count(),
-            'parents' => User::where('role', 'parent')->where('is_active', true)->count(),
-            'students' => User::where('role', 'student')->where('is_active', true)->count(),
+            'teachers' => User::where('role', 'teacher')->whereRaw('is_active = true')->count(),
+            'parents' => User::where('role', 'parent')->whereRaw('is_active = true')->count(),
+            'students' => User::where('role', 'student')->whereRaw('is_active = true')->count(),
             'admins' => User::where('role', 'super_admin')->count(),
         ];
 
@@ -114,19 +114,19 @@ class UserController extends Controller
             'teacher_id' => [
                 'nullable',
                 Rule::exists('users', 'id')
-                    ->where(fn ($query) => $query->where('role', 'teacher')->where('is_active', true)),
+                    ->where(fn ($query) => $query->where('role', 'teacher')->whereRaw('is_active = true')),
             ],
             'parent_ids' => 'nullable|array',
             'parent_ids.*' => [
                 Rule::exists('users', 'id')
-                    ->where(fn ($query) => $query->where('role', 'parent')->where('is_active', true)),
+                    ->where(fn ($query) => $query->where('role', 'parent')->whereRaw('is_active = true')),
             ],
         ]);
 
         $teacherId = $request->filled('teacher_id')
             ? User::where('id', $request->teacher_id)
                 ->where('role', 'teacher')
-                ->where('is_active', true)
+                ->whereRaw('is_active = true')
                 ->value('id')
             : null;
 
@@ -169,7 +169,7 @@ class UserController extends Controller
             ]);
 
             $parentIds = collect($request->input('parent_ids', []))
-                ->filter(fn($id) => User::where('id', $id)->where('role', 'parent')->where('is_active', true)->exists())
+                ->filter(fn($id) => User::where('id', $id)->where('role', 'parent')->whereRaw('is_active = true')->exists())
                 ->values()
                 ->all();
             $student->parents()->attach($parentIds);

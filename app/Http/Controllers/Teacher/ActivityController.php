@@ -39,8 +39,8 @@ class ActivityController extends Controller
         return view('teacher.activities', [
             'calendarDays' => $this->calendarDays($teacherId),
             'activities' => $activities->groupBy('day_of_week'),
-            'students' => Student::where('teacher_id', $teacherId)->where('is_active', true)->orderBy('last_name')->orderBy('first_name')->get(),
-            'classNames' => Student::where('teacher_id', $teacherId)->where('is_active', true)->whereNotNull('class_name')->where('class_name', '!=', '')->distinct()->orderBy('class_name')->pluck('class_name'),
+            'students' => Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')->orderBy('last_name')->orderBy('first_name')->get(),
+            'classNames' => Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')->whereNotNull('class_name')->where('class_name', '!=', '')->distinct()->orderBy('class_name')->pluck('class_name'),
             'stats' => $stats,
             'days' => $days,
             'weekStart' => $weekStart,
@@ -179,7 +179,7 @@ class ActivityController extends Controller
 
     private function students(Activity $activity)
     {
-        $query = Student::where('teacher_id', $activity->teacher_id)->where('is_active', true);
+        $query = Student::where('teacher_id', $activity->teacher_id)->whereRaw('is_active = true');
 
         if ($activity->target_mode === 'individual') {
             $query->whereIn('id', $activity->target_student_ids ?? []);
@@ -226,7 +226,7 @@ class ActivityController extends Controller
         ]);
 
         if (($validated['target_mode'] ?? 'section') === 'individual') {
-            $validIds = Student::where('teacher_id', auth()->id())->where('is_active', true)
+            $validIds = Student::where('teacher_id', auth()->id())->whereRaw('is_active = true')
                 ->whereIn('id', $validated['target_student_ids'] ?? [])->pluck('id')->all();
             if (count($validIds) !== count($validated['target_student_ids'] ?? [])) {
                 throw ValidationException::withMessages(['target_student_ids' => 'Choose only active students assigned to your class.']);

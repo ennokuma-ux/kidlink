@@ -20,7 +20,7 @@ class AttendanceController extends Controller
 
         $students = Cache::remember("teacher.{$teacherId}.students", 300, function () use ($teacherId) {
             return Student::where('teacher_id', $teacherId)
-                ->where('is_active', true)
+                ->whereRaw('is_active = true')
                 ->orderBy('first_name')
                 ->get(['id', 'first_name', 'last_name', 'full_name', 'class_name', 'academic_year']);
         });

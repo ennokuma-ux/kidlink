@@ -50,7 +50,7 @@ class User extends Authenticatable
 
     public function activeChildren(): \Illuminate\Support\Collection
     {
-        return $this->activeChildrenCache ??= $this->children()->where('is_active', true)->get();
+        return $this->activeChildrenCache ??= $this->children()->whereRaw('is_active = true')->get();
     }
 
     public function teacherStudents(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -275,7 +275,7 @@ class EccdController extends Controller
     public function index(Request $request)
     {
         $teacherId = auth()->id();
-        $students = Student::where('teacher_id', $teacherId)->where('is_active', true)->get();
+        $students = Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')->get();
         // No default child: the page opens on a prompt and the teacher picks one.
         // Resolved only against this teacher's own students, so a guessed id
         // cannot open someone else's checklist.
@@ -368,7 +368,7 @@ class EccdController extends Controller
         ]);
 
         $student = Student::where('teacher_id', auth()->id())
-            ->where('is_active', true)
+            ->whereRaw('is_active = true')
             ->findOrFail($validated['student_id']);
 
         $record = EccdRecord::where('student_id', $student->id)
@@ -419,7 +419,7 @@ class EccdController extends Controller
         $teacherId = auth()->id();
 
         $student = Student::where('teacher_id', $teacherId)
-            ->where('is_active', true)
+            ->whereRaw('is_active = true')
             ->findOrFail($validated['student_id']);
 
         $statuses = collect($validated['statuses'] ?? [])

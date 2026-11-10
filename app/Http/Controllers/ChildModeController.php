@@ -127,7 +127,7 @@ class ChildModeController extends Controller
     private function availableAccounts()
     {
         return $this->playableStudents(auth()->user())
-            ->where('students.is_active', true)
+            ->whereRaw('students.is_active = true')
             ->orderBy('first_name')
             ->get();
     }

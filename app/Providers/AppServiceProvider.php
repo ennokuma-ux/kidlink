@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
             if ($user->role === 'parent') {
                 $children = $user->activeChildren();
             } elseif ($user->role === 'teacher') {
-                $children = Student::where('teacher_id', $user->id)->where('is_active', true)->get();
+                $children = Student::where('teacher_id', $user->id)->whereRaw('is_active = true')->get();
             } else {
                 $children = collect();
             }

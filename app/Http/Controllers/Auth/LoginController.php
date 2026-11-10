@@ -43,7 +43,7 @@ class LoginController extends Controller
             ]);
 
             if ($user->role === 'parent') {
-                $child = $user->children()->where('is_active', true)->first();
+                $child = $user->children()->whereRaw('is_active = true')->first();
                 if ($child) {
                     session([
                         'child_id' => $child->id,

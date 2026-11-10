@@ -15,7 +15,7 @@ class GameAssignmentController extends Controller
     public function index()
     {
         $teacherId = auth()->id();
-        $students = Student::where('teacher_id', $teacherId)->where('is_active', true)
+        $students = Student::where('teacher_id', $teacherId)->whereRaw('is_active = true')
             ->orderBy('class_name')->orderBy('first_name')->orderBy('last_name')->get();
         $games = GameCatalog::all();
         $assignments = StudentGameAssignment::where('teacher_id', $teacherId)->get();
