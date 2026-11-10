@@ -58,8 +58,11 @@ class Mascot
         // Parent/teacher child mode explicitly records which child is active.
         // Prefer that ID over a user_id lookup so a shared or legacy-linked
         // account can never make a girl inherit the wrong sibling's mascot.
-        if (filter_var(session('student_mode', false), FILTER_VALIDATE_BOOLEAN) && session()->filled('student_child_id')) {
-            $activeStudent = Student::find(session('student_child_id'));
+        $studentMode = filter_var(session()->get('student_mode', false), FILTER_VALIDATE_BOOLEAN);
+        $activeChildId = session()->get('student_child_id');
+
+        if ($studentMode && $activeChildId !== null && $activeChildId !== '') {
+            $activeStudent = Student::find($activeChildId);
 
             if ($activeStudent && (int) $activeStudent->user_id === (int) Auth::id()) {
                 return $activeStudent;
