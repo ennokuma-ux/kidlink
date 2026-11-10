@@ -12,7 +12,7 @@
         </div>
         <x-student-chooser :students="$students" :selected="$selectedStudent"
                            :action="route('teacher.eccd.index')" param="student_id"
-                           :extra="['evaluation' => $evaluationNumber]" />
+                           :extra="['evaluation' => $evaluationNumber, 'age_group' => $ageGroup]" />
 
         <div class="w-full md:w-auto md:min-w-[290px]" aria-label="ECCD checklist age group">
             <p class="text-xs font-semibold uppercase tracking-wide text-[#5f6873] mb-2">ECCD checklist age group</p>

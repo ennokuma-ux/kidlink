@@ -140,23 +140,6 @@ class EccdController extends Controller
     ];
 
 
-    private $domains0To3 = [
-            'Gross Motor' => [
-            ],
-            'Fine Motor' => [
-            ],
-            'Self-Help' => [
-            ],
-            'Social-Emotional' => [
-            ],
-            'Receptive Language' => [
-            ],
-            'Expressive Language' => [
-            ],
-            'Cognitive' => [
-            ],
-        ];
-
     private $indicators0To3 = [
             'Gross Motor' => [
                 ['age_band' => 'Infants (0 months–1 year)', 'indicator' => 'Infant lifts head when held standing'],
@@ -301,7 +284,7 @@ class EccdController extends Controller
         $evaluationNumber = $request->evaluation ?? 1;
         $ageGroup = $request->query('age_group', '3-5');
         abort_unless(in_array($ageGroup, ['0-3', '3-5'], true), 404);
-        $domains = $ageGroup === '0-3' ? $this->domains0To3 : $this->domains;
+        $domains = $ageGroup === '0-3' ? array_keys($this->indicators0To3) : $this->domains;
         $indicators = $ageGroup === '0-3' ? $this->indicators0To3 : $this->indicators;
 
         $records = collect();

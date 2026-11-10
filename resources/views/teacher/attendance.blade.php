@@ -82,6 +82,11 @@
 </div>
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    @if($students->hasPages())
+        <div class="px-6 py-4 border-b border-[#f1e7cc]">
+            {{ $students->onEachSide(1)->links() }}
+        </div>
+    @endif
     <form method="POST" action="{{ route('teacher.attendance.store') }}">
         @csrf
 <input type="hidden" name="date" value="{{ $date->format('Y-m-d') }}">
