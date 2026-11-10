@@ -1,6 +1,14 @@
 User-agent: *
 Allow: /
+
+# Keep authenticated and account-specific areas out of search results.
 Disallow: /admin
 Disallow: /teacher
 Disallow: /parent
 Disallow: /student
+Disallow: /child-mode
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /password
+Disallow: /api
