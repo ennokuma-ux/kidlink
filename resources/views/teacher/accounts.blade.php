@@ -483,7 +483,7 @@ function createPager(name, rowEls) {
                 const label = button.textContent;
                 if (label === '‹' && page > 1) button.addEventListener('click', () => { page--; render(); });
                 else if (label === '›' && page < total) button.addEventListener('click', () => { page++; render(); });
-                else if (/^\\d+$/.test(label) && +label !== page) button.addEventListener('click', () => { page = +label; render(); });
+                else if (/^\d+$/.test(label) && +label !== page) button.addEventListener('click', () => { page = +label; render(); });
             });
             el.replaceChildren(infoCopy, navCopy);
         });
