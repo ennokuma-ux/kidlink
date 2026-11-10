@@ -48,8 +48,8 @@ class StudentController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        $activeParents = $parents->whereRaw('is_active = true')->values();
-        $archivedParents = $parents->whereRaw('is_active = false')->values();
+        $activeParents = $parents->filter(fn ($parent) => (bool) $parent->is_active)->values();
+        $archivedParents = $parents->reject(fn ($parent) => (bool) $parent->is_active)->values();
 
         // The teacher's own requests for an admin to approve, newest first.
         $accountRequests = AccountRequest::with('reviewer')
