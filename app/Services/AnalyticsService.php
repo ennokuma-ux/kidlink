@@ -127,7 +127,7 @@ class AnalyticsService
         $query = Attendance::whereBetween('date', [$first, $last])
             ->selectRaw('date, status, COUNT(*) as total')
             ->groupBy('date', 'status');
-        if (!empty($studentIds)) {
+        if ($studentIds !== null) {
             $query->whereIn('student_id', $studentIds);
         }
 
@@ -169,7 +169,7 @@ class AnalyticsService
             $date = $weekStart->copy()->addDays($i);
 
             $query = Attendance::whereDate('date', $date);
-            if (!empty($studentIds)) {
+            if ($studentIds !== null) {
                 $query->whereIn('student_id', $studentIds);
             }
 
@@ -227,7 +227,7 @@ class AnalyticsService
             ->selectRaw('date, status, COUNT(*) as total')
             ->groupBy('date', 'status');
 
-        if (!empty($studentIds)) {
+        if ($studentIds !== null) {
             $query->whereIn('student_id', $studentIds);
         }
 
@@ -748,7 +748,7 @@ public const ECCD_DOMAIN_SHORT = [
         $trend = [];
 
         $query = GameScore::where('created_at', '>=', $start);
-        if (!empty($studentIds)) {
+        if ($studentIds !== null) {
             $query->whereIn('student_id', $studentIds);
         }
 
@@ -804,7 +804,7 @@ public const ECCD_DOMAIN_SHORT = [
         ];
 
         $studentQuery = Student::query();
-        if (!empty($studentIds)) {
+        if ($studentIds !== null) {
             $studentQuery->whereIn('id', $studentIds);
         }
 
@@ -815,7 +815,7 @@ public const ECCD_DOMAIN_SHORT = [
         $pointQuery = Point::query();
         $attendanceQuery = Attendance::query();
 
-        if (!empty($studentIds)) {
+        if ($studentIds !== null) {
             $scoreQuery->whereIn('student_id', $studentIds);
             $pointQuery->whereIn('student_id', $studentIds);
             $attendanceQuery->whereIn('student_id', $studentIds);

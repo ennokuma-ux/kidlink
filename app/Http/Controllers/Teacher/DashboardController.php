@@ -95,6 +95,15 @@ class DashboardController extends Controller
             ? $allStudents->values()
             : $allStudents->where('class_name', $section)->values();
 
+        // The headline cards on group analytics pages must use the same cohort
+        // as the selected scope. Keep the selection-screen counts centre/teacher-wide.
+        $totalStudents = $students->count();
+        $todayAttendance = Attendance::whereDate('date', $today)
+            ->whereIn('student_id', $students->pluck('id'))
+            ->get();
+        $presentToday = $todayAttendance->where('status', 'Present')->count();
+        $absentToday = $todayAttendance->where('status', 'Absent')->count();
+
         // The per-section rollup compares classes, so it must never be narrowed
         // by the section or single-student filter: it always counts every class
         // this teacher has.
