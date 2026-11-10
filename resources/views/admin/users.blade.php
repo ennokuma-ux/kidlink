@@ -4,7 +4,9 @@
 @section('page-title', __('admin_ui.manage_accounts'))
 
 @section('content')
-@php($accountView = request('view') === 'archived' ? 'archived' : 'active')
+@php
+    $accountView = request('view') === 'archived' ? 'archived' : 'active';
+@endphp
 <style>
     input.password-entry::-ms-reveal,
     input.password-entry::-ms-clear,
