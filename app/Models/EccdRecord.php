@@ -13,8 +13,10 @@ class EccdRecord extends Model
 
     protected $fillable = [
         'student_id',
+        'age_group',
         'domain',
         'indicator',
+        'age_band',
         'notes',
         'status',
         'assessed_by',

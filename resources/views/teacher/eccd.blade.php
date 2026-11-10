@@ -17,17 +17,18 @@
         <div class="w-full md:w-auto md:min-w-[290px]" aria-label="ECCD checklist age group">
             <p class="text-xs font-semibold uppercase tracking-wide text-[#5f6873] mb-2">ECCD checklist age group</p>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" disabled aria-disabled="true"
-                    title="The 0 to 3 years checklist will be added when its indicators are provided"
-                    class="px-3 py-2 rounded-lg border border-dashed border-[#c9c3b8] bg-[#f8f7f4] text-[#8b949d] text-sm font-semibold cursor-not-allowed">
+                <a href="{{ route('teacher.eccd.index', array_filter(['student_id' => $selectedStudent?->id, 'evaluation' => $evaluationNumber, 'age_group' => '0-3'])) }}"
+                   aria-current="{{ $ageGroup === '0-3' ? 'page' : 'false' }}"
+                   class="px-3 py-2 rounded-lg border text-center text-sm font-semibold transition {{ $ageGroup === '0-3' ? 'border-[#1982c4] bg-[#eaf5fc] text-[#145f8e]' : 'border-[#d8d2c4] bg-white text-[#5f6873] hover:bg-[#fffbf0]' }}">
                     0–3 years
-                    <span class="block text-[11px] font-normal">Coming soon</span>
-                </button>
-                <button type="button" aria-current="true"
-                    class="px-3 py-2 rounded-lg border-2 border-[#1982c4] bg-[#eaf5fc] text-[#145f8e] text-sm font-semibold">
+                    <span class="block text-[11px] font-normal">Early childhood checklist</span>
+                </a>
+                <a href="{{ route('teacher.eccd.index', array_filter(['student_id' => $selectedStudent?->id, 'evaluation' => $evaluationNumber, 'age_group' => '3-5'])) }}"
+                   aria-current="{{ $ageGroup === '3-5' ? 'page' : 'false' }}"
+                   class="px-3 py-2 rounded-lg border text-center text-sm font-semibold transition {{ $ageGroup === '3-5' ? 'border-[#1982c4] bg-[#eaf5fc] text-[#145f8e]' : 'border-[#d8d2c4] bg-white text-[#5f6873] hover:bg-[#fffbf0]' }}">
                     3–5 years
-                    <span class="block text-[11px] font-normal">Current checklist</span>
-                </button>
+                    <span class="block text-[11px] font-normal">Preschool checklist</span>
+                </a>
             </div>
         </div>
     </div>
@@ -104,6 +105,7 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
     @csrf
     <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
     <input type="hidden" name="evaluation" value="{{ $evaluationNumber }}">
+    <input type="hidden" name="age_group" value="{{ $ageGroup }}">
     <input type="hidden" name="next" value="" id="eccdNext">
 
     {{-- Changes are staged on the page and only written when Save is confirmed. --}}
@@ -147,7 +149,12 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
             @forelse($domainRecords as $i => $record)
             <tr class="hover:bg-[#fffbf0] transition" data-eccd-row>
                 <td class="px-4 py-2 text-[#5f6873]">{{ $i + 1 }}</td>
-                <td class="px-4 py-2 text-sm font-medium text-[#182438] min-w-[9rem]">{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}</td>
+                <td class="px-4 py-2 text-sm font-medium text-[#182438] min-w-[9rem]">
+                    @if($record->age_band)
+                    <span class="block text-[10px] uppercase tracking-wide text-[#1982c4] font-bold mb-1">{{ $record->age_band }}</span>
+                    @endif
+                    {{ $labels['indicators'][$record->indicator] ?? $record->indicator }}
+                </td>
                 <td class="px-4 py-2">
                     <div class="flex items-center justify-center gap-2" data-eccd-group data-record="{{ $record->id }}" data-original="{{ $record->status }}" data-current="{{ $record->status }}" role="group" aria-label="{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}">
                         <input type="hidden" name="statuses[{{ $record->id }}]" value="{{ $record->status }}" disabled data-eccd-input>
