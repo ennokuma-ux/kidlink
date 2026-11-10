@@ -64,7 +64,9 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
     @foreach($days as $offset => $day)
-        @php($date = $weekStart->copy()->addDays($offset))
+        @php
+            $date = $weekStart->copy()->addDays($offset);
+        @endphp
         <div class="bg-white rounded-xl shadow-sm overflow-hidden {{ $date->isToday() ? 'ring-2 ring-[#ff8555]' : '' }}">
             <div class="text-center py-3 font-semibold {{ $date->isToday() ? 'bg-[#ff8555] text-white' : 'bg-[#f1e7cc] text-[#182438]' }}">
                 {{ $date->format('D') }}
@@ -96,7 +98,9 @@
                     </div>
                     <p class="text-[#5f6873] text-xs">{{ substr($activity->start_time, 0, 5) }} - {{ substr($activity->end_time, 0, 5) }}</p>
                     @if(($activity->target_mode ?? 'section') === 'individual')
-                        @php($count = count($activity->target_student_ids ?? []))
+                        @php
+                            $count = count($activity->target_student_ids ?? []);
+                        @endphp
                         <p class="text-[#6b7280] text-xs mt-1">{{ __('Students') }}: {{ $count }}</p>
                     @elseif($activity->group_name)
                         <p class="text-[#6b7280] text-xs mt-1">{{ __('teacher.group_label') }} {{ $activity->group_name }}</p>
@@ -532,10 +536,10 @@ function openEditModal(button) {
         document.getElementById('editStart').value = @json(old('start_time'));
         document.getElementById('editEnd').value = @json(old('end_time'));
         document.getElementById('editWeek').value = @json(old('week'));
-        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
+        activityTarget.set(document.querySelector('#editActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(old('target_student_ids', [])));
         document.getElementById('editActivityModal').classList.remove('hidden');
     @else
-        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(array_map('intval', old('target_student_ids', []))));
+        activityTarget.set(document.querySelector('#addActivityModal [data-activity-target]'), @json(old('target_mode', 'section')), @json(old('group_name', '')), @json(old('target_student_ids', [])));
         document.getElementById('addActivityModal').classList.remove('hidden');
     @endif
 @endif
