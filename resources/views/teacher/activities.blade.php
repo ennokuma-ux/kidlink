@@ -540,10 +540,14 @@ function openEditModal(button) {
     @endif
 @endif
 </script>
-// Keep this account's Activity Planner lease alive while this page is open.
+// Keep the Activity Planner lease alive for this browser/device only.
 const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
 const activityLockReleaseUrl = @json(route('teacher.activities.lock.release'));
+const activityLockPageUrl = @json(route('teacher.activities.index'));
 const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+let activityLockTimer = null;
+let activityLockLost = false;
+
 const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
     method: 'POST',
     credentials: 'same-origin',
@@ -554,42 +558,47 @@ const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
         'Accept': 'application/json'
     }
 });
-let activityLockPageActive = true;
-let activityLockRedirecting = false;
 
-async function verifyActivityPageLock() {
-    if (!activityLockPageActive || activityLockRedirecting) return;
-
+const verifyActivityLock = async () => {
+    if (activityLockLost) return;
     try {
         const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
         if (response.status === 409) {
-            activityLockRedirecting = true;
-            window.clearInterval(activityLockTimer);
-            // Re-enter through the protected page route. The server will either
-            // grant a fresh lock or show the concurrent-access error page.
-            window.location.replace(@json(route('teacher.activities.index')));
+            activityLockLost = true;
+            if (activityLockTimer) window.clearInterval(activityLockTimer);
+            window.location.replace(activityLockPageUrl);
         }
     } catch (error) {
-        // A brief network interruption is handled by the server-side lease expiry.
+        // The server-side lease expires automatically if this device disconnects.
     }
-}
+};
 
-// Keep the lease alive while the planner is open.
-const activityLockTimer = window.setInterval(verifyActivityPageLock, 30000);
+const startActivityLockHeartbeat = () => {
+    if (activityLockTimer) window.clearInterval(activityLockTimer);
+    verifyActivityLock();
+    activityLockTimer = window.setInterval(verifyActivityLock, 25000);
+};
 
-// Re-check when the page is restored from browser back/forward cache or the
-// user returns to this tab. This prevents a stale page from continuing after
-// another session has acquired the planner lock.
-window.addEventListener('pageshow', verifyActivityPageLock);
+startActivityLockHeartbeat();
+
+// Revalidate after refresh restoration, browser Back/Forward, or returning to this tab.
+window.addEventListener('pageshow', verifyActivityLock);
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') verifyActivityPageLock();
+    if (document.visibilityState === 'visible') verifyActivityLock();
 });
 
-// Release the lock when navigating away, refreshing, or closing this page.
-window.addEventListener('pagehide', () => {
-    activityLockPageActive = false;
-    window.clearInterval(activityLockTimer);
+// Release when the user navigates to a different page. Do not release on
+// pagehide: browsers also fire pagehide during refresh, which can race the
+// next GET and accidentally remove the freshly reacquired lock.
+document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link || link.target === '_blank' || event.defaultPrevented || event.button !== 0) return;
+
+    const destination = new URL(link.href, window.location.href);
+    if (destination.origin !== window.location.origin) return;
+    if (destination.pathname === new URL(activityLockPageUrl, window.location.origin).pathname) return;
+
+    if (activityLockTimer) window.clearInterval(activityLockTimer);
     sendActivityLockRequest(activityLockReleaseUrl, true).catch(() => {});
 });
-
 @endpush
