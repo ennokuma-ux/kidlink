@@ -540,5 +540,34 @@ function openEditModal(button) {
     @endif
 @endif
 </script>
-// Multiple authorized sessions can use the Activity Planner simultaneously.
+// Keep this account's Activity Planner lease alive while this page is open.
+const activityLockHeartbeatUrl = @json(route('teacher.activities.lock.heartbeat'));
+const activityLockReleaseUrl = @json(route('teacher.activities.lock.release'));
+const activityLockCsrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const sendActivityLockRequest = (url, keepalive = false) => fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin',
+    keepalive,
+    headers: {
+        'X-CSRF-TOKEN': activityLockCsrf,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+    }
+});
+const activityLockTimer = window.setInterval(async () => {
+    try {
+        const response = await sendActivityLockRequest(activityLockHeartbeatUrl);
+        if (response.status === 409) {
+            window.clearInterval(activityLockTimer);
+            window.location.href = @json(route('teacher.activities.index'));
+        }
+    } catch (error) {
+        // A brief network interruption is handled by the server-side lease expiry.
+    }
+}, 30000);
+window.addEventListener('pagehide', () => {
+    window.clearInterval(activityLockTimer);
+    sendActivityLockRequest(activityLockReleaseUrl, true).catch(() => {});
+});
+
 @endpush

@@ -58,41 +58,47 @@ class PreventConcurrentActivityAccess
         }
 
         if ($routeName === 'teacher.activities.index' && $request->isMethod('GET')) {
-            $lockedByAnotherDevice = DB::transaction(function () use ($userId, $token) {
-                DB::table('user_page_locks')->insertOrIgnore([
-                    'user_id' => $userId,
-                    'page_key' => self::PAGE_KEY,
+            // Acquire the page lease atomically. A read-then-write sequence with
+            // lockForUpdate() is not reliable on every supported database
+            // (notably SQLite), and can let two first-time requests both pass.
+            // The unique (user_id, page_key) index guarantees one lock row;
+            // this conditional UPDATE only takes it when it is ours or expired.
+            $now = now();
+            DB::table('user_page_locks')->insertOrIgnore([
+                'user_id' => $userId,
+                'page_key' => self::PAGE_KEY,
+                'lock_token' => $token,
+                'last_seen_at' => $now,
+                'expires_at' => $now->copy()->addSeconds(self::LEASE_SECONDS),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+
+            DB::table('user_page_locks')
+                ->where('user_id', $userId)
+                ->where('page_key', self::PAGE_KEY)
+                ->where(function ($query) use ($token, $now) {
+                    $query->where('lock_token', $token)
+                        ->orWhere('expires_at', '<=', $now);
+                })
+                ->update([
                     'lock_token' => $token,
-                    'last_seen_at' => now(),
-                    'expires_at' => now()->addSeconds(self::LEASE_SECONDS),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'last_seen_at' => $now,
+                    'expires_at' => $now->copy()->addSeconds(self::LEASE_SECONDS),
+                    'updated_at' => $now,
                 ]);
 
-                $lock = DB::table('user_page_locks')
-                    ->where('user_id', $userId)
-                    ->where('page_key', self::PAGE_KEY)
-                    ->lockForUpdate()
-                    ->first();
+            // Some database drivers report zero affected rows when the row
+            // already contains these values. Confirm ownership from the row
+            // itself instead of relying on the UPDATE row count.
+            $ownsLock = DB::table('user_page_locks')
+                ->where('user_id', $userId)
+                ->where('page_key', self::PAGE_KEY)
+                ->where('lock_token', $token)
+                ->where('expires_at', '>', now())
+                ->exists();
 
-                if ($lock && $lock->lock_token !== $token && \Illuminate\Support\Carbon::parse($lock->expires_at)->isFuture()) {
-                    return true;
-                }
-
-                DB::table('user_page_locks')
-                    ->where('user_id', $userId)
-                    ->where('page_key', self::PAGE_KEY)
-                    ->update([
-                        'lock_token' => $token,
-                        'last_seen_at' => now(),
-                        'expires_at' => now()->addSeconds(self::LEASE_SECONDS),
-                        'updated_at' => now(),
-                    ]);
-
-                return false;
-            });
-
-            if ($lockedByAnotherDevice) {
+            if (! $ownsLock) {
                 return response()->view('errors.concurrent-access', [
                     'retryUrl' => route('teacher.activities.index', $request->query()),
                 ], 409);
