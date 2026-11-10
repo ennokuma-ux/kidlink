@@ -29,7 +29,7 @@
 
         <div class="flex items-center gap-3 ml-auto md:ml-0">
             <x-lang_switcher />
-            <a href="{{ route('login') }}" class="flex items-center justify-center h-[34px] px-4 rounded-full font-semibold transition hover:brightness-95" style="background: #ff6b35; color: #182438; font-size: 13px;">{{ __('landing.login') }}</a>
+            <a href="{{ route('login') }}" class="flex items-center justify-center h-[34px] px-4 rounded-full font-semibold transition hover:brightness-95" style="background: #ff6b35; color: #ffffff; font-size: 13px;">{{ __('landing.login') }}</a>
         </div>
 
         <button class="menu-button md:hidden ml-auto flex flex-col gap-[3px] w-[27px] h-[27px] items-center justify-center bg-transparent border-0" id="menuButton" aria-label="{{ __('Menu') }}" aria-expanded="false" aria-controls="mobileNav">
@@ -45,7 +45,7 @@
         <a href="#teachers" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_teachers') }}</a>
         <a href="#parents" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_parents') }}</a>
         <a href="#about" class="text-[16px] font-medium" style="color: #182438;">{{ __('landing.nav_about') }}</a>
-        <a href="{{ route('login') }}" class="text-[16px] font-medium text-center rounded-full px-5 py-2.5" style="background: #ff6b35; color: #182438;">{{ __('landing.login') }}</a>
+        <a href="{{ route('login') }}" class="text-[16px] font-medium text-center rounded-full px-5 py-2.5" style="background: #ff6b35; color: #ffffff;">{{ __('landing.login') }}</a>
     </div>
 </header>
 
@@ -67,7 +67,7 @@
             {{ __('landing.hero_subtitle') }}
         </p>
 
-        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-8 rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #182438; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
+        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-8 rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #ffffff; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
 
         <div class="mt-10 flex items-end justify-center gap-6 sm:gap-10">
             <x-mascot mascot="kido" state="happy" :size="116" bounce eager />
@@ -190,7 +190,7 @@
         <p class="max-w-[420px] mx-auto mt-[18px] text-[15px] leading-[1.75]" style="color: #5f6873;">
             {{ __('landing.cta_subtitle') }}
         </p>
-        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-[30px] rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #182438; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
+        <a href="{{ route('login') }}" class="flex items-center justify-center h-[48px] min-w-[130px] px-[30px] mt-[30px] rounded-full text-[16px] font-semibold transition hover:brightness-95 hover:-translate-y-0.5" style="background: #ff6b35; color: #ffffff; box-shadow: 0 4px 12px rgba(255,133,85,0.14);">{{ __('landing.get_started') }}</a>
     </div>
 </section>
 

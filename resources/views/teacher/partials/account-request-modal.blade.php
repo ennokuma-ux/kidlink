@@ -62,7 +62,7 @@
                 {{-- Parent login password is optional; the system uses password123 when blank. --}}
                 <div x-show="role === 'parent'">
                     <label class="block text-sm font-medium text-[#182438] mb-2">Parent account password <span class="text-[#6b7280] font-normal">(optional)</span></label>
-                    <input type="password" name="password" x-ref="password" value="{{ old('password') }}" minlength="8" :disabled="role !== 'parent'" autocomplete="new-password" placeholder="Leave blank to use password123" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <input type="password" name="password" x-ref="password" value="{{ old('password') }}" minlength="8" :disabled="role !== 'parent'" autocomplete="off" placeholder="Leave blank to use password123" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                     <p class="text-xs text-[#6b7280] mt-1">Parents will be asked to change this password the first time they sign in.</p>
                 </div>
 
