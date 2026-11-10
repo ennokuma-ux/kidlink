@@ -280,7 +280,9 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', $archiving ? 'Account archived.' : 'Account restored.');
+            ->with('success', $archiving
+                ? $user->full_name . ' has been archived.'
+                : $user->full_name . ' has been restored.');
     }
 
 }

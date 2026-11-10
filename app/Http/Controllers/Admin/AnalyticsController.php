@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AnalyticsController extends Controller
 {
@@ -120,6 +121,25 @@ class AnalyticsController extends Controller
             : $sectionScopedIds;
         $interventions = $this->analytics->interventionFlags($interventionStudentIds);
         $interventionCount = count(array_filter($interventions, fn ($flag) => $flag['intervention_required']));
+        $interventions = $this->analytics->sortStudentRows($interventions, $sort);
+        $interventionPerPage = 7;
+        $interventionTotal = count($interventions);
+        $interventionLastPage = max(1, (int) ceil($interventionTotal / $interventionPerPage));
+        $interventionPage = min(
+            max(1, (int) $request->query('intervention_page', 1)),
+            $interventionLastPage
+        );
+        $interventions = new LengthAwarePaginator(
+            array_slice($interventions, ($interventionPage - 1) * $interventionPerPage, $interventionPerPage),
+            $interventionTotal,
+            $interventionPerPage,
+            $interventionPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+                'pageName' => 'intervention_page',
+            ]
+        );
 
         // Per-category scores for the leaderboard tables. The scoped list is
         // only known when filtering, so fall back to every active enrolment.

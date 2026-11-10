@@ -169,7 +169,7 @@
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-center gap-2">
                             <form method="POST" action="{{ route('teacher.accounts.toggle', $student) }}"
-                                data-confirm="{{ __('teacher.archive_student_confirm') }}" data-confirm-title="{{ __('teacher.archive_title') }}" data-confirm-yes="{{ __('teacher.archive') }}" data-confirm-no="{{ __('teacher.cancel') }}">
+                                data-confirm="{{ __('teacher.archive_student_confirm') }} {{ $student->full_name }}?" data-confirm-title="{{ __('teacher.archive_title') }}" data-confirm-yes="{{ __('teacher.archive') }}" data-confirm-no="{{ __('teacher.cancel') }}">
                                 @csrf @method('PUT')
                                 <button type="submit" title="{{ __('teacher.archive') }}"
                                     class="w-9 h-9 rounded-lg border border-[#f1e7cc] hover:bg-[#fffbf0] transition text-[#1982c4]">
@@ -236,7 +236,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-2">
                                 <form method="POST" action="{{ route('teacher.accounts.parent.toggle', $parent) }}"
-                                    data-confirm="{{ __('teacher.archive_parent_confirm') }}" data-confirm-title="{{ __('teacher.archive_title') }}" data-confirm-yes="{{ __('teacher.archive') }}" data-confirm-no="{{ __('teacher.cancel') }}">
+                                    data-confirm="{{ __('teacher.archive_parent_confirm') }} {{ $parent->full_name }}?" data-confirm-title="{{ __('teacher.archive_title') }}" data-confirm-yes="{{ __('teacher.archive') }}" data-confirm-no="{{ __('teacher.cancel') }}">
                                     @csrf @method('PUT')
                                     <button type="submit" title="{{ __('teacher.archive') }}"
                                         class="w-9 h-9 rounded-lg border border-[#f1e7cc] hover:bg-[#fffbf0] transition text-[#1982c4]">

@@ -4,10 +4,14 @@
 ])
 
 @php
-    // AnalyticsService::interventionFlags() returns a plain array, not a paginator.
-    // Normalize it once so the component can safely use Collection helpers.
-    $interventionItems = collect($interventions);
-    $interventionTotal = $interventionItems->count();
+    // Support both paginated dashboard results and plain arrays.
+    $interventionIsPaginator = is_object($interventions) && method_exists($interventions, 'items');
+    $interventionItems = $interventionIsPaginator
+        ? collect($interventions->items())
+        : collect($interventions);
+    $interventionTotal = $interventionIsPaginator
+        ? $interventions->total()
+        : $interventionItems->count();
 @endphp
 
 {{--
@@ -98,9 +102,16 @@
             @endforeach
         </div>
         @if($interventionTotal > 0)
-            <div class="px-5 py-3 border-t border-[#f5c6cf]">
-                <p class="text-xs text-[#6b7280]">Showing all {{ $interventionTotal }} interventions</p>
-            </div>
+            @if($interventionIsPaginator && $interventions->lastPage() > 1)
+                <x-intervention-pager :interventions="$interventions" position="bottom" />
+            @else
+                <div class="px-5 py-3 border-t border-[#f5c6cf]">
+                    <p class="text-xs text-[#6b7280]">
+                        Showing {{ $interventionIsPaginator ? $interventions->firstItem() : 1 }}–{{ $interventionIsPaginator ? $interventions->lastItem() : $interventionTotal }}
+                        of {{ $interventionTotal }} interventions
+                    </p>
+                </div>
+            @endif
         @endif
     @endif
 </div>

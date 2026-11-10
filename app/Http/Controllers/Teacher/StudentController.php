@@ -140,7 +140,9 @@ class StudentController extends Controller
         }
 
         return redirect()->route('teacher.accounts.index')
-            ->with('success', $archiving ? 'Student archived.' : 'Student restored.');
+            ->with('success', $archiving
+                ? $student->full_name . ' has been archived.'
+                : $student->full_name . ' has been restored.');
     }
 
     public function toggleParentActive(User $user)
@@ -153,7 +155,9 @@ class StudentController extends Controller
         $user->update(['is_active' => !$archiving]);
 
         return redirect()->route('teacher.accounts.index')
-            ->with('success', $archiving ? 'Parent account archived.' : 'Parent account restored.');
+            ->with('success', $archiving
+                ? $user->full_name . ' has been archived.'
+                : $user->full_name . ' has been restored.');
     }
 
     public function storeParent(Request $request)
