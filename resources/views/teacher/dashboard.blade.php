@@ -1,4 +1,4 @@
-﻿@extends('layouts.teacher')
+@extends('layouts.teacher')
 
 @section('title', __('page.dashboard'))
 @section('page-title', __('page.teacher_dashboard'))
@@ -161,41 +161,44 @@
                 <h4 class="text-sm font-semibold text-[#182438]">Attendance by student</h4>
                 <span class="text-xs text-[#6b7280]">Last 6 months &middot; below {{ $attMin }}% needs a look</span>
             </div>
-            @if($attCount)
-            <ul class="divide-y divide-[#f1e7cc]">
-                @foreach($attendanceStudents as $i => $att)
-                    @php
-                        $rate = $att['rate'];
-                        $rateColor = $rate === null ? '#9aa1ab' : ($rate >= 90 ? '#8ac926' : ($rate >= $attMin ? '#ffca3a' : '#ff595e'));
-                    @endphp
-                    <li data-pager-row @if($i >= $attPerPage) hidden @endif>
-                        <div class="flex items-center gap-3 py-2.5">
-                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ \App\Models\Student::colorForSection($att['class_name']) }}" title="{{ \App\Models\Student::sectionLabel($att['class_name']) }}"></span>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-[#182438] truncate">{{ $att['name'] }}</p>
-                                <p class="text-xs text-[#6b7280]">
-                                    @if($att['recorded'] > 0)
-                                        {{ $att['present'] }} present &middot; {{ $att['late'] }} late &middot; {{ $att['absent'] }} absent@if($att['last_absent']) &middot; last absent {{ $att['last_absent'] }}@endif
+            @if($attCount > 0)
+                <ul class="divide-y divide-[#f1e7cc]">
+                    @foreach($attendanceStudents as $i => $att)
+                        @php
+                            $rate = $att['rate'];
+                            $rateColor = $rate === null ? '#9aa1ab' : ($rate >= 90 ? '#8ac926' : ($rate >= $attMin ? '#ffca3a' : '#ff595e'));
+                        @endphp
+                        <li data-pager-row>
+                            <div class="flex items-center gap-3 py-2.5">
+                                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ \App\Models\Student::colorForSection($att['class_name']) }}" title="{{ \App\Models\Student::sectionLabel($att['class_name']) }}"></span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-[#182438] truncate">{{ $att['name'] }}</p>
+                                    <p class="text-xs text-[#6b7280]">
+                                        @if($att['recorded'] > 0)
+                                            {{ $att['present'] }} present &middot; {{ $att['late'] }} late &middot; {{ $att['absent'] }} absent
+                                            @if(!empty($att['last_absent']))
+                                                &middot; last absent {{ $att['last_absent'] }}
+                                            @endif
+                                        @else
+                                            No attendance recorded yet
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="w-20 shrink-0 text-right">
+                                    @if($rate !== null)
+                                        <span class="text-sm font-bold" style="color: {{ $rateColor }}">{{ $rate }}%</span>
+                                        <div class="h-1.5 rounded-full bg-[#f4f2ec] mt-1" role="img" aria-label="{{ $rate }}% attendance"><div class="h-1.5 rounded-full" style="width: {{ $rate }}%; background-color: {{ $rateColor }}"></div></div>
                                     @else
-                                        No attendance recorded yet
+                                        <span class="text-xs text-[#6b7280]">&mdash;</span>
                                     @endif
-                                </p>
+                                </div>
                             </div>
-                            <div class="w-20 shrink-0 text-right">
-                                @if($rate !== null)
-                                    <span class="text-sm font-bold" style="color: {{ $rateColor }}">{{ $rate }}%</span>
-                                    <div class="h-1.5 rounded-full bg-[#f4f2ec] mt-1" role="img" aria-label="{{ $rate }}% attendance"><div class="h-1.5 rounded-full" style="width: {{ $rate }}%; background-color: {{ $rateColor }}"></div></div>
-                                @else
-                                    <span class="text-xs text-[#6b7280]">&mdash;</span>
-                                @endif
-                            </div>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-            @if($attCount > $attPerPage)
-                <nav data-pager-nav class="mt-3 flex flex-wrap items-center justify-between gap-2" aria-label="Attendance by student pages"></nav>
-            @endif
+                        </li>
+                    @endforeach
+                </ul>
+                @if($attCount > $attPerPage)
+                    <nav data-pager-nav class="mt-3 flex flex-wrap items-center justify-between gap-2" aria-label="Attendance by student pages"></nav>
+                @endif
             @else
                 <p class="text-sm text-[#6b7280] py-4 text-center">No students to show.</p>
             @endif
