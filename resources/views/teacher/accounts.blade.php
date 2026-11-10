@@ -11,24 +11,24 @@
             <p class="text-sm text-[#5f6873] mt-1">{{ __('teacher.manage_accounts_subtitle') }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3 self-start md:self-auto">
-            <div class="flex items-center gap-1 bg-[#fdf3d6] rounded-lg p-1">
+            <div class="flex flex-wrap items-center gap-1 bg-[#fdf3d6] rounded-lg p-1 w-full sm:w-auto">
                 <button type="button" id="viewStudentsBtn" onclick="switchView('students')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white">
                     {{ __('teacher.students') }}
                 </button>
                 <button type="button" id="viewParentsBtn" onclick="switchView('parents')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
                     {{ __('teacher.parents') }}
                 </button>
                 <button type="button" id="viewArchivedBtn" onclick="switchView('archived')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
                     {{ __('teacher.archived') }}
                     @if($archivedStudents->count() + $archivedParents->count() > 0)
                         <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-[#f1e7cc] text-[#5f6873] text-xs">{{ $archivedStudents->count() + $archivedParents->count() }}</span>
                     @endif
                 </button>
                 <button type="button" id="viewRequestsBtn" onclick="switchView('requests')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
                     {{ __('teacher.requests_tab') }}
                     @if($requestCounts['pending'] > 0)
                         <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-[#fdf3d7] text-[#8a6d10] text-xs">{{ $requestCounts['pending'] }}</span>

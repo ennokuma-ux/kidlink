@@ -31,13 +31,13 @@
             <p class="text-sm text-[#5f6873] mt-1">{{ __('admin_ui.create_manage_teachers_parents') }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3 self-start md:self-auto">
-            <div class="flex items-center gap-1 bg-[#fdf3d6] rounded-lg p-1">
+            <div class="flex flex-wrap items-center gap-1 bg-[#fdf3d6] rounded-lg p-1 w-full sm:w-auto">
                 <button type="button" id="viewActiveBtn" onclick="switchView('active')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition bg-[#ff8555] text-white">
                     {{ __('admin_ui.active') }}
                 </button>
                 <button type="button" id="viewArchivedBtn" onclick="switchView('archived')"
-                    class="px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
+                    class="px-3 sm:px-5 py-2 rounded-md text-sm font-semibold transition text-[#5f6873] hover:text-[#182438]">
                     {{ __('admin_ui.archived') }}
                     @if($archivedUsers->count() > 0)
                         <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-[#f1e7cc] text-[#5f6873] text-xs">{{ $archivedUsers->count() }}</span>

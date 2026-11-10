@@ -99,6 +99,9 @@ a.kidlink-student-option:focus,
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 img, video { max-width: 100%; height: auto; }
 body { overflow-wrap: anywhere; }
+/* Long unbroken strings (emails, URLs) may break anywhere, but controls and table headings must not:
+   with "anywhere" a flex item can shrink below its longest word and the label splits mid-word. */
+button, [role="button"], select, th, label { overflow-wrap: normal; }
 table { max-width: 100%; }
 
 /* Text on the orange brand colour: navy passes 4.5:1, white does not. */
@@ -134,6 +137,13 @@ table { max-width: 100%; }
 
   /* Sidebar links and pager buttons. */
   aside nav a { min-height: 44px; }
+}
+
+/* Page headers: the language switcher, Child Mode and Logout together are wider than a phone,
+   so let them wrap onto a second row instead of overlapping the menu button. */
+@media (max-width: 767px) {
+  header > .flex.items-center.justify-between { flex-wrap: wrap; row-gap: .5rem; }
+  header > .flex.items-center.justify-between > .shrink-0 { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
 }
 
 /* Modals: scroll inside the viewport and never overflow it. */
