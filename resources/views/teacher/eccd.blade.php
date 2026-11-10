@@ -130,7 +130,7 @@ $eccdPalette = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
             @forelse($domainRecords as $i => $record)
             <tr class="hover:bg-[#fffbf0] transition" data-eccd-row>
                 <td class="px-4 py-2 text-[#5f6873]">{{ $i + 1 }}</td>
-                <td class="px-4 py-2 text-sm font-medium text-[#182438]">{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}</td>
+                <td class="px-4 py-2 text-sm font-medium text-[#182438] min-w-[9rem]">{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}</td>
                 <td class="px-4 py-2">
                     <div class="flex items-center justify-center gap-2" data-eccd-group data-record="{{ $record->id }}" data-original="{{ $record->status }}" data-current="{{ $record->status }}" role="group" aria-label="{{ $labels['indicators'][$record->indicator] ?? $record->indicator }}">
                         <input type="hidden" name="statuses[{{ $record->id }}]" value="{{ $record->status }}" disabled data-eccd-input>

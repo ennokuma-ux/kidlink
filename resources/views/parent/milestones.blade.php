@@ -32,9 +32,9 @@
 @else
 
 <!-- Status totals -->
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
     @foreach($statusStyle as $status => $style)
-    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
+    <div class="bg-white rounded-xl shadow-sm p-2 sm:p-4 border border-gray-100 text-center">
         <p class="text-2xl font-bold" style="color: {{ $style['fg'] }};">{{ $counts[$status] }}</p>
         <p class="text-xs font-semibold text-gray-500 uppercase mt-1">{{ $style['label'] }}</p>
     </div>

@@ -101,7 +101,13 @@ img, video { max-width: 100%; height: auto; }
 body { overflow-wrap: anywhere; }
 /* Long unbroken strings (emails, URLs) may break anywhere, but controls and table headings must not:
    with "anywhere" a flex item can shrink below its longest word and the label splits mid-word. */
-button, [role="button"], select, th, label { overflow-wrap: normal; }
+button, [role="button"], select, label { overflow-wrap: normal; }
+/* Table cells keep whole words (they still wrap between words, and break a very long string only
+   when nothing else fits), and round avatars/icon circles never get squeezed into a sliver. */
+td, th { overflow-wrap: break-word; }
+.rounded-full { overflow-wrap: normal; }
+span.rounded-full, a.rounded-full { white-space: nowrap; }
+.rounded-full.flex.items-center.justify-center { flex-shrink: 0; }
 table { max-width: 100%; }
 
 /* Text on the orange brand colour: navy passes 4.5:1, white does not. */
@@ -137,6 +143,12 @@ table { max-width: 100%; }
 
   /* Sidebar links and pager buttons. */
   aside nav a { min-height: 44px; }
+}
+
+/* Any table that is wider than a phone scrolls sideways inside its card instead of squeezing every
+   column or being clipped by the card's rounded edge. */
+@media (max-width: 767px) {
+  :has(> table) { overflow-x: auto; max-width: 100%; }
 }
 
 /* Page headers: the language switcher, Child Mode and Logout together are wider than a phone,
