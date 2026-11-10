@@ -29,7 +29,7 @@
         <button onclick="document.getElementById('addActivityModal').classList.remove('hidden')" class="bg-[#ff8555] text-white px-6 py-2.5 rounded-lg hover:bg-[#f47548] transition font-medium">
             {{ __('teacher.add_activity_plus') }}
         </button>
-        <select id="typeFilter" onchange="filterActivities()" class="px-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+        <select aria-label="{{ __('teacher.type') }}" id="typeFilter" onchange="filterActivities()" class="px-4 py-2.5 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
             <option value="all">{{ __('teacher.all_types') }}</option>
             <option value="Lesson">{{ __('teacher.type_lesson') }}</option>
             <option value="Craft">{{ __('teacher.type_craft') }}</option>
@@ -181,11 +181,11 @@
             <input type="hidden" name="week" value="{{ $weekStart->toDateString() }}">
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.title') }}</label>
-                <input type="text" name="title" required maxlength="255" value="{{ old('title') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <input aria-label="{{ __('teacher.title') }}" type="text" name="title" required maxlength="255" value="{{ old('title') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
             </div>
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.type') }}</label>
-                <select name="type" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <select aria-label="{{ __('teacher.type') }}" name="type" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                     <option value="Lesson">{{ __('teacher.type_lesson') }}</option>
                     <option value="Craft">{{ __('teacher.type_craft') }}</option>
                     <option value="Music">{{ __('teacher.type_music') }}</option>
@@ -195,7 +195,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.day') }}</label>
-                <select name="day_of_week" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <select aria-label="{{ __('teacher.day') }}" name="day_of_week" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                     @foreach($days as $offset => $day)
                         <option value="{{ $day }}">{{ $weekStart->copy()->addDays($offset)->format('D') }}, {{ $weekStart->copy()->addDays($offset)->format('M j') }}</option>
                     @endforeach
@@ -204,11 +204,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.start_time') }}</label>
-                    <input type="time" name="start_time" required value="{{ old('start_time') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <input aria-label="{{ __('teacher.start_time') }}" type="time" name="start_time" required value="{{ old('start_time') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.end_time') }}</label>
-                    <input type="time" name="end_time" required value="{{ old('end_time') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <input aria-label="{{ __('teacher.end_time') }}" type="time" name="end_time" required value="{{ old('end_time') }}" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
             </div>
             @include('teacher.partials.activity-target', ['prefix' => 'add'])
@@ -245,11 +245,11 @@
             <input type="hidden" name="week" id="editWeek" value="{{ $weekStart->toDateString() }}">
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.title') }}</label>
-                <input type="text" name="title" id="editTitle" required maxlength="255" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <input aria-label="{{ __('teacher.title') }}" type="text" name="title" id="editTitle" required maxlength="255" class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
             </div>
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.type') }}</label>
-                <select name="type" id="editType" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <select aria-label="{{ __('teacher.type') }}" name="type" id="editType" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                     <option value="Lesson">{{ __('teacher.type_lesson') }}</option>
                     <option value="Craft">{{ __('teacher.type_craft') }}</option>
                     <option value="Music">{{ __('teacher.type_music') }}</option>
@@ -259,7 +259,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.day') }}</label>
-                <select name="day_of_week" id="editDay" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                <select aria-label="{{ __('teacher.day') }}" name="day_of_week" id="editDay" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                     @foreach($days as $day)
                         <option value="{{ $day }}">{{ $day }}</option>
                     @endforeach
@@ -268,11 +268,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.start_time') }}</label>
-                    <input type="time" name="start_time" id="editStart" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <input aria-label="{{ __('teacher.start_time') }}" type="time" name="start_time" id="editStart" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#182438] mb-2">{{ __('teacher.end_time') }}</label>
-                    <input type="time" name="end_time" id="editEnd" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
+                    <input aria-label="{{ __('teacher.end_time') }}" type="time" name="end_time" id="editEnd" required class="w-full px-4 py-3 border border-[#f1e7cc] rounded-lg focus:ring-2 focus:ring-[#ff8555] outline-none">
                 </div>
             </div>
             @include('teacher.partials.activity-target', ['prefix' => 'edit'])
@@ -326,13 +326,18 @@ window.activityCalendar = function (days, weekStart, baseUrl, labels) {
 
 // ---- Who the activity is for: a group, or individual students ---------------
 window.activityTarget = (function () {
-    const STUDENTS = @json($students->map(fn ($st) => [
-        'id' => $st->id,
-        'name' => $st->name,
-        'section' => $st->class_name ?: '',
-        'year' => $st->academic_year ?: '',
-        'age' => (int) $st->age,
-    ])->values());
+    @php
+        // Built here instead of inline: the JSON directive splits its argument on every comma and
+        // drops everything after the third piece, which turned this list into a ParseError.
+        $pickerStudents = $students->map(fn ($st) => [
+            'id' => $st->id,
+            'name' => $st->name,
+            'section' => $st->class_name ?: '',
+            'year' => $st->academic_year ?: '',
+            'age' => (int) $st->age,
+        ])->values();
+    @endphp
+    const STUDENTS = @json($pickerStudents);
     const AGE_LABEL = age => age < 1 ? @json(__('Below 1')) : age + ' ' + @json(__('teacher.yrs'));
     const byId = new Map(STUDENTS.map(st => [st.id, st]));
 
